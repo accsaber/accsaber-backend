@@ -1,0 +1,25 @@
+spring:
+  datasource:
+    url: jdbc:mariadb://127.0.0.1:3306/acc
+    driver-class-name: org.mariadb.jdbc.Driver
+    username: acc
+    password: acc
+    platform: mariadb
+  jpa:
+    database: sql_server
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MariaDBDialect
+    show-sql: true
+logging:
+  level:
+    de.ixsen: TRACE
+#  file:
+#    name: logs/accsaber.log
+
+accsaber:
+  disable-score-fetching: true
+  score-fetch-intervall-seconds: 600000
+  allowed-origins: http://localhost:4200,localhost:8080,http://127.0.0.1:4200
