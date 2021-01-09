@@ -22,11 +22,7 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -59,13 +55,15 @@ public class PlayerService implements HasLogger {
         return this.rankedPlayerRepository.findAllWithRanking();
     }
 
-    public void signupPlayer(String playerId) {
+    public void signupPlayer(String playerId, String playerName, String hmd) {
         if (this.playerRepository.existsById(playerId)) {
             throw new AccsaberOperationException(ExceptionType.PLAYER_ALREADY_EXISTS, "Player with ID " + playerId + " already exists.");
         }
 
         Player player = new Player();
         player.setPlayerId(playerId);
+        player.setPlayerName(playerName);
+        player.setHmd(hmd);
 
         this.playerRepository.save(player);
     }
@@ -79,7 +77,6 @@ public class PlayerService implements HasLogger {
         return player.get();
     }
 
-
     public Player getPlayer(String playerId) {
         Optional<Player> player = this.playerRepository.findById(playerId);
         if (player.isEmpty()) {
@@ -88,7 +85,6 @@ public class PlayerService implements HasLogger {
 
         return player.get();
     }
-
 
     public void loadPlayerScores() {
         List<Player> allPlayers = this.playerRepository.findAllWithScores();
@@ -156,7 +152,6 @@ public class PlayerService implements HasLogger {
                 }
             }
         }
-
 
         this.scoreRepository.saveAll(newlySetScores);
         this.recalculateApForPlayer(player);
