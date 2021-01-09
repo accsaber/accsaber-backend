@@ -1,7 +1,7 @@
 package de.ixsen.accsaber.api.mapping;
 
 import de.ixsen.accsaber.api.dtos.PlayerDto;
-import de.ixsen.accsaber.database.model.players.Player;
+import de.ixsen.accsaber.database.model.players.RankedPlayer;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
@@ -14,8 +14,8 @@ public interface PlayerMapper {
 
     PlayerMapper INSTANCE = Mappers.getMapper(PlayerMapper.class);
 
-    @Mapping(target = "rank", ignore = true)
-    PlayerDto playerToPlayerDto(Player player);
+    @Mapping(target = "rank", source = "ranking")
+    PlayerDto playerToPlayerDto(RankedPlayer player);
 
-    ArrayList<PlayerDto> playersToPlayerDtos(List<Player> players);
+    ArrayList<PlayerDto> playersToPlayerDtos(List<RankedPlayer> players);
 }

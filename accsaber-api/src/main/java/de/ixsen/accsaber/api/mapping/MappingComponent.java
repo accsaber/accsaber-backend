@@ -16,4 +16,8 @@ public class MappingComponent {
     public MapLeaderboardPlayerMapper getMapLeaderboardPlayerMapper() {
         return MapLeaderboardPlayerMapper.INSTANCE;
     }
+
+    public ScoreMapper getScoreMapper() {
+        return ScoreMapper.INSTANCE;
+    }
 }

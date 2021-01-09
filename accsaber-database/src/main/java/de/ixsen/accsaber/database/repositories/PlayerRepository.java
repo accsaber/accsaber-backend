@@ -15,6 +15,3 @@ public interface PlayerRepository extends JpaRepository<Player, String> {
             "LEFT JOIN fetch player.scores ")
     List<Player> findAllWithScores();
 }
-
-
-
