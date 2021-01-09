@@ -11,6 +11,7 @@ public class RankedMapDto {
 
     private String leaderboardId;
     private String beatsaverKey;
+    private String songHash;
 
     private double techyness;
 
@@ -68,6 +69,14 @@ public class RankedMapDto {
 
     public void setBeatsaverKey(String beatsaverKey) {
         this.beatsaverKey = beatsaverKey;
+    }
+
+    public String getSongHash() {
+        return this.songHash;
+    }
+
+    public void setSongHash(final String songHash) {
+        this.songHash = songHash;
     }
 
     public double getTechyness() {
