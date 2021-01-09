@@ -35,10 +35,12 @@ public class PlayerController {
     public ResponseEntity<?> addNewPlayer(@RequestBody SignupDto signupDto) {
         String playerId = signupDto.getScoresaberLink();
         if (playerId.toLowerCase().contains("scoresaber")) {
-            playerId = playerId.replace("https://scoresaber.com/u/", "")
+            playerId = playerId
+                    .replace("https://scoresaber.com/u/", "")
                     .replace("http://scoresaber.com/u/", "")
                     .replace("scoresaber.com/u/", "")
-                    .split("/")[0].split("\\?")[0];
+                    .split("/")[0]
+                    .split("\\?")[0];
         }
 
         this.playerService.signupPlayer(playerId, signupDto.getPlayerName(), signupDto.getHmd());
