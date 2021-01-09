@@ -36,8 +36,12 @@ public class PlayerService implements HasLogger {
     private final RankedMapRepository rankedMapRepository;
 
     @Autowired
-    public PlayerService(PlayerRepository playerRepository, RankedPlayerRepository rankedPlayerRepository, ScoreRepository scoreRepository,
-                         RankedMapRepository rankedMapRepository, ScoreSaberConnector scoreSaberConnector, BusinessMappingComponent mappingComponent) {
+    public PlayerService(PlayerRepository playerRepository,
+                         RankedPlayerRepository rankedPlayerRepository,
+                         ScoreRepository scoreRepository,
+                         RankedMapRepository rankedMapRepository,
+                         ScoreSaberConnector scoreSaberConnector,
+                         BusinessMappingComponent mappingComponent) {
         this.playerRepository = playerRepository;
         this.rankedPlayerRepository = rankedPlayerRepository;
         this.scoreRepository = scoreRepository;
@@ -140,8 +144,7 @@ public class PlayerService implements HasLogger {
         if (optPlayerData.isPresent()) {
             int newMaxPage = (int) Math.ceil(playerData.getScoreStats().getTotalPlayCount() / 8.0);
             if (pageCount < newMaxPage && score == null) {
-                this.getLogger()
-                        .trace("Player {} has set a score that created a new page, while scores were loading, reloading latest page.", player.getPlayerName());
+                this.getLogger().trace("Player {} has set a score that created a new page, while scores were loading, reloading latest page.", player.getPlayerName());
                 ScoreSaberScoreListDto scoreSaberScore = this.getScoreSaberScore(player.getPlayerId(), newMaxPage);
 
                 for (ScoreSaberScoreDto scoreSaberScoreDto : scoreSaberScore.getScores()) {
