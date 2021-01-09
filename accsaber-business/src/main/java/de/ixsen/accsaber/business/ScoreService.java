@@ -1,8 +1,11 @@
 package de.ixsen.accsaber.business;
 
 import de.ixsen.accsaber.database.model.maps.RankedMap;
+import de.ixsen.accsaber.database.model.players.Player;
+import de.ixsen.accsaber.database.model.players.RankedScore;
 import de.ixsen.accsaber.database.model.players.Score;
 import de.ixsen.accsaber.database.repositories.RankedMapRepository;
+import de.ixsen.accsaber.database.repositories.RankedScoreRepository;
 import de.ixsen.accsaber.database.repositories.ScoreRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,20 +18,22 @@ import java.util.Map;
 public class ScoreService implements HasLogger {
 
     private final ScoreRepository scoreRepository;
+    private final RankedScoreRepository rankedScoreRepository;
     private final RankedMapRepository rankedMapRepository;
 
     @Autowired
-    public ScoreService(ScoreRepository scoreRepository, RankedMapRepository rankedMapRepository) {
+    public ScoreService(ScoreRepository scoreRepository, RankedScoreRepository rankedScoreRepository, RankedMapRepository rankedMapRepository) {
         this.scoreRepository = scoreRepository;
+        this.rankedScoreRepository = rankedScoreRepository;
         this.rankedMapRepository = rankedMapRepository;
     }
 
-    public List<Score> getScoresForLeaderboardId(Long leaderboardId) {
-        return this.scoreRepository.findAllByLeaderboardIdOrderByScoreDesc(leaderboardId);
+    public List<RankedScore> getScoresForLeaderboardId(Long leaderboardId) {
+        return this.rankedScoreRepository.findAllRankedMapsByLeaderboardId(leaderboardId);
     }
 
     public void recalculateApForAllScores() {
-        List<Score> allRankedScores = this.scoreRepository.findAllByIsRankedMapScore(true);
+        List<Score> allRankedScores = this.scoreRepository.findAllRankedMaps();
         Map<Long, RankedMap> rankedMaps = new HashMap<>();
 
         for (RankedMap rankedMap : this.rankedMapRepository.findAll()) {
@@ -46,4 +51,7 @@ public class ScoreService implements HasLogger {
     }
 
 
+    public List<RankedScore> getScoresForPlayer(Player player) {
+        return this.rankedScoreRepository.findAllByPlayerOrderByApDesc(player);
+    }
 }
