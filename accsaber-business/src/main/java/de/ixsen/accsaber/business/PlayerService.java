@@ -1,5 +1,16 @@
 package de.ixsen.accsaber.business;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import javax.transaction.Transactional;
+
 import de.ixsen.accsaber.business.exceptions.AccsaberOperationException;
 import de.ixsen.accsaber.business.exceptions.ExceptionType;
 import de.ixsen.accsaber.business.exceptions.FetchScoreException;
@@ -19,33 +30,19 @@ import de.ixsen.accsaber.integration.model.scoresaber.ScoreSaberScoreListDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
 @Service
 public class PlayerService implements HasLogger {
 
-    private final PlayerRepository playerRepository;
-    private final RankedPlayerRepository rankedPlayerRepository;
-    private final ScoreSaberConnector scoreSaberConnector;
+    private final PlayerRepository         playerRepository;
+    private final RankedPlayerRepository   rankedPlayerRepository;
+    private final ScoreSaberConnector      scoreSaberConnector;
     private final BusinessMappingComponent mappingComponent;
-    private final ScoreRepository scoreRepository;
-    private final RankedMapRepository rankedMapRepository;
+    private final ScoreRepository          scoreRepository;
+    private final RankedMapRepository      rankedMapRepository;
 
     @Autowired
-    public PlayerService(PlayerRepository playerRepository,
-                         RankedPlayerRepository rankedPlayerRepository,
-                         ScoreRepository scoreRepository,
-                         RankedMapRepository rankedMapRepository,
-                         ScoreSaberConnector scoreSaberConnector,
-                         BusinessMappingComponent mappingComponent) {
+    public PlayerService(PlayerRepository playerRepository, RankedPlayerRepository rankedPlayerRepository, ScoreRepository scoreRepository,
+                         RankedMapRepository rankedMapRepository, ScoreSaberConnector scoreSaberConnector, BusinessMappingComponent mappingComponent) {
         this.playerRepository = playerRepository;
         this.rankedPlayerRepository = rankedPlayerRepository;
         this.scoreRepository = scoreRepository;
@@ -59,13 +56,15 @@ public class PlayerService implements HasLogger {
         return this.rankedPlayerRepository.findAllWithRanking();
     }
 
-    public void signupPlayer(String playerId) {
+    public void signupPlayer(String playerId, String playerName, String hmd) {
         if (this.playerRepository.existsById(playerId)) {
             throw new AccsaberOperationException(ExceptionType.PLAYER_ALREADY_EXISTS, "Player with ID " + playerId + " already exists.");
         }
 
         Player player = new Player();
         player.setPlayerId(playerId);
+        player.setPlayerName(playerName);
+        player.setHmd(hmd);
 
         this.playerRepository.save(player);
     }
@@ -79,7 +78,6 @@ public class PlayerService implements HasLogger {
         return player.get();
     }
 
-
     public Player getPlayer(String playerId) {
         Optional<Player> player = this.playerRepository.findById(playerId);
         if (player.isEmpty()) {
@@ -89,10 +87,9 @@ public class PlayerService implements HasLogger {
         return player.get();
     }
 
-
     public void loadPlayerScores() {
         List<Player> allPlayers = this.playerRepository.findAllWithScores();
-        Instant start = Instant.now();
+        Instant      start      = Instant.now();
         this.getLogger().info("Loading scores for " + allPlayers.size() + " players.");
         List<RankedMap> rankedMaps = this.rankedMapRepository.findAll();
 
@@ -115,9 +112,9 @@ public class PlayerService implements HasLogger {
         this.mappingComponent.getPlayerMapper().scoreSaberPlayerToPlayer(player, playerData.getPlayerInfo());
         int totalPlayCount = playerData.getScoreStats().getTotalPlayCount();
 
-        int pageCount = (int) Math.ceil(totalPlayCount / 8.0);
+        int             pageCount     = (int) Math.ceil(totalPlayCount / 8.0);
         Iterator<Score> scoreIterator = new ArrayList<>(player.getScores()).iterator();
-        Score score = null;
+        Score           score         = null;
         if (scoreIterator.hasNext()) {
             score = scoreIterator.next();
         }
@@ -148,7 +145,8 @@ public class PlayerService implements HasLogger {
         if (optPlayerData.isPresent()) {
             int newMaxPage = (int) Math.ceil(playerData.getScoreStats().getTotalPlayCount() / 8.0);
             if (pageCount < newMaxPage && score == null) {
-                this.getLogger().trace("Player {} has set a score that created a new page, while scores were loading, reloading latest page.", player.getPlayerName());
+                this.getLogger()
+                    .trace("Player {} has set a score that created a new page, while scores were loading, reloading latest page.", player.getPlayerName());
                 ScoreSaberScoreListDto scoreSaberScore = this.getScoreSaberScore(player.getPlayerId(), newMaxPage);
 
                 for (ScoreSaberScoreDto scoreSaberScoreDto : scoreSaberScore.getScores()) {
@@ -156,7 +154,6 @@ public class PlayerService implements HasLogger {
                 }
             }
         }
-
 
         this.scoreRepository.saveAll(newlySetScores);
         this.recalculateApForPlayer(player);
@@ -199,8 +196,8 @@ public class PlayerService implements HasLogger {
     }
 
     private void recalculateApForPlayer(Player player) {
-        double playerAp = 0.0f;
-        double playerAccSum = 0.0f;
+        double      playerAp     = 0.0f;
+        double      playerAccSum = 0.0f;
         List<Score> rankedScores = player.getScores().stream().filter(Score::getIsRankedMapScore).collect(Collectors.toList());
         if (rankedScores.size() == 0) {
             player.setAp(playerAp);
