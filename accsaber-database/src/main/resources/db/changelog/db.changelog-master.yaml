@@ -1,0 +1,5 @@
+databaseChangeLog:
+  - include:
+      file: db/changelog/changelogs/master-changelog.xml
+  - include:
+      file: db/changelog/changelogs/feature_profile-page.xml
