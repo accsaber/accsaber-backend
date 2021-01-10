@@ -1,0 +1,160 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+  <changeSet author="Ixsen (generated)" id="1610302219659-1">
+    <createTable tableName="player">
+      <column name="player_id" type="VARCHAR(255)">
+        <constraints nullable="false" primaryKey="true"/>
+      </column>
+      <column defaultValueComputed="NULL" name="ap" type="FLOAT"/>
+      <column name="avatar_url" type="VARCHAR(255)"/>
+      <column defaultValueComputed="NULL" name="average_acc" type="FLOAT"/>
+      <column name="hmd" type="VARCHAR(255)"/>
+      <column defaultValueBoolean="false" name="is_acc_champ" type="BIT"/>
+      <column name="player_name" type="VARCHAR(255)"/>
+      <column defaultValueComputed="NULL" name="average_ap_per_map" type="DOUBLE"/>
+      <column name="ranked_plays" type="INT">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+  </changeSet>
+  <changeSet author="Ixsen (generated)" id="1610302219659-2">
+    <createTable tableName="player_scores">
+      <column name="player_player_id" type="VARCHAR(255)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="scores_score_id" type="BIGINT">
+        <constraints nullable="false" unique="true"/>
+      </column>
+    </createTable>
+  </changeSet>
+  <changeSet author="Ixsen (generated)" id="1610302219659-3">
+    <createTable tableName="ranked_map">
+      <column name="leaderboard_id" type="BIGINT">
+        <constraints nullable="false" primaryKey="true"/>
+      </column>
+      <column name="max_score" type="INT">
+        <constraints nullable="false"/>
+      </column>
+      <column name="song_song_hash" type="VARCHAR(255)"/>
+      <column name="difficulty" type="VARCHAR(255)"/>
+      <column defaultValueComputed="NULL" name="techyness" type="FLOAT"/>
+    </createTable>
+  </changeSet>
+  <changeSet author="Ixsen (generated)" id="1610302219659-4">
+    <createTable tableName="revinfo">
+      <column autoIncrement="true" name="rev" type="INT">
+        <constraints nullable="false" primaryKey="true"/>
+      </column>
+      <column defaultValueComputed="NULL" name="revtstmp" type="BIGINT"/>
+    </createTable>
+  </changeSet>
+  <changeSet author="Ixsen (generated)" id="1610302219659-5">
+    <createTable tableName="score">
+      <column name="score_id" type="BIGINT">
+        <constraints nullable="false" primaryKey="true"/>
+      </column>
+      <column defaultValueComputed="NULL" name="accuracy" type="FLOAT"/>
+      <column defaultValueComputed="NULL" name="ap" type="FLOAT"/>
+      <column defaultValueBoolean="false" name="is_ranked_map_score" type="BIT"/>
+      <column defaultValueComputed="NULL" name="map_leaderboard_id" type="BIGINT"/>
+      <column name="rank_when_scores_set" type="INT">
+        <constraints nullable="false"/>
+      </column>
+      <column name="score" type="INT">
+        <constraints nullable="false"/>
+      </column>
+      <column defaultValueComputed="NULL" name="time_set" type="datetime"/>
+      <column name="unmodifified_score" type="INT">
+        <constraints nullable="false"/>
+      </column>
+      <column name="player_player_id" type="VARCHAR(255)"/>
+    </createTable>
+  </changeSet>
+  <changeSet author="Ixsen (generated)" id="1610302219659-6">
+    <createTable tableName="score_aud">
+      <column name="score_id" type="BIGINT">
+        <constraints nullable="false" primaryKey="true"/>
+      </column>
+      <column name="rev" type="INT">
+        <constraints nullable="false" primaryKey="true"/>
+      </column>
+      <column defaultValueComputed="NULL" name="revtype" type="TINYINT"/>
+      <column defaultValueComputed="NULL" name="accuracy" type="FLOAT"/>
+      <column defaultValueComputed="NULL" name="ap" type="FLOAT"/>
+      <column defaultValueBoolean="false" name="is_ranked_map_score" type="BIT"/>
+      <column defaultValueComputed="NULL" name="map_leaderboard_id" type="BIGINT"/>
+      <column defaultValueComputed="NULL" name="rank_when_scores_set" type="INT"/>
+      <column defaultValueComputed="NULL" name="score" type="INT"/>
+      <column defaultValueComputed="NULL" name="time_set" type="datetime"/>
+      <column defaultValueComputed="NULL" name="unmodifified_score" type="INT"/>
+    </createTable>
+  </changeSet>
+  <changeSet author="Ixsen (generated)" id="1610302219659-7">
+    <createTable tableName="song">
+      <column name="song_hash" type="VARCHAR(255)">
+        <constraints nullable="false" primaryKey="true"/>
+      </column>
+      <column name="level_author_name" type="VARCHAR(255)"/>
+      <column name="song_author_name" type="VARCHAR(255)"/>
+      <column name="song_name" type="VARCHAR(255)"/>
+      <column name="song_sub_name" type="VARCHAR(255)"/>
+      <column name="beat_saver_key" type="VARCHAR(255)"/>
+    </createTable>
+  </changeSet>
+  <changeSet author="Ixsen (generated)" id="1610302219659-8">
+    <createTable tableName="song_ranked_maps">
+      <column name="song_song_hash" type="VARCHAR(255)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="ranked_maps_leaderboard_id" type="BIGINT">
+        <constraints nullable="false" unique="true"/>
+      </column>
+    </createTable>
+  </changeSet>
+  <changeSet author="Ixsen (generated)" id="1610302219659-9">
+    <createIndex indexName="FK2643n0n4qla092adroq4f2t1t" tableName="score_aud">
+      <column name="rev"/>
+    </createIndex>
+  </changeSet>
+  <changeSet author="Ixsen (generated)" id="1610302219659-10">
+    <createIndex indexName="FK4winagap05gx3bo8383io05d9" tableName="ranked_map">
+      <column name="song_song_hash"/>
+    </createIndex>
+  </changeSet>
+  <changeSet author="Ixsen (generated)" id="1610302219659-11">
+    <createIndex indexName="FKej60cngjpkyb71gph22kl5s9q" tableName="song_ranked_maps">
+      <column name="song_song_hash"/>
+    </createIndex>
+  </changeSet>
+  <changeSet author="Ixsen (generated)" id="1610302219659-12">
+    <createIndex indexName="FKmaginyr1s91l46u0xhue5lugm" tableName="player_scores">
+      <column name="player_player_id"/>
+    </createIndex>
+  </changeSet>
+  <changeSet author="Ixsen (generated)" id="1610302219659-13">
+    <createIndex indexName="FKn3a3d1q1qva19x9m5nneh8n6a" tableName="score">
+      <column name="player_player_id"/>
+    </createIndex>
+  </changeSet>
+  <changeSet author="Ixsen (generated)" id="1610302219659-14">
+    <addForeignKeyConstraint baseColumnNames="rev" baseTableName="score_aud" constraintName="FK2643n0n4qla092adroq4f2t1t" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="rev" referencedTableName="revinfo" validate="true"/>
+  </changeSet>
+  <changeSet author="Ixsen (generated)" id="1610302219659-15">
+    <addForeignKeyConstraint baseColumnNames="song_song_hash" baseTableName="ranked_map" constraintName="FK4winagap05gx3bo8383io05d9" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="song_hash" referencedTableName="song" validate="true"/>
+  </changeSet>
+  <changeSet author="Ixsen (generated)" id="1610302219659-16">
+    <addForeignKeyConstraint baseColumnNames="scores_score_id" baseTableName="player_scores" constraintName="FKbvi1c9k85wt5bnl34v25yrvmj" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="score_id" referencedTableName="score" validate="true"/>
+  </changeSet>
+  <changeSet author="Ixsen (generated)" id="1610302219659-17">
+    <addForeignKeyConstraint baseColumnNames="song_song_hash" baseTableName="song_ranked_maps" constraintName="FKej60cngjpkyb71gph22kl5s9q" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="song_hash" referencedTableName="song" validate="true"/>
+  </changeSet>
+  <changeSet author="Ixsen (generated)" id="1610302219659-18">
+    <addForeignKeyConstraint baseColumnNames="ranked_maps_leaderboard_id" baseTableName="song_ranked_maps" constraintName="FKjebyy90sham3tbsni41301gcr" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="leaderboard_id" referencedTableName="ranked_map" validate="true"/>
+  </changeSet>
+  <changeSet author="Ixsen (generated)" id="1610302219659-19">
+    <addForeignKeyConstraint baseColumnNames="player_player_id" baseTableName="player_scores" constraintName="FKmaginyr1s91l46u0xhue5lugm" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="player_id" referencedTableName="player" validate="true"/>
+  </changeSet>
+  <changeSet author="Ixsen (generated)" id="1610302219659-20">
+    <addForeignKeyConstraint baseColumnNames="player_player_id" baseTableName="score" constraintName="FKn3a3d1q1qva19x9m5nneh8n6a" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="player_id" referencedTableName="player" validate="true"/>
+  </changeSet>
+</databaseChangeLog>
