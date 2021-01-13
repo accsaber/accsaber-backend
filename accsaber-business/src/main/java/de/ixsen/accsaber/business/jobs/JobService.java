@@ -24,8 +24,8 @@ public class JobService implements HasLogger {
         this.scoreService = scoreService;
         this.disableScoreFetching = disableScoreFetching;
 
-//        this.scoreService.recalculateApForAllScores();
-//        this.playerService.recalculateApForAllPlayers();
+        this.scoreService.recalculateApForAllScores();
+        this.playerService.recalculateApForAllPlayers();
     }
 
     @Scheduled(fixedDelayString = "${accsaber.score-fetch-intervall-seconds}")

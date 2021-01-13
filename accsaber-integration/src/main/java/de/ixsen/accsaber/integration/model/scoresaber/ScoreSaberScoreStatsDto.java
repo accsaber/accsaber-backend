@@ -1,9 +1,9 @@
 package de.ixsen.accsaber.integration.model.scoresaber;
 
 public class ScoreSaberScoreStatsDto {
-    private int totalScore;
+    private long totalScore;
 
-    private int totalRankedScore;
+    private long totalRankedScore;
 
     private double averageRankedAccuracy;
 
@@ -11,16 +11,16 @@ public class ScoreSaberScoreStatsDto {
 
     private int rankedPlayCount;
 
-    public void setTotalScore(int totalScore){
+    public void setTotalScore(long totalScore){
         this.totalScore = totalScore;
     }
-    public int getTotalScore(){
+    public long getTotalScore(){
         return this.totalScore;
     }
-    public void setTotalRankedScore(int totalRankedScore){
+    public void setTotalRankedScore(long totalRankedScore){
         this.totalRankedScore = totalRankedScore;
     }
-    public int getTotalRankedScore(){
+    public long getTotalRankedScore(){
         return this.totalRankedScore;
     }
     public void setAverageRankedAccuracy(double averageRankedAccuracy){
