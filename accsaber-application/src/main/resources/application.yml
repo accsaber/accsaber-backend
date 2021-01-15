@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:mariadb://127.0.0.1:3306/acc
+    url: jdbc:mariadb://127.0.0.1:3306/accsaber_db
     driver-class-name: org.mariadb.jdbc.Driver
     username: acc
     password: acc
@@ -20,6 +20,6 @@ logging:
 #    name: logs/accsaber.log
  
 accsaber:
-  disable-score-fetching: true
+  disable-score-fetching: false
   score-fetch-intervall-seconds: 600000
   allowed-origins: http://localhost:4200,localhost:8080,http://127.0.0.1:4200
