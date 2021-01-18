@@ -1,9 +1,9 @@
 package de.ixsen.accsaber.api.dtos;
 
 public class PlayerScoreDto {
-    private String rank;
+    private long rank;
     private double ap;
-    private int score;
+    private long score;
     private double accuracy;
 
     private String songName;
@@ -15,11 +15,13 @@ public class PlayerScoreDto {
     private String leaderboardId;
     private String beatsaverKey;
 
-    public String getRank() {
+    private String timeSet;
+
+    public long getRank() {
         return this.rank;
     }
 
-    public void setRank(String rank) {
+    public void setRank(long rank) {
         this.rank = rank;
     }
 
@@ -31,11 +33,11 @@ public class PlayerScoreDto {
         this.ap = ap;
     }
 
-    public int getScore() {
+    public long getScore() {
         return this.score;
     }
 
-    public void setScore(int score) {
+    public void setScore(long score) {
         this.score = score;
     }
 
@@ -101,5 +103,13 @@ public class PlayerScoreDto {
 
     public void setBeatsaverKey(String beatsaverKey) {
         this.beatsaverKey = beatsaverKey;
+    }
+
+    public String getTimeSet() {
+        return this.timeSet;
+    }
+
+    public void setTimeSet(String timeSet) {
+        this.timeSet = timeSet;
     }
 }

@@ -20,7 +20,7 @@ public interface ScoreMapper {
     @Mapping(target = "levelAuthorName", source = "map.song.levelAuthorName")
     @Mapping(target = "difficulty", source = "map.difficulty")
     @Mapping(target = "beatsaverKey", source = "map.song.beatSaverKey")
-    PlayerScoreDto rankedScoreToPlayerScore(RankedScore player);
+    PlayerScoreDto rankedScoreToPlayerScore(RankedScore rankedScore);
 
-    ArrayList<PlayerScoreDto> rankedScoresToPlayerScores(List<RankedScore> players);
+    ArrayList<PlayerScoreDto> rankedScoresToPlayerScores(List<RankedScore> rankedScores);
 }

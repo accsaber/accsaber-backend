@@ -1,5 +1,6 @@
 package de.ixsen.accsaber.database.model.maps;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
@@ -17,7 +18,7 @@ public class Song {
     private String songAuthorName;
     private String levelAuthorName;
 
-    @OneToMany(fetch = FetchType.EAGER)
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private List<RankedMap> rankedMaps;
 
     private String beatSaverKey;

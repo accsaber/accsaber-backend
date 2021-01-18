@@ -1,25 +1,25 @@
 package de.ixsen.accsaber.api.dtos;
 
 public class CreateRankedMapDto {
-    private Long leaderBoardId;
-    private String beatSaverId;
+    private Long leaderboardId;
+    private String beatSaverKey;
     private String difficulty;
     private double techyness;
 
-    public Long getLeaderBoardId() {
-        return this.leaderBoardId;
+    public Long getLeaderboardId() {
+        return this.leaderboardId;
     }
 
-    public void setLeaderBoardId(Long leaderBoardId) {
-        this.leaderBoardId = leaderBoardId;
+    public void setLeaderboardId(Long leaderboardId) {
+        this.leaderboardId = leaderboardId;
     }
 
-    public String getBeatSaverId() {
-        return this.beatSaverId;
+    public String getBeatSaverKey() {
+        return this.beatSaverKey;
     }
 
-    public void setBeatSaverId(String beatSaverId) {
-        this.beatSaverId = beatSaverId;
+    public void setBeatSaverKey(String beatSaverKey) {
+        this.beatSaverKey = beatSaverKey;
     }
 
     public String getDifficulty() {

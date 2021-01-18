@@ -37,7 +37,7 @@ public class RankedMapService {
         this.beatSaverConnector = beatSaverConnector;
     }
 
-    public List<RankedMap> getRankedSongs() {
+    public List<RankedMap> getRankedMaps() {
         return this.rankedMapRepository.findAll();
     }
 
@@ -69,7 +69,7 @@ public class RankedMapService {
 
         song.getRankedMaps().add(rankedMap);
 
-        this.rankedMapRepository.save(rankedMap);
+        this.songRepository.save(song);
 
         List<Score> nowRankedScores = this.scoreRepository.findAllByLeaderboardId(rankedMap.getLeaderboardId());
         nowRankedScores.forEach(score -> {

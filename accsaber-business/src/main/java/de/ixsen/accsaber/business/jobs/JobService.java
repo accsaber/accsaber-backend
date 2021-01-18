@@ -9,6 +9,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
+
 @Service
 @EnableScheduling
 public class JobService implements HasLogger {
@@ -16,16 +18,26 @@ public class JobService implements HasLogger {
     private final PlayerService playerService;
     private final ScoreService scoreService;
     private final boolean disableScoreFetching;
+    private final boolean recalculateApOnStartup;
 
 
     @Autowired
-    public JobService(PlayerService playerService, ScoreService scoreService, @Value("${accsaber.disable-score-fetching}") boolean disableScoreFetching) {
+    public JobService(PlayerService playerService, ScoreService scoreService,
+                      @Value("${accsaber.disable-score-fetching}") boolean disableScoreFetching,
+                      @Value("${accsaber.recalculate-ap-on-startup}") boolean recalculateApOnStartup) {
         this.playerService = playerService;
         this.scoreService = scoreService;
         this.disableScoreFetching = disableScoreFetching;
+        this.recalculateApOnStartup = recalculateApOnStartup;
+    }
 
-        this.scoreService.recalculateApForAllScores();
-        this.playerService.recalculateApForAllPlayers();
+    @PostConstruct
+    public void onStartUpDone() {
+        if (this.recalculateApOnStartup) {
+            this.getLogger().info("Recalculating all AP values...");
+            this.scoreService.recalculateApForAllScores();
+            this.playerService.recalculateApForAllPlayers();
+        }
     }
 
     @Scheduled(fixedDelayString = "${accsaber.score-fetch-intervall-seconds}")

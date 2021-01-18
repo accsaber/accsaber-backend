@@ -1,6 +1,9 @@
 package de.ixsen.accsaber.api.error;
 
+import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.exceptions.TokenExpiredException;
 import de.ixsen.accsaber.business.exceptions.AccsaberOperationException;
+import de.ixsen.accsaber.business.exceptions.ExceptionType;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -9,6 +12,15 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 @ControllerAdvice
 public class AccsaberExceptionHandler extends ResponseEntityExceptionHandler {
+
+    @ExceptionHandler(TokenExpiredException.class)
+    public ResponseEntity<ErrorDto> handleInvalidToken(JWTVerificationException exception) {
+        ErrorDto errorDto = new ErrorDto();
+        errorDto.setErrorCode(ExceptionType.AUTH_INVALID.getErrorCode());
+        errorDto.setMessage("Invalid authentication");
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorDto);
+    }
 
     @ExceptionHandler(AccsaberOperationException.class)
     public ResponseEntity<ErrorDto> handlePlayerAlreadySignedUp(AccsaberOperationException exception) {
