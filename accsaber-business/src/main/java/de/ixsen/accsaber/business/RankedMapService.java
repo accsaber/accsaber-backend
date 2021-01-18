@@ -109,7 +109,7 @@ public class RankedMapService {
         song.setLevelAuthorName(beatSaverSongInfo.getMetadata().getLevelAuthorName());
         song.setSongAuthorName(beatSaverSongInfo.getMetadata().getSongAuthorName());
         song.setSongHash(beatSaverSongInfo.getHash());
-        song.setSongName(beatSaverSongInfo.getName());
+        song.setSongName(beatSaverSongInfo.getMetadata().getSongName());
         song.setSongSubName(beatSaverSongInfo.getMetadata().getSongSubName());
         song.setBeatSaverKey(beatSaverSongInfo.getKey());
 
