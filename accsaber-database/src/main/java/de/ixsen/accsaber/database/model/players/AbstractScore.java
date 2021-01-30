@@ -1,6 +1,7 @@
 package de.ixsen.accsaber.database.model.players;
 
 import de.ixsen.accsaber.database.model.maps.RankedMap;
+import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 
 import javax.persistence.Column;
@@ -16,19 +17,25 @@ import java.time.Instant;
 public class AbstractScore {
 
     @Id
+    @Audited
     private Long scoreId;
 
     private int rankWhenScoresSet;
+    @Audited
     private int score;
+    @Audited
     private int unmodififiedScore;
 
+    @Audited
     private Double accuracy;
+    @Audited
     private Double ap;
 
     @Column(name = "is_ranked_map_score")
     private Boolean isRankedMapScore = false;
 
     @OrderBy
+    @Audited
     private Instant timeSet;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -37,6 +44,7 @@ public class AbstractScore {
     private RankedMap rankedMap;
 
     @Column(name = "map_leaderboard_id")
+    @Audited
     private Long leaderboardId;
 
     @ManyToOne

@@ -8,11 +8,14 @@ import de.ixsen.accsaber.database.repositories.RankedMapRepository;
 import de.ixsen.accsaber.database.repositories.RankedScoreRepository;
 import de.ixsen.accsaber.database.repositories.ScoreRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.history.Revision;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class ScoreService implements HasLogger {
@@ -53,5 +56,15 @@ public class ScoreService implements HasLogger {
 
     public List<RankedScore> getScoresForPlayer(Player player) {
         return this.rankedScoreRepository.findAllByPlayerOrderByApDesc(player);
+    }
+
+    public List<Score> getScoreHistoryForPlayer(Player player, long leaderboardId) {
+        return this.scoreRepository
+                .findByPlayerAndLeaderboardId(player, leaderboardId)
+                .map(score -> this.scoreRepository.findRevisions(score.getScoreId())
+                        .get()
+                        .map(Revision::getEntity)
+                        .collect(Collectors.toList()))
+                .orElse(Collections.emptyList());
     }
 }

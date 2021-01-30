@@ -16,7 +16,7 @@ public class MapLeaderboardPlayerDto {
     private int score;
     private double ap;
 
-    private Instant timeSet;
+    private String timeSet;
 
     public int getRank() {
         return this.rank;
@@ -82,11 +82,11 @@ public class MapLeaderboardPlayerDto {
         this.ap = ap;
     }
 
-    public Instant getTimeSet() {
+    public String getTimeSet() {
         return this.timeSet;
     }
 
-    public void setTimeSet(Instant timeSet) {
+    public void setTimeSet(String timeSet) {
         this.timeSet = timeSet;
     }
 }

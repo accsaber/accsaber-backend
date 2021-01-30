@@ -13,13 +13,18 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.MariaDBDialect
     show-sql: true
+
 logging:
   level:
     de.ixsen: TRACE
 #  file:
 #    name: logs/accsaber.log
- 
 accsaber:
-  disable-score-fetching: false
+  disable-score-fetching: true
+  recalculate-ap-on-startup: false
   score-fetch-intervall-seconds: 600000
   allowed-origins: http://localhost:4200,localhost:8080,http://127.0.0.1:4200
+
+  auth:
+    secret: replacethissecretwitharealsecret
+    expiration-time: 3_600_000

@@ -37,7 +37,7 @@ public class RankedMapService {
         this.beatSaverConnector = beatSaverConnector;
     }
 
-    public List<RankedMap> getRankedSongs() {
+    public List<RankedMap> getRankedMaps() {
         return this.rankedMapRepository.findAll();
     }
 
@@ -69,7 +69,7 @@ public class RankedMapService {
 
         song.getRankedMaps().add(rankedMap);
 
-        this.rankedMapRepository.save(rankedMap);
+        this.songRepository.save(song);
 
         List<Score> nowRankedScores = this.scoreRepository.findAllByLeaderboardId(rankedMap.getLeaderboardId());
         nowRankedScores.forEach(score -> {
@@ -109,7 +109,7 @@ public class RankedMapService {
         song.setLevelAuthorName(beatSaverSongInfo.getMetadata().getLevelAuthorName());
         song.setSongAuthorName(beatSaverSongInfo.getMetadata().getSongAuthorName());
         song.setSongHash(beatSaverSongInfo.getHash());
-        song.setSongName(beatSaverSongInfo.getName());
+        song.setSongName(beatSaverSongInfo.getMetadata().getSongName());
         song.setSongSubName(beatSaverSongInfo.getMetadata().getSongSubName());
         song.setBeatSaverKey(beatSaverSongInfo.getKey());
 

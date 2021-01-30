@@ -2,6 +2,7 @@ package de.ixsen.accsaber.api.controllers;
 
 import de.ixsen.accsaber.api.dtos.CreateRankedMapDto;
 import de.ixsen.accsaber.api.dtos.RankedMapDto;
+import de.ixsen.accsaber.api.dtos.RankedMapsStatisticsDto;
 import de.ixsen.accsaber.api.mapping.MappingComponent;
 import de.ixsen.accsaber.business.PlayerService;
 import de.ixsen.accsaber.business.RankedMapService;
@@ -16,6 +17,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/ranked-maps")
@@ -35,7 +38,7 @@ public class RankedMapsController {
 
     @PostMapping
     public ResponseEntity<?> addNewRankedMap(@RequestBody CreateRankedMapDto rankedMapDto) {
-        this.rankedMapService.addNewRankedMap(rankedMapDto.getBeatSaverId(), rankedMapDto.getLeaderBoardId(), rankedMapDto.getDifficulty(), rankedMapDto.getTechyness());
+        this.rankedMapService.addNewRankedMap(rankedMapDto.getBeatSaverKey(), rankedMapDto.getLeaderboardId(), rankedMapDto.getDifficulty(), rankedMapDto.getTechyness());
         this.playerService.recalculateApForAllPlayers();
         return ResponseEntity.noContent().build();
     }
@@ -43,8 +46,26 @@ public class RankedMapsController {
     @GetMapping
     public ResponseEntity<List<RankedMapDto>> getAllRankedMaps() {
         List<RankedMapDto> rankedMapDtos = this.mappingComponent
-                .getRankedMapMapper().rankedMapsToDtos(this.rankedMapService.getRankedSongs());
+                .getRankedMapMapper().rankedMapsToDtos(this.rankedMapService.getRankedMaps());
         return ResponseEntity.ok(rankedMapDtos);
+    }
+
+    @GetMapping("/statistics")
+    public ResponseEntity<RankedMapsStatisticsDto> getRankedStat() {
+        List<RankedMap> rankedMaps = this.rankedMapService.getRankedMaps();
+        long trueAccCount = rankedMaps.stream().filter(r -> r.getTechyness() <= 4).count();
+        long techAccCount = rankedMaps.stream().filter(r -> r.getTechyness() >= 10).count();
+        RankedMapsStatisticsDto rankedMapsStatisticsDto = new RankedMapsStatisticsDto();
+        rankedMapsStatisticsDto.setMapCount(rankedMaps.size());
+        rankedMapsStatisticsDto.setTechAccMapCount(techAccCount);
+        rankedMapsStatisticsDto.setTrueAccMapCount(trueAccCount);
+        rankedMapsStatisticsDto.setStandardAccMapCount(rankedMaps.size() - trueAccCount - techAccCount);
+        Map<Double, Long> techynessToMapCount = rankedMaps
+                .stream()
+                .collect(Collectors.groupingBy(RankedMap::getTechyness, Collectors.counting()));
+        rankedMapsStatisticsDto.setTechynessToMapCount(techynessToMapCount);
+
+        return ResponseEntity.ok(rankedMapsStatisticsDto);
     }
 
     @GetMapping("/{leaderboardId}")

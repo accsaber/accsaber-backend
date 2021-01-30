@@ -1,6 +1,5 @@
 package de.ixsen.accsaber.database.model.maps;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
@@ -12,7 +11,7 @@ public class RankedMap {
     private Long leaderboardId;
     private int maxScore;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     private Song song;
 
     private String difficulty;

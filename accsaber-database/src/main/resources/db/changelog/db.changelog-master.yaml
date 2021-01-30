@@ -3,3 +3,5 @@ databaseChangeLog:
       file: db/changelog/changelogs/master-changelog.xml
   - include:
       file: db/changelog/changelogs/feature_profile-page.xml
+  - include:
+      file: db/changelog/changelogs/1-feature_staff-login.xml
