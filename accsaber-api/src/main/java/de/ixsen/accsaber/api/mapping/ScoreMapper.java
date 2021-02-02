@@ -13,6 +13,7 @@ import java.util.List;
 public interface ScoreMapper {
     ScoreMapper INSTANCE = Mappers.getMapper(ScoreMapper.class);
 
+    @Mapping(target = "songHash", source = "map.song.songHash")
     @Mapping(target = "techyness", source = "map.techyness")
     @Mapping(target = "songName", source = "map.song.songName")
     @Mapping(target = "songAuthorName", source = "map.song.songAuthorName")

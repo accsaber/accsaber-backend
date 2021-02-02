@@ -10,6 +10,7 @@ public class PlayerScoreDto {
     private String songAuthorName;
     private String levelAuthorName;
     private double techyness;
+    private String songHash;
 
     private String difficulty;
     private String leaderboardId;
@@ -111,5 +112,13 @@ public class PlayerScoreDto {
 
     public void setTimeSet(String timeSet) {
         this.timeSet = timeSet;
+    }
+
+    public String getSongHash() {
+        return songHash;
+    }
+
+    public void setSongHash(String songHash) {
+        this.songHash = songHash;
     }
 }
