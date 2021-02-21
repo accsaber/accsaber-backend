@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.UnsupportedMediaTypeException;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -22,7 +23,7 @@ import java.util.stream.Collectors;
 @Service
 public class ScoreSaberConnector {
 
-    public static final String URL = "https://new.scoresaber.com/api";
+    public static final String URL = "https://new.scoresaber.com";
     private final WebClient webClient;
 
     private final Set<Instant> recentRequests;
@@ -37,7 +38,7 @@ public class ScoreSaberConnector {
     public Optional<ScoreSaberPlayerDto> getPlayerData(String playerId) throws InterruptedException {
         this.handleConnectionLimit();
 
-        String requestUrl = URL + "/player/" + playerId + "/full";
+        String requestUrl = URL + "/api/player/" + playerId + "/full";
 
         return this.webClient.get().uri(requestUrl)
                 .retrieve()
@@ -59,7 +60,7 @@ public class ScoreSaberConnector {
     public ScoreSaberScoreListDto getPlayerScores(String playerId, int page) throws InterruptedException {
         this.handleConnectionLimit();
 
-        String requestUrl = URL + "/player/" + playerId + "/scores/recent/" + page;
+        String requestUrl = URL + "/api/player/" + playerId + "/scores/recent/" + page;
         return this.webClient.get().uri(requestUrl)
                 .retrieve()
                 .bodyToMono(ScoreSaberScoreListDto.class)
@@ -74,6 +75,22 @@ public class ScoreSaberConnector {
                     this.pauseInstant = Instant.now();
                     throw new RuntimeException();
                 })
+                .block();
+    }
+
+    public byte[] loadAvatar(String avatarUrl) {
+        return this.webClient.get().uri(URL + avatarUrl)
+                .accept(MediaType.IMAGE_JPEG)
+                .retrieve()
+                .bodyToMono(byte[].class)
+                .block();
+    }
+
+    public byte[] loadCover(String hash) {
+        return this.webClient.get().uri(URL + "/api/static/covers/" + hash.toUpperCase() + ".png")
+                .accept(MediaType.IMAGE_JPEG)
+                .retrieve()
+                .bodyToMono(byte[].class)
                 .block();
     }
 

@@ -17,12 +17,19 @@ import de.ixsen.accsaber.integration.model.scoresaber.ScoreSaberPlayerDto;
 import de.ixsen.accsaber.integration.model.scoresaber.ScoreSaberScoreDto;
 import de.ixsen.accsaber.integration.model.scoresaber.ScoreSaberScoreListDto;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -34,6 +41,7 @@ public class PlayerService implements HasLogger {
     private final BusinessMappingComponent mappingComponent;
     private final ScoreRepository scoreRepository;
     private final RankedMapRepository rankedMapRepository;
+    private final String avatarFolder;
 
     @Autowired
     public PlayerService(PlayerRepository playerRepository,
@@ -41,13 +49,15 @@ public class PlayerService implements HasLogger {
                          ScoreRepository scoreRepository,
                          RankedMapRepository rankedMapRepository,
                          ScoreSaberConnector scoreSaberConnector,
-                         BusinessMappingComponent mappingComponent) {
+                         BusinessMappingComponent mappingComponent,
+                         @Value("${accsaber.image-save-location}") String imageFolder) {
         this.playerRepository = playerRepository;
         this.rankedPlayerRepository = rankedPlayerRepository;
         this.scoreRepository = scoreRepository;
         this.rankedMapRepository = rankedMapRepository;
         this.scoreSaberConnector = scoreSaberConnector;
         this.mappingComponent = mappingComponent;
+        this.avatarFolder = imageFolder + "/avatars";
     }
 
     @Transactional
@@ -106,7 +116,12 @@ public class PlayerService implements HasLogger {
             return;
         }
 
+
         ScoreSaberPlayerDto playerData = optPlayerData.get();
+        if (player.getAvatarUrl() == null) {
+            this.loadAvatar(player.getPlayerId(), playerData.getPlayerInfo().getAvatar());
+        }
+
         this.getLogger().trace("Loading {} scores for {}.", playerData.getScoreStats().getTotalPlayCount(), playerData.getPlayerInfo().getPlayerName());
         this.mappingComponent.getPlayerMapper().scoreSaberPlayerToPlayer(player, playerData.getPlayerInfo());
         int totalPlayCount = playerData.getScoreStats().getTotalPlayCount();
@@ -193,6 +208,31 @@ public class PlayerService implements HasLogger {
         this.playerRepository.saveAll(allPlayers);
     }
 
+    public void loadAvatars() {
+        Instant start = Instant.now();
+        this.getLogger().info("Loading avatars..");
+        this.playerRepository.findAll().forEach(player -> {
+            if (player.getAvatarUrl() != null) {
+                this.loadAvatar(player.getPlayerId(), player.getAvatarUrl());
+            }
+        });
+        this.getLogger().info("Loading avatars finished in {} seconds.", Duration.between(start, Instant.now()).getSeconds());
+
+    }
+
+    /**
+     * Loads the avatar of a player.
+     */
+    private void loadAvatar(String playerId, String avatarUrl) {
+        byte[] avatar = this.scoreSaberConnector.loadAvatar(avatarUrl);
+        try (FileOutputStream fileOutputStream = new FileOutputStream(this.avatarFolder + "/" + playerId + ".jpg")) {
+            fileOutputStream.write(avatar);
+        } catch (IOException e) {
+            this.getLogger().error("Unable to save avatar for player with playerId {}", playerId, e);
+        }
+    }
+
+
     private void recalculateApForPlayer(Player player) {
         double playerAp = 0.0f;
         double playerAccSum = 0.0f;
@@ -217,8 +257,8 @@ public class PlayerService implements HasLogger {
     private Optional<ScoreSaberPlayerDto> getScoreSaberPlayerData(String playerId) {
         return this.tryGetScoreSaberPlayerData(playerId, 0);
     }
-
     // TODO recheck whether recursion is the way to go here.
+
     private Optional<ScoreSaberPlayerDto> tryGetScoreSaberPlayerData(String playerId, int tryCount) {
         try {
             return this.scoreSaberConnector.getPlayerData(playerId);
@@ -236,8 +276,8 @@ public class PlayerService implements HasLogger {
     private ScoreSaberScoreListDto getScoreSaberScore(String playerId, int page) {
         return this.tryGetScoreSaberScore(playerId, page, 0);
     }
-
     // TODO recheck whether recursion is the way to go here.
+
     private ScoreSaberScoreListDto tryGetScoreSaberScore(String playerId, int page, int tryCount) {
         try {
             return this.scoreSaberConnector.getPlayerScores(playerId, page);
