@@ -64,10 +64,12 @@ public class SongService implements HasLogger {
 
     private void saveSongCover(String hash) {
         byte[] cover = this.scoreSaberConnector.loadCover(hash);
-        try (FileOutputStream fileOutputStream = new FileOutputStream(this.coverFolder + "/" + hash + ".png")) {
+        try (FileOutputStream fileOutputStream = new FileOutputStream(this.coverFolder + "/" + hash.toUpperCase() + ".png")) {
             fileOutputStream.write(cover);
         } catch (IOException e) {
             this.getLogger().error("Unable to save cover for song with hash {}", hash, e);
         }
     }
 }
+
+// The update includes song covers and avatars as well as a general layout change
