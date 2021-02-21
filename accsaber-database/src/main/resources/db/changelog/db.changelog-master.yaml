@@ -5,5 +5,3 @@ databaseChangeLog:
       file: db/changelog/changelogs/feature_profile-page.xml
   - include:
       file: db/changelog/changelogs/1-feature_staff-login.xml
-#  - include:
-#      file: db/changelog/changelogs/2-rank_history.xml
