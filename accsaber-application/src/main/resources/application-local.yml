@@ -23,7 +23,7 @@ accsaber:
   disable-score-fetching: true
   disable-avatar-fetching: false
   recalculate-ap-on-startup: false
-  reload-song-covers-on-startup: true
+  reload-song-covers-on-startup: false
   score-fetch-intervall-millis: 600000
   avatar-fetch-intervall-millis: 86400000
   allowed-origins: http://localhost:4200,localhost:8080,http://127.0.0.1:4200

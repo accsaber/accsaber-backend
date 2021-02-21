@@ -203,3 +203,5 @@ hs_err_pid*
 target
 */.idea
 .idea/**
+
+application-local.yml
