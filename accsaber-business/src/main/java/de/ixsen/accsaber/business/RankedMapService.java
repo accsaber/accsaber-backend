@@ -7,34 +7,33 @@ import de.ixsen.accsaber.database.model.maps.Song;
 import de.ixsen.accsaber.database.model.players.Score;
 import de.ixsen.accsaber.database.repositories.RankedMapRepository;
 import de.ixsen.accsaber.database.repositories.ScoreRepository;
-import de.ixsen.accsaber.database.repositories.SongRepository;
 import de.ixsen.accsaber.integration.connector.BeatSaverConnector;
 import de.ixsen.accsaber.integration.model.beatsaver.BeatSaverDifficultyDetails;
 import de.ixsen.accsaber.integration.model.beatsaver.BeatSaverSongInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class RankedMapService {
 
-    private final SongRepository songRepository;
     private final BeatSaverConnector beatSaverConnector;
     private final RankedMapRepository rankedMapRepository;
     private final ScoreRepository scoreRepository;
 
+    private final SongService songService;
+
     @Autowired
-    public RankedMapService(SongRepository songRepository,
-                            RankedMapRepository rankedMapRepository,
+    public RankedMapService(RankedMapRepository rankedMapRepository,
                             ScoreRepository scoreRepository,
-                            BeatSaverConnector beatSaverConnector) {
-        this.songRepository = songRepository;
+                            BeatSaverConnector beatSaverConnector,
+                            SongService songService) {
         this.rankedMapRepository = rankedMapRepository;
         this.scoreRepository = scoreRepository;
         this.beatSaverConnector = beatSaverConnector;
+        this.songService = songService;
     }
 
     public List<RankedMap> getRankedMaps() {
@@ -51,12 +50,12 @@ public class RankedMapService {
 
     public void addNewRankedMap(String beatSaverId, Long leaderBoardId, String difficulty, Double techyness) {
         BeatSaverSongInfo beatSaverSongInfo = this.beatSaverConnector.getMapInfoByKey(beatSaverId);
-        Optional<Song> optionalSong = this.songRepository.findById(beatSaverSongInfo.getHash());
-        Song song = optionalSong.orElseGet(() -> this.createSong(beatSaverSongInfo));
 
         if (this.rankedMapRepository.existsById(leaderBoardId)) {
             throw new AccsaberOperationException(ExceptionType.RANKED_MAP_ALREADY_EXISTS, "The ranked map with the leaderboardId " + leaderBoardId + " already exists");
         }
+
+        Song song = this.songService.getOrCreateSong(beatSaverSongInfo);
 
         BeatSaverDifficultyDetails beatSaverDifficultyDetails = beatSaverSongInfo.getMetadata().getCharacteristics().get(0).getDifficulties().get(difficulty);
 
@@ -69,7 +68,7 @@ public class RankedMapService {
 
         song.getRankedMaps().add(rankedMap);
 
-        this.songRepository.save(song);
+        song = this.songService.saveSong(song);
 
         List<Score> nowRankedScores = this.scoreRepository.findAllByLeaderboardId(rankedMap.getLeaderboardId());
         nowRankedScores.forEach(score -> {
@@ -104,17 +103,5 @@ public class RankedMapService {
         return score;
     }
 
-    private Song createSong(BeatSaverSongInfo beatSaverSongInfo) {
-        Song song = new Song();
-        song.setLevelAuthorName(beatSaverSongInfo.getMetadata().getLevelAuthorName());
-        song.setSongAuthorName(beatSaverSongInfo.getMetadata().getSongAuthorName());
-        song.setSongHash(beatSaverSongInfo.getHash());
-        song.setSongName(beatSaverSongInfo.getMetadata().getSongName());
-        song.setSongSubName(beatSaverSongInfo.getMetadata().getSongSubName());
-        song.setBeatSaverKey(beatSaverSongInfo.getKey());
 
-        song.setRankedMaps(new ArrayList<>());
-
-        return song;
-    }
 }

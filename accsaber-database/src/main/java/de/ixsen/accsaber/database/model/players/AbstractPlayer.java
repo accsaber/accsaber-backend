@@ -1,8 +1,12 @@
 package de.ixsen.accsaber.database.model.players;
 
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
+import java.util.Date;
+import java.util.Map;
 
 @MappedSuperclass
 public abstract class AbstractPlayer {
@@ -22,6 +26,9 @@ public abstract class AbstractPlayer {
     private Double ap;
     private Double averageApPerMap;
     private int rankedPlays;
+
+//    @ElementCollection(fetch = FetchType.EAGER)
+//    private Map<Date, Integer> rankHistory;
 
 
     public String getPlayerId() {
@@ -95,4 +102,12 @@ public abstract class AbstractPlayer {
     public void setRankedPlays(int rankedPlays) {
         this.rankedPlays = rankedPlays;
     }
+
+//    public Map<Date, Integer> getRankHistory() {
+//        return this.rankHistory;
+//    }
+//
+//    public void setRankHistory(Map<Date, Integer> rankHistory) {
+//        this.rankHistory = rankHistory;
+//    }
 }
