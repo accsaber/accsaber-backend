@@ -1,7 +1,12 @@
 package de.ixsen.accsaber.business;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import de.ixsen.accsaber.business.exceptions.AccsaberOperationException;
 import de.ixsen.accsaber.business.exceptions.ExceptionType;
+import de.ixsen.accsaber.business.playlist.Playlist;
+import de.ixsen.accsaber.business.playlist.PlaylistSong;
+import de.ixsen.accsaber.business.playlist.PlaylistSongDifficulty;
 import de.ixsen.accsaber.database.model.maps.RankedMap;
 import de.ixsen.accsaber.database.model.maps.Song;
 import de.ixsen.accsaber.database.model.players.Score;
@@ -11,10 +16,18 @@ import de.ixsen.accsaber.integration.connector.BeatSaverConnector;
 import de.ixsen.accsaber.integration.model.beatsaver.BeatSaverDifficultyDetails;
 import de.ixsen.accsaber.integration.model.beatsaver.BeatSaverSongInfo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
+import org.springframework.util.FileCopyUtils;
 
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.UncheckedIOException;
 import java.util.List;
 import java.util.Optional;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 @Service
 public class RankedMapService {
@@ -78,6 +91,39 @@ public class RankedMapService {
             score.setAp(ap);
         });
         this.scoreRepository.saveAll(nowRankedScores);
+    }
+
+    public byte[] getRankedMapsJson() throws JsonProcessingException {
+        Playlist playlist = new Playlist();
+        playlist.setPlaylistTitle("AccSaber Ranked Maps");
+        playlist.setPlaylistAuthor("AccSaber");
+        playlist.setImage(this.getPlaylistImage());
+
+        for (RankedMap rankedMap : this.getRankedMaps()) {
+            PlaylistSong playlistSong = playlist.getSongs().stream().filter(s -> s.getHash().equals(rankedMap.getSong().getSongHash())).findFirst().orElseGet(() -> {
+                PlaylistSong newPlaylistSong = new PlaylistSong();
+                newPlaylistSong.setHash(rankedMap.getSong().getSongHash());
+                newPlaylistSong.setSongName(rankedMap.getSong().getSongName());
+
+                playlist.getSongs().add(newPlaylistSong);
+                return newPlaylistSong;
+            });
+            PlaylistSongDifficulty playlistSongDifficulty = new PlaylistSongDifficulty();
+            playlistSongDifficulty.setName(rankedMap.getDifficulty());
+            playlistSongDifficulty.setCharacteristic("Standard");
+            playlistSong.getDifficulties().add(playlistSongDifficulty);
+        }
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.writeValueAsBytes(playlist);
+    }
+
+    private String getPlaylistImage() {
+        ClassPathResource resource = new ClassPathResource("logo-data");
+        try (Reader reader = new InputStreamReader(resource.getInputStream(), UTF_8)) {
+            return FileCopyUtils.copyToString(reader);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e); // TODO
+        }
     }
 
     // There has to be a better way to do this
