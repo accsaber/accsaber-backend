@@ -31,3 +31,8 @@ accsaber:
   auth:
     secret: replacethissecretwitharealsecret
     expiration-time: 3_600_000
+
+  discord:
+    auth-url: https://discord.com/api/oauth2
+    client-id: # id
+    client-secret: # secret
