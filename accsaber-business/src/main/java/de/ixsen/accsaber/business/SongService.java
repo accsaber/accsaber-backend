@@ -7,6 +7,7 @@ import de.ixsen.accsaber.integration.model.beatsaver.BeatSaverSongInfo;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.Duration;
@@ -39,6 +40,11 @@ public class SongService implements HasLogger {
         return optionalSong.orElseGet(() -> this.createSong(beatSaverSongInfo));
     }
 
+    public void removeSong(BeatSaverSongInfo beatSaverSongInfo) {
+        this.songRepository.deleteById(beatSaverSongInfo.getHash());
+        this.deleteSongCover(beatSaverSongInfo.getHash());
+    }
+
     public void reloadAllCovers() {
         Instant start = Instant.now();
         this.getLogger().info("Reloading all song covers");
@@ -68,6 +74,14 @@ public class SongService implements HasLogger {
             fileOutputStream.write(cover);
         } catch (IOException e) {
             this.getLogger().error("Unable to save cover for song with hash {}", hash, e);
+        }
+    }
+
+    private void deleteSongCover(String hash) {
+        File file = new File(this.coverFolder + "/" + hash.toUpperCase() + ".png");
+        boolean deleted = file.delete();
+        if (!deleted) {
+            this.getLogger().error("Failed to delete cover photo.");
         }
     }
 }

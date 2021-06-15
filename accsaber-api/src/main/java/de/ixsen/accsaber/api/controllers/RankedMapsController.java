@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import de.ixsen.accsaber.api.dtos.CreateRankedMapDto;
 import de.ixsen.accsaber.api.dtos.RankedMapDto;
 import de.ixsen.accsaber.api.dtos.RankedMapsStatisticsDto;
+import de.ixsen.accsaber.api.dtos.RemoveRankedMapDto;
 import de.ixsen.accsaber.api.mapping.MappingComponent;
 import de.ixsen.accsaber.business.PlayerService;
 import de.ixsen.accsaber.business.RankedMapService;
@@ -11,12 +12,7 @@ import de.ixsen.accsaber.database.model.maps.RankedMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
@@ -50,6 +46,12 @@ public class RankedMapsController {
         List<RankedMapDto> rankedMapDtos = this.mappingComponent
                 .getRankedMapMapper().rankedMapsToDtos(this.rankedMapService.getRankedMaps());
         return ResponseEntity.ok(rankedMapDtos);
+    }
+
+    @PostMapping("/delete")
+    public ResponseEntity<?> removeRankedMap(@RequestBody RemoveRankedMapDto removeRankedMapDto) {
+        this.rankedMapService.removeRankedMap(removeRankedMapDto.getLeaderboardId(), removeRankedMapDto.getBeatSaverKey());
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/statistics")

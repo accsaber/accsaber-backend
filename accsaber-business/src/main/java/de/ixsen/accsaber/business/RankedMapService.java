@@ -93,6 +93,14 @@ public class RankedMapService {
         this.scoreRepository.saveAll(nowRankedScores);
     }
 
+    public void removeRankedMap(Long leaderboardId, String beatSaverId) {
+        BeatSaverSongInfo beatSaverSongInfo = this.beatSaverConnector.getMapInfoByKey(beatSaverId);
+        if (this.rankedMapRepository.existsById(leaderboardId)) {
+            this.songService.removeSong(beatSaverSongInfo);
+            this.rankedMapRepository.deleteById(leaderboardId);
+        }
+    }
+
     public byte[] getRankedMapsJson() throws JsonProcessingException {
         Playlist playlist = new Playlist();
         playlist.setPlaylistTitle("AccSaber Ranked Maps");
