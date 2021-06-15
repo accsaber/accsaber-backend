@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import de.ixsen.accsaber.api.dtos.CreateRankedMapDto;
 import de.ixsen.accsaber.api.dtos.RankedMapDto;
 import de.ixsen.accsaber.api.dtos.RankedMapsStatisticsDto;
-import de.ixsen.accsaber.api.dtos.RemoveRankedMapDto;
 import de.ixsen.accsaber.api.mapping.MappingComponent;
 import de.ixsen.accsaber.business.PlayerService;
 import de.ixsen.accsaber.business.RankedMapService;
@@ -48,9 +47,9 @@ public class RankedMapsController {
         return ResponseEntity.ok(rankedMapDtos);
     }
 
-    @PostMapping("/delete")
-    public ResponseEntity<?> removeRankedMap(@RequestBody RemoveRankedMapDto removeRankedMapDto) {
-        this.rankedMapService.removeRankedMap(removeRankedMapDto.getLeaderboardId(), removeRankedMapDto.getBeatSaverKey());
+    @DeleteMapping("/{leaderboardId}")
+    public ResponseEntity<?> removeRankedMap(@PathVariable Long leaderboardId) {
+        this.rankedMapService.removeRankedMap(leaderboardId);
         return ResponseEntity.noContent().build();
     }
 

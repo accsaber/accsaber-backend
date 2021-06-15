@@ -93,10 +93,16 @@ public class RankedMapService {
         this.scoreRepository.saveAll(nowRankedScores);
     }
 
-    public void removeRankedMap(Long leaderboardId, String beatSaverId) {
-        BeatSaverSongInfo beatSaverSongInfo = this.beatSaverConnector.getMapInfoByKey(beatSaverId);
+    public void removeRankedMap(Long leaderboardId) {
         if (this.rankedMapRepository.existsById(leaderboardId)) {
-            this.songService.removeSong(beatSaverSongInfo);
+            RankedMap map = this.rankedMapRepository.getOne(leaderboardId);
+            Song song = map.getSong();
+            List<RankedMap> rankedMaps = song.getRankedMaps();
+            rankedMaps.remove(map);
+            song.setRankedMaps(rankedMaps);
+            if (rankedMaps.size() == 0) {
+                this.songService.removeSong(song.getSongHash());
+            }
             this.rankedMapRepository.deleteById(leaderboardId);
         }
     }

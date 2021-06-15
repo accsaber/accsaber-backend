@@ -40,9 +40,9 @@ public class SongService implements HasLogger {
         return optionalSong.orElseGet(() -> this.createSong(beatSaverSongInfo));
     }
 
-    public void removeSong(BeatSaverSongInfo beatSaverSongInfo) {
-        this.songRepository.deleteById(beatSaverSongInfo.getHash());
-        this.deleteSongCover(beatSaverSongInfo.getHash());
+    public void removeSong(String hash) {
+        this.songRepository.deleteById(hash);
+        this.deleteSongCover(hash);
     }
 
     public void reloadAllCovers() {
