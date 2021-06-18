@@ -100,10 +100,10 @@ public class RankedMapService {
             List<RankedMap> rankedMaps = song.getRankedMaps();
             rankedMaps.remove(map);
             song.setRankedMaps(rankedMaps);
+            this.rankedMapRepository.deleteById(leaderboardId);
             if (rankedMaps.size() == 0) {
                 this.songService.removeSong(song.getSongHash());
             }
-            this.rankedMapRepository.deleteById(leaderboardId);
         }
     }
 
