@@ -94,17 +94,24 @@ public class RankedMapService {
     }
 
     public void removeRankedMap(Long leaderboardId) {
-        if (this.rankedMapRepository.existsById(leaderboardId)) {
-            RankedMap map = this.rankedMapRepository.getOne(leaderboardId);
-            Song song = map.getSong();
-            List<RankedMap> rankedMaps = song.getRankedMaps();
-            rankedMaps.remove(map);
-            song.setRankedMaps(rankedMaps);
-            this.rankedMapRepository.deleteById(leaderboardId);
-            if (rankedMaps.size() == 0) {
-                this.songService.removeSong(song.getSongHash());
-            }
+        Optional<RankedMap> map = this.rankedMapRepository.findById(leaderboardId);
+        if(map.isEmpty()){
+            throw new AccsaberOperationException(ExceptionType.RANKED_MAP_NOT_FOUND,
+                    "The ranked map"  + leaderboardId + " does not currently exist.");
         }
+
+        Song song = map.get().getSong();
+        List<RankedMap> rankedMaps = song.getRankedMaps();
+        rankedMaps.remove(map);
+        song.setRankedMaps(rankedMaps);
+        this.rankedMapRepository.deleteById(leaderboardId);
+        if (rankedMaps.size() == 0) {
+            this.songService.removeSong(song.getSongHash());
+        }
+
+        List<Score> unrankedScores = this.scoreRepository.findAllByLeaderboardId(leaderboardId);
+        unrankedScores.forEach(score -> score.setIsRankedMapScore(false));
+        this.scoreRepository.saveAll(unrankedScores);
     }
 
     public byte[] getRankedMapsJson() throws JsonProcessingException {

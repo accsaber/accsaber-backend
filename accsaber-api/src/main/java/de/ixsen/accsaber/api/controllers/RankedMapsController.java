@@ -50,7 +50,7 @@ public class RankedMapsController {
     @DeleteMapping("/{leaderboardId}")
     public ResponseEntity<?> removeRankedMap(@PathVariable Long leaderboardId) {
         this.rankedMapService.removeRankedMap(leaderboardId);
-        return ResponseEntity.ok("Successfully deleted.");
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/statistics")
