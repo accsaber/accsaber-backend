@@ -23,7 +23,7 @@ public class AccsaberExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(AccsaberOperationException.class)
-    public ResponseEntity<ErrorDto> handlePlayerAlreadySignedUp(AccsaberOperationException exception) {
+    public ResponseEntity<ErrorDto> handleAccsaberOperationException(AccsaberOperationException exception) {
         ErrorDto errorDto = new ErrorDto();
         errorDto.setErrorCode(exception.getErrorCode());
         errorDto.setMessage(exception.getMessage());
