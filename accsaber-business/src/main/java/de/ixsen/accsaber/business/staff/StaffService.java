@@ -26,4 +26,8 @@ public class StaffService {
         this.staffUserRepository.save(staffUser);
         return staffUser;
     }
+
+    public StaffUser findUserByName(String name) {
+        return this.staffUserRepository.findByUsername(name);
+    }
 }

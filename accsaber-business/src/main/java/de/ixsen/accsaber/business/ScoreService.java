@@ -1,10 +1,10 @@
 package de.ixsen.accsaber.business;
 
-import de.ixsen.accsaber.database.model.maps.RankedMap;
+import de.ixsen.accsaber.database.model.maps.BeatMap;
 import de.ixsen.accsaber.database.model.players.Player;
 import de.ixsen.accsaber.database.model.players.RankedScore;
 import de.ixsen.accsaber.database.model.players.Score;
-import de.ixsen.accsaber.database.repositories.RankedMapRepository;
+import de.ixsen.accsaber.database.repositories.BeatMapRepository;
 import de.ixsen.accsaber.database.repositories.RankedScoreRepository;
 import de.ixsen.accsaber.database.repositories.ScoreRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,13 +22,13 @@ public class ScoreService implements HasLogger {
 
     private final ScoreRepository scoreRepository;
     private final RankedScoreRepository rankedScoreRepository;
-    private final RankedMapRepository rankedMapRepository;
+    private final BeatMapRepository mapRepository;
 
     @Autowired
-    public ScoreService(ScoreRepository scoreRepository, RankedScoreRepository rankedScoreRepository, RankedMapRepository rankedMapRepository) {
+    public ScoreService(ScoreRepository scoreRepository, RankedScoreRepository rankedScoreRepository, BeatMapRepository mapRepository) {
         this.scoreRepository = scoreRepository;
         this.rankedScoreRepository = rankedScoreRepository;
-        this.rankedMapRepository = rankedMapRepository;
+        this.mapRepository = mapRepository;
     }
 
     public List<RankedScore> getScoresForLeaderboardId(Long leaderboardId) {
@@ -37,16 +37,16 @@ public class ScoreService implements HasLogger {
 
     public void recalculateApForAllScores() {
         List<Score> allRankedScores = this.scoreRepository.findAllRankedMaps();
-        Map<Long, RankedMap> rankedMaps = new HashMap<>();
+        Map<Long, BeatMap> rankedMaps = new HashMap<>();
 
-        for (RankedMap rankedMap : this.rankedMapRepository.findAll()) {
+        for (BeatMap rankedMap : this.mapRepository.findAll()) {
             rankedMaps.put(rankedMap.getLeaderboardId(), rankedMap);
         }
 
         allRankedScores.forEach(score -> {
             score.setIsRankedMapScore(true);
             score.setAccuracy(score.getScore() / (double) rankedMaps.get(score.getLeaderboardId()).getMaxScore());
-            double ap = APUtils.calculateApByAcc(score.getAccuracy(), rankedMaps.get(score.getLeaderboardId()).getTechyness());
+            double ap = APUtils.calculateApByAcc(score.getAccuracy(), rankedMaps.get(score.getLeaderboardId()).getComplexity());
             score.setAp(ap);
         });
 

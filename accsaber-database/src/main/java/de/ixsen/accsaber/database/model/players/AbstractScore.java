@@ -1,6 +1,6 @@
 package de.ixsen.accsaber.database.model.players;
 
-import de.ixsen.accsaber.database.model.maps.RankedMap;
+import de.ixsen.accsaber.database.model.maps.BeatMap;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 
@@ -41,7 +41,7 @@ public class AbstractScore {
     @ManyToOne(fetch = FetchType.LAZY)
     @NotAudited
     @JoinColumn(insertable = false, updatable = false, name = "map_leaderboard_id")
-    private RankedMap rankedMap;
+    private BeatMap rankedMap;
 
     @Column(name = "map_leaderboard_id")
     @Audited
@@ -100,11 +100,11 @@ public class AbstractScore {
         this.timeSet = timeSet;
     }
 
-    public RankedMap getMap() {
+    public BeatMap getMap() {
         return this.rankedMap;
     }
 
-    public void setMap(RankedMap map) {
+    public void setMap(BeatMap map) {
         this.rankedMap = map;
     }
 

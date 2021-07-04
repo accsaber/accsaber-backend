@@ -2,6 +2,7 @@ package de.ixsen.accsaber.database.model.staff;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import java.util.Objects;
 
 @Entity
 public class StaffUser {
@@ -33,5 +34,18 @@ public class StaffUser {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || this.getClass() != o.getClass()) return false;
+        StaffUser staffUser = (StaffUser) o;
+        return this.username.equals(staffUser.username);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.username);
     }
 }

@@ -20,6 +20,7 @@ public class AccSaberUserDetailsService implements UserDetailsService {
         this.staffUserRepository = staffUserRepository;
     }
 
+    // FIXME Add the role to the granted authorities
     @Override
     public UserDetails loadUserByUsername(String s) throws UsernameNotFoundException {
         Optional<StaffUser> user = this.staffUserRepository.findById(s);

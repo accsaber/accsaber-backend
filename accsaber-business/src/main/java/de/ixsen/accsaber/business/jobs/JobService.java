@@ -1,7 +1,7 @@
 package de.ixsen.accsaber.business.jobs;
 
 import de.ixsen.accsaber.business.HasLogger;
-import de.ixsen.accsaber.business.PlayerService;
+import de.ixsen.accsaber.business.players.PlayerService;
 import de.ixsen.accsaber.business.ScoreService;
 import de.ixsen.accsaber.business.SongService;
 import org.springframework.beans.factory.annotation.Autowired;

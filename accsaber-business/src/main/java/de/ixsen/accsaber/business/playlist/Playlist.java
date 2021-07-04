@@ -8,7 +8,8 @@ public class Playlist {
     private String playlistAuthor;
     private String image;
     private List<PlaylistSong> songs;
-    private final String syncURL = "https://www.accsaber.ixsen.de/ranked-maps/playlist";
+    // TODO Make configurable
+    private final String syncURL = "https://www.accsaber.ixsen.de/api/ranked-maps/playlist";
 
     public Playlist() {
         this.songs = new ArrayList<>();
