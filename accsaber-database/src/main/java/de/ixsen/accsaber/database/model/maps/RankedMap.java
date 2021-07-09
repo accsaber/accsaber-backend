@@ -1,5 +1,7 @@
 package de.ixsen.accsaber.database.model.maps;
 
+import de.ixsen.accsaber.database.model.Leaderboard;
+
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
@@ -7,6 +9,9 @@ import javax.persistence.ManyToOne;
 @Entity
 public class RankedMap {
 
+    /**
+     * Scoresaber LeaderboardID
+     */
     @Id
     private Long leaderboardId;
     private int maxScore;
@@ -17,6 +22,9 @@ public class RankedMap {
     private String difficulty;
 
     private double techyness;
+
+    @ManyToOne
+    private Leaderboard leaderboard;
 
     public Long getLeaderboardId() {
         return this.leaderboardId;
@@ -56,5 +64,13 @@ public class RankedMap {
 
     public void setTechyness(double techyness) {
         this.techyness = techyness;
+    }
+
+    public Leaderboard getLeaderboard() {
+        return leaderboard;
+    }
+
+    public void setLeaderboard(Leaderboard leaderboard) {
+        this.leaderboard = leaderboard;
     }
 }

@@ -21,11 +21,6 @@ public abstract class AbstractPlayer {
     private Boolean isAccChamp;
     private String hmd;
 
-    private Double averageAcc;
-
-    private Double ap;
-    private Double averageApPerMap;
-    private int rankedPlays;
 
 //    @ElementCollection(fetch = FetchType.EAGER)
 //    private Map<Date, Integer> rankHistory;
@@ -70,44 +65,4 @@ public abstract class AbstractPlayer {
     public void setHmd(String hmd) {
         this.hmd = hmd;
     }
-
-    public Double getAverageAcc() {
-        return this.averageAcc;
-    }
-
-    public void setAverageAcc(Double averageAcc) {
-        this.averageAcc = averageAcc;
-    }
-
-    public Double getAp() {
-        return this.ap;
-    }
-
-    public void setAp(Double ap) {
-        this.ap = ap;
-    }
-
-    public Double getAverageApPerMap() {
-        return this.averageApPerMap;
-    }
-
-    public void setAverageApPerMap(Double averageApPerMap) {
-        this.averageApPerMap = averageApPerMap;
-    }
-
-    public int getRankedPlays() {
-        return this.rankedPlays;
-    }
-
-    public void setRankedPlays(int rankedPlays) {
-        this.rankedPlays = rankedPlays;
-    }
-
-//    public Map<Date, Integer> getRankHistory() {
-//        return this.rankHistory;
-//    }
-//
-//    public void setRankHistory(Map<Date, Integer> rankHistory) {
-//        this.rankHistory = rankHistory;
-//    }
 }
