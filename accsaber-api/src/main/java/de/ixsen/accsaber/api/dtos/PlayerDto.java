@@ -12,11 +12,12 @@ public class PlayerDto {
     private boolean isAccChamp;
     private String hmd;
 
-    private double averageAcc;
-    private double ap;
+//    private double averageAcc;
+//    private double ap;
+//    private double averageApPerMap;
 
     private int rankedPlays;
-    private double averageApPerMap;
+
 
     public int getRank() {
         return this.rank;
@@ -66,22 +67,6 @@ public class PlayerDto {
         this.hmd = hmd;
     }
 
-    public double getAverageAcc() {
-        return this.averageAcc;
-    }
-
-    public void setAverageAcc(double averageAcc) {
-        this.averageAcc = averageAcc;
-    }
-
-    public double getAp() {
-        return this.ap;
-    }
-
-    public void setAp(double ap) {
-        this.ap = ap;
-    }
-
     public int getRankedPlays() {
         return this.rankedPlays;
     }
@@ -90,11 +75,29 @@ public class PlayerDto {
         this.rankedPlays = rankedPlays;
     }
 
-    public double getAverageApPerMap() {
-        return this.averageApPerMap;
-    }
-
-    public void setAverageApPerMap(double averageApPerMap) {
-        this.averageApPerMap = averageApPerMap;
-    }
+//
+//    public double getAverageAcc() {
+//        return this.averageAcc;
+//    }
+//
+//    public void setAverageAcc(double averageAcc) {
+//        this.averageAcc = averageAcc;
+//    }
+//
+//    public double getAp() {
+//        return this.ap;
+//    }
+//
+//    public void setAp(double ap) {
+//        this.ap = ap;
+//    }
+//
+//
+//    public double getAverageApPerMap() {
+//        return this.averageApPerMap;
+//    }
+//
+//    public void setAverageApPerMap(double averageApPerMap) {
+//        this.averageApPerMap = averageApPerMap;
+//    }
 }

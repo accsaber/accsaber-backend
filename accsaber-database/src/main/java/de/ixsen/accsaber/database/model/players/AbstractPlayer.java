@@ -1,15 +1,12 @@
 package de.ixsen.accsaber.database.model.players;
 
 import javax.persistence.Column;
-import javax.persistence.ElementCollection;
-import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
-import java.util.Date;
-import java.util.Map;
+import java.io.Serializable;
 
 @MappedSuperclass
-public abstract class AbstractPlayer {
+public abstract class AbstractPlayer implements Serializable {
 
     @Id
     private String playerId;
@@ -20,11 +17,6 @@ public abstract class AbstractPlayer {
     @Column(name = "is_acc_champ")
     private Boolean isAccChamp;
     private String hmd;
-
-
-//    @ElementCollection(fetch = FetchType.EAGER)
-//    private Map<Date, Integer> rankHistory;
-
 
     public String getPlayerId() {
         return this.playerId;

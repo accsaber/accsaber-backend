@@ -2,21 +2,22 @@ package de.ixsen.accsaber.database.model;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import java.io.Serializable;
 
 @Entity
-public class Leaderboard  {
+public class Leaderboard implements Serializable {
     @Id
     private String name;
 
     private String description;
 
     /**
-     *     Potential for the future:
-     *     Different calcs for different leaderboards, steeper curve for true acc, less steep for tech etc
+     * Potential for the future:
+     * Different calcs for different leaderboards, steeper curve for true acc, less steep for tech etc
      */
 
     public String getName() {
-        return name;
+        return this.name;
     }
 
     public void setName(String name) {
@@ -24,7 +25,7 @@ public class Leaderboard  {
     }
 
     public String getDescription() {
-        return description;
+        return this.description;
     }
 
     public void setDescription(String description) {

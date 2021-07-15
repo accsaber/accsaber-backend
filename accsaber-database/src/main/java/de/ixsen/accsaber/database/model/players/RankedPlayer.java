@@ -19,5 +19,4 @@ public class RankedPlayer extends AbstractPlayer {
     public void setRanking(Long ranking) {
         this.ranking = ranking;
     }
-
 }
