@@ -5,7 +5,7 @@ import javax.persistence.Id;
 import java.io.Serializable;
 
 @Entity
-public class Leaderboard implements Serializable {
+public class Category implements Serializable {
     @Id
     private String name;
 

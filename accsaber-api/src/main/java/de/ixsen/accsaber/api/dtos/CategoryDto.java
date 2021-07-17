@@ -1,6 +1,6 @@
 package de.ixsen.accsaber.api.dtos;
 
-public class LeaderboardDto {
+public class CategoryDto {
 
     private String name;
     private String description;

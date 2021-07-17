@@ -8,12 +8,12 @@ import javax.persistence.ManyToOne;
 import java.util.List;
 
 @Entity
-public class LeaderboardPerformance extends BaseEntity {
+public class CategoryPerformance extends BaseEntity {
     @ManyToOne
     private Player player;
 
     @ManyToOne
-    private Leaderboard leaderboard;
+    private Category category;
 
     private Double averageAcc;
 
@@ -21,6 +21,7 @@ public class LeaderboardPerformance extends BaseEntity {
     private Double averageApPerMap;
     private int rankedPlays;
 
+    // TODO -> rank history for each category?
     @ManyToMany
     private List<RankHistoryEntry> leaderboardHistory;
 
@@ -32,12 +33,12 @@ public class LeaderboardPerformance extends BaseEntity {
         this.player = player;
     }
 
-    public Leaderboard getLeaderboard() {
-        return leaderboard;
+    public Category getCategory() {
+        return category;
     }
 
-    public void setLeaderboard(Leaderboard leaderboard) {
-        this.leaderboard = leaderboard;
+    public void setCategory(Category category) {
+        this.category = category;
     }
 
     public Double getAverageAcc() {

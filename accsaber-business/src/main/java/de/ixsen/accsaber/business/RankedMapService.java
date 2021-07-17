@@ -85,7 +85,7 @@ public class RankedMapService {
 
         List<Score> nowRankedScores = this.scoreRepository.findAllByLeaderboardId(rankedMap.getLeaderboardId());
         nowRankedScores.forEach(score -> {
-            score.setIsRankedMapScore(true);
+            score.setRankedMap(rankedMap);
             score.setAccuracy(score.getScore() / (double) rankedMap.getMaxScore());
             double ap = APUtils.calculateApByAcc(score.getAccuracy(), rankedMap.getTechyness());
             score.setAp(ap);

@@ -21,3 +21,10 @@ To start the application through the command line first run:
 `mvn clean install`   
 in the root folder, then navigate into the accsaber-application module and run  
 `mvn spring-boot:run -Dspring-boot.run.profiles=local`
+
+## Generating Liquibase chnangelogs
+
+Navigate into the accsaber-database module and run
+`mvn liquibase:diff`
+
+It will create a liquibase-temp-changeLog.xml in the changelog folder. Move this file to changelogs and rename it appropriately

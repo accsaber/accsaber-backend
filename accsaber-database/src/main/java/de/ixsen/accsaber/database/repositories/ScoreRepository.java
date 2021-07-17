@@ -16,7 +16,7 @@ public interface ScoreRepository extends JpaRepository<Score, Long>, RevisionRep
 
     List<Score> findAllByLeaderboardId(Long leaderboardId);
 
-    @Query(value = "select * from score s where s.is_ranked_map_score = true", nativeQuery = true)
+    @Query(value = "select * from score s where s.map_leaderboard_id IS NOT NULL", nativeQuery = true)
     List<Score> findAllRankedMaps();
 
     Optional<Score> findByPlayerAndLeaderboardId(Player player, long leaderboardId);

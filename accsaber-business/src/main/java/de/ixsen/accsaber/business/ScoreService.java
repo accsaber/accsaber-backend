@@ -44,7 +44,6 @@ public class ScoreService implements HasLogger {
         }
 
         allRankedScores.forEach(score -> {
-            score.setIsRankedMapScore(true);
             score.setAccuracy(score.getScore() / (double) rankedMaps.get(score.getLeaderboardId()).getMaxScore());
             double ap = APUtils.calculateApByAcc(score.getAccuracy(), rankedMaps.get(score.getLeaderboardId()).getTechyness());
             score.setAp(ap);

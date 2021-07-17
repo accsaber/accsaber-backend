@@ -1,6 +1,6 @@
 package de.ixsen.accsaber.database.model.maps;
 
-import de.ixsen.accsaber.database.model.Leaderboard;
+import de.ixsen.accsaber.database.model.Category;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -24,7 +24,7 @@ public class RankedMap {
     private double techyness;
 
     @ManyToOne
-    private Leaderboard leaderboard;
+    private Category category;
 
     public Long getLeaderboardId() {
         return this.leaderboardId;
@@ -66,11 +66,11 @@ public class RankedMap {
         this.techyness = techyness;
     }
 
-    public Leaderboard getLeaderboard() {
-        return leaderboard;
+    public Category getCategory() {
+        return category;
     }
 
-    public void setLeaderboard(Leaderboard leaderboard) {
-        this.leaderboard = leaderboard;
+    public void setCategory(Category category) {
+        this.category = category;
     }
 }

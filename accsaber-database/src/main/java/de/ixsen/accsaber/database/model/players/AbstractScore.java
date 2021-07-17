@@ -11,10 +11,11 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.OrderBy;
+import java.io.Serializable;
 import java.time.Instant;
 
 @MappedSuperclass
-public class AbstractScore {
+public class AbstractScore implements Serializable {
 
     @Id
     @Audited
@@ -30,9 +31,6 @@ public class AbstractScore {
     private Double accuracy;
     @Audited
     private Double ap;
-
-    @Column(name = "is_ranked_map_score")
-    private Boolean isRankedMapScore = false;
 
     @OrderBy
     @Audited
@@ -104,7 +102,7 @@ public class AbstractScore {
         return this.rankedMap;
     }
 
-    public void setMap(RankedMap map) {
+    public void setRankedMap(RankedMap map) {
         this.rankedMap = map;
     }
 
@@ -122,14 +120,6 @@ public class AbstractScore {
 
     public void setAp(Double ap) {
         this.ap = ap;
-    }
-
-    public Boolean getIsRankedMapScore() {
-        return this.isRankedMapScore;
-    }
-
-    public void setIsRankedMapScore(Boolean rankedMapScore) {
-        this.isRankedMapScore = rankedMapScore;
     }
 
     public Player getPlayer() {
