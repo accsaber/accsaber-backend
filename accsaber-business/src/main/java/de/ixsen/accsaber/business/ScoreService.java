@@ -2,10 +2,8 @@ package de.ixsen.accsaber.business;
 
 import de.ixsen.accsaber.database.model.maps.RankedMap;
 import de.ixsen.accsaber.database.model.players.Player;
-import de.ixsen.accsaber.database.model.players.RankedScore;
 import de.ixsen.accsaber.database.model.players.Score;
 import de.ixsen.accsaber.database.repositories.RankedMapRepository;
-import de.ixsen.accsaber.database.repositories.RankedScoreRepository;
 import de.ixsen.accsaber.database.repositories.ScoreRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.history.Revision;
@@ -21,18 +19,16 @@ import java.util.stream.Collectors;
 public class ScoreService implements HasLogger {
 
     private final ScoreRepository scoreRepository;
-    private final RankedScoreRepository rankedScoreRepository;
     private final RankedMapRepository rankedMapRepository;
 
     @Autowired
-    public ScoreService(ScoreRepository scoreRepository, RankedScoreRepository rankedScoreRepository, RankedMapRepository rankedMapRepository) {
+    public ScoreService(ScoreRepository scoreRepository, RankedMapRepository rankedMapRepository) {
         this.scoreRepository = scoreRepository;
-        this.rankedScoreRepository = rankedScoreRepository;
         this.rankedMapRepository = rankedMapRepository;
     }
 
-    public List<RankedScore> getScoresForLeaderboardId(Long leaderboardId) {
-        return this.rankedScoreRepository.findAllRankedMapsByLeaderboardId(leaderboardId);
+    public List<Score> getScoresForLeaderboardId(Long leaderboardId) {
+        return this.scoreRepository.findAllRankedMapsByLeaderboardId(leaderboardId);
     }
 
     public void recalculateApForAllScores() {
@@ -45,7 +41,7 @@ public class ScoreService implements HasLogger {
 
         allRankedScores.forEach(score -> {
             score.setAccuracy(score.getScore() / (double) rankedMaps.get(score.getLeaderboardId()).getMaxScore());
-            double ap = APUtils.calculateApByAcc(score.getAccuracy(), rankedMaps.get(score.getLeaderboardId()).getTechyness());
+            double ap = APUtils.calculateApByAcc(score.getAccuracy(), rankedMaps.get(score.getLeaderboardId()).getcomplexity());
             score.setAp(ap);
         });
 
@@ -53,8 +49,8 @@ public class ScoreService implements HasLogger {
     }
 
 
-    public List<RankedScore> getScoresForPlayer(Player player) {
-        return this.rankedScoreRepository.findAllByPlayerOrderByApDesc(player);
+    public List<Score> getScoresForPlayer(Player player) {
+        return this.scoreRepository.findAllByPlayerOrderByApDesc(player);
     }
 
     public List<Score> getScoreHistoryForPlayer(Player player, long leaderboardId) {

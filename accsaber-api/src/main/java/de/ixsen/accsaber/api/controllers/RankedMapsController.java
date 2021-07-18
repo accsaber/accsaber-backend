@@ -40,7 +40,7 @@ public class RankedMapsController {
 
     @PostMapping
     public ResponseEntity<?> addNewRankedMap(@RequestBody CreateRankedMapDto rankedMapDto) {
-        this.rankedMapService.addNewRankedMap(rankedMapDto.getBeatSaverKey(), rankedMapDto.getLeaderboardId(), rankedMapDto.getDifficulty(), rankedMapDto.getTechyness());
+        this.rankedMapService.addNewRankedMap(rankedMapDto.getBeatSaverKey(), rankedMapDto.getLeaderboardId(), rankedMapDto.getDifficulty(), rankedMapDto.getcomplexity());
         this.playerService.recalculateApForAllPlayers();
         return ResponseEntity.noContent().build();
     }
@@ -55,17 +55,17 @@ public class RankedMapsController {
     @GetMapping("/statistics")
     public ResponseEntity<RankedMapsStatisticsDto> getRankedStat() {
         List<RankedMap> rankedMaps = this.rankedMapService.getRankedMaps();
-        long trueAccCount = rankedMaps.stream().filter(r -> r.getTechyness() <= 4).count();
-        long techAccCount = rankedMaps.stream().filter(r -> r.getTechyness() >= 10).count();
+        long trueAccCount = rankedMaps.stream().filter(r -> r.getcomplexity() <= 4).count();
+        long techAccCount = rankedMaps.stream().filter(r -> r.getcomplexity() >= 10).count();
         RankedMapsStatisticsDto rankedMapsStatisticsDto = new RankedMapsStatisticsDto();
         rankedMapsStatisticsDto.setMapCount(rankedMaps.size());
         rankedMapsStatisticsDto.setTechAccMapCount(techAccCount);
         rankedMapsStatisticsDto.setTrueAccMapCount(trueAccCount);
         rankedMapsStatisticsDto.setStandardAccMapCount(rankedMaps.size() - trueAccCount - techAccCount);
-        Map<Double, Long> techynessToMapCount = rankedMaps
+        Map<Double, Long> complexityToMapCount = rankedMaps
                 .stream()
-                .collect(Collectors.groupingBy(RankedMap::getTechyness, Collectors.counting()));
-        rankedMapsStatisticsDto.setTechynessToMapCount(techynessToMapCount);
+                .collect(Collectors.groupingBy(RankedMap::getcomplexity, Collectors.counting()));
+        rankedMapsStatisticsDto.setcomplexityToMapCount(complexityToMapCount);
 
         return ResponseEntity.ok(rankedMapsStatisticsDto);
     }

@@ -26,7 +26,7 @@ public class CategoryService {
 
 
     public void createNewLeaderboard(Category newCategory) {
-        if (this.categoryRepository.existsById(newCategory.getName())) {
+        if (this.categoryRepository.existsById(newCategory.getCategoryName())) {
             throw new AccsaberOperationException(ExceptionType.LEADERBOARD_ALREADY_EXISTS, String.format("Leaderboard with the id {%s} already exists", newCategory.getDescription()));
         }
 

@@ -61,7 +61,7 @@ public class RankedMapService {
         return optionalRankedMap.get();
     }
 
-    public void addNewRankedMap(String beatSaverId, Long leaderBoardId, String difficulty, Double techyness) {
+    public void addNewRankedMap(String beatSaverId, Long leaderBoardId, String difficulty, Double complexity) {
         BeatSaverSongInfo beatSaverSongInfo = this.beatSaverConnector.getMapInfoByKey(beatSaverId);
 
         if (this.rankedMapRepository.existsById(leaderBoardId)) {
@@ -76,7 +76,7 @@ public class RankedMapService {
         rankedMap.setLeaderboardId(leaderBoardId);
         rankedMap.setMaxScore(this.calculateMaxScore(beatSaverDifficultyDetails.getNotes()));
         rankedMap.setSong(song);
-        rankedMap.setTechyness(techyness);
+        rankedMap.setcomplexity(complexity);
         rankedMap.setDifficulty(difficulty);
 
         song.getRankedMaps().add(rankedMap);
@@ -87,7 +87,7 @@ public class RankedMapService {
         nowRankedScores.forEach(score -> {
             score.setRankedMap(rankedMap);
             score.setAccuracy(score.getScore() / (double) rankedMap.getMaxScore());
-            double ap = APUtils.calculateApByAcc(score.getAccuracy(), rankedMap.getTechyness());
+            double ap = APUtils.calculateApByAcc(score.getAccuracy(), rankedMap.getcomplexity());
             score.setAp(ap);
         });
         this.scoreRepository.saveAll(nowRankedScores);

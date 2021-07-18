@@ -9,7 +9,7 @@ public class PlayerScoreDto {
     private String songName;
     private String songAuthorName;
     private String levelAuthorName;
-    private double techyness;
+    private double complexity;
     private String songHash;
 
     private String difficulty;
@@ -74,12 +74,12 @@ public class PlayerScoreDto {
         this.levelAuthorName = levelAuthorName;
     }
 
-    public double getTechyness() {
-        return this.techyness;
+    public double getcomplexity() {
+        return this.complexity;
     }
 
-    public void setTechyness(double techyness) {
-        this.techyness = techyness;
+    public void setcomplexity(double complexity) {
+        this.complexity = complexity;
     }
 
     public String getDifficulty() {

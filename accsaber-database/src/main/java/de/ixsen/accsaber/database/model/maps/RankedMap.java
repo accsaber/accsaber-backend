@@ -21,7 +21,7 @@ public class RankedMap {
 
     private String difficulty;
 
-    private double techyness;
+    private double complexity;
 
     @ManyToOne
     private Category category;
@@ -58,12 +58,12 @@ public class RankedMap {
         this.difficulty = difficulty;
     }
 
-    public double getTechyness() {
-        return this.techyness;
+    public double getcomplexity() {
+        return this.complexity;
     }
 
-    public void setTechyness(double techyness) {
-        this.techyness = techyness;
+    public void setcomplexity(double complexity) {
+        this.complexity = complexity;
     }
 
     public Category getCategory() {

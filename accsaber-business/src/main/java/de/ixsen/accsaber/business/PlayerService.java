@@ -8,12 +8,10 @@ import de.ixsen.accsaber.database.model.Category;
 import de.ixsen.accsaber.database.model.CategoryPerformance;
 import de.ixsen.accsaber.database.model.maps.RankedMap;
 import de.ixsen.accsaber.database.model.players.Player;
-import de.ixsen.accsaber.database.model.players.RankedPlayer;
 import de.ixsen.accsaber.database.model.players.Score;
 import de.ixsen.accsaber.database.repositories.CategoryRepository;
 import de.ixsen.accsaber.database.repositories.PlayerRepository;
 import de.ixsen.accsaber.database.repositories.RankedMapRepository;
-import de.ixsen.accsaber.database.repositories.RankedPlayerRepository;
 import de.ixsen.accsaber.database.repositories.ScoreRepository;
 import de.ixsen.accsaber.integration.connector.ScoreSaberConnector;
 import de.ixsen.accsaber.integration.model.scoresaber.ScoreSaberPlayerDto;
@@ -39,7 +37,7 @@ import java.util.stream.Collectors;
 public class PlayerService implements HasLogger {
 
     private final PlayerRepository playerRepository;
-    private final RankedPlayerRepository rankedPlayerRepository;
+//    private final RankedPlayerRepository rankedPlayerRepository;
     private final ScoreSaberConnector scoreSaberConnector;
     private final BusinessMappingComponent mappingComponent;
     private final ScoreRepository scoreRepository;
@@ -49,7 +47,7 @@ public class PlayerService implements HasLogger {
 
     @Autowired
     public PlayerService(PlayerRepository playerRepository,
-                         RankedPlayerRepository rankedPlayerRepository,
+//                         RankedPlayerRepository rankedPlayerRepository,
                          ScoreRepository scoreRepository,
                          RankedMapRepository rankedMapRepository,
                          ScoreSaberConnector scoreSaberConnector,
@@ -57,7 +55,7 @@ public class PlayerService implements HasLogger {
                          CategoryRepository categoryRepository,
                          @Value("${accsaber.image-save-location}") String imageFolder) {
         this.playerRepository = playerRepository;
-        this.rankedPlayerRepository = rankedPlayerRepository;
+//        this.rankedPlayerRepository = rankedPlayerRepository;
         this.scoreRepository = scoreRepository;
         this.rankedMapRepository = rankedMapRepository;
         this.scoreSaberConnector = scoreSaberConnector;
@@ -67,8 +65,8 @@ public class PlayerService implements HasLogger {
     }
 
     @Transactional
-    public List<RankedPlayer> getAllPlayers() {
-        return this.rankedPlayerRepository.findAllWithRanking();
+    public List<Player> getAllPlayers() {
+        return this.playerRepository.findAllWithrank();
     }
 
     public void signupPlayer(String playerId, String playerName, String hmd) {
@@ -84,8 +82,8 @@ public class PlayerService implements HasLogger {
         this.playerRepository.save(player);
     }
 
-    public RankedPlayer getRankedPlayer(String playerId) {
-        Optional<RankedPlayer> player = this.rankedPlayerRepository.findPlayerByPlayerId(playerId);
+    public Player getRankedPlayer(String playerId) {
+        Optional<Player> player = this.playerRepository.findPlayerByPlayerIdWithrank(playerId);
         if (player.isEmpty()) {
             throw new AccsaberOperationException(ExceptionType.PLAYER_NOT_FOUND, "Player with ID " + playerId + " does not exist.");
         }
@@ -202,7 +200,7 @@ public class PlayerService implements HasLogger {
             RankedMap rankedMap = potentialRankedMap.get();
             score.setAccuracy(scoreSaberScoreDto.getScore() / (double) rankedMap.getMaxScore());
 
-            double ap = APUtils.calculateApByAcc(score.getAccuracy(), rankedMap.getTechyness());
+            double ap = APUtils.calculateApByAcc(score.getAccuracy(), rankedMap.getcomplexity());
             score.setAp(ap);
         }
     }

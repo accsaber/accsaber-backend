@@ -6,8 +6,9 @@ import java.io.Serializable;
 
 @Entity
 public class Category implements Serializable {
+
     @Id
-    private String name;
+    private String categoryName;
 
     private String description;
 
@@ -16,12 +17,12 @@ public class Category implements Serializable {
      * Different calcs for different leaderboards, steeper curve for true acc, less steep for tech etc
      */
 
-    public String getName() {
-        return this.name;
+    public String getCategoryName() {
+        return this.categoryName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setCategoryName(String categoryName) {
+        this.categoryName = categoryName;
     }
 
     public String getDescription() {

@@ -1,7 +1,5 @@
 package de.ixsen.accsaber.api.dtos;
 
-import java.time.Instant;
-
 public class MapLeaderboardPlayerDto {
     private int rank;
 

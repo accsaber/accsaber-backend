@@ -13,7 +13,7 @@ public class RankedMapDto {
     private String beatsaverKey;
     private String songHash;
 
-    private double techyness;
+    private double complexity;
 
     public String getSongName() {
         return this.songName;
@@ -79,11 +79,11 @@ public class RankedMapDto {
         this.songHash = songHash;
     }
 
-    public double getTechyness() {
-        return this.techyness;
+    public double getcomplexity() {
+        return this.complexity;
     }
 
-    public void setTechyness(double techyness) {
-        this.techyness = techyness;
+    public void setcomplexity(double complexity) {
+        this.complexity = complexity;
     }
 }

@@ -1,32 +1,45 @@
 package de.ixsen.accsaber.database.model;
 
 import de.ixsen.accsaber.database.model.players.Player;
+import org.hibernate.annotations.ColumnDefault;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.Transient;
 import java.util.List;
 
 @Entity
 public class CategoryPerformance extends BaseEntity {
+
     @ManyToOne
+    @JoinColumn(name = "player_id")
     private Player player;
 
     @ManyToOne
+    @JoinColumn(name = "category_name")
     private Category category;
 
     private Double averageAcc;
 
     private Double ap;
     private Double averageApPerMap;
+
+    @ColumnDefault("0")
     private int rankedPlays;
+
+    @Column(insertable = false, updatable = false)
+    @Transient
+    private Long rank;
 
     // TODO -> rank history for each category?
     @ManyToMany
     private List<RankHistoryEntry> leaderboardHistory;
 
     public Player getPlayer() {
-        return player;
+        return this.player;
     }
 
     public void setPlayer(Player player) {
@@ -34,7 +47,7 @@ public class CategoryPerformance extends BaseEntity {
     }
 
     public Category getCategory() {
-        return category;
+        return this.category;
     }
 
     public void setCategory(Category category) {
@@ -42,7 +55,7 @@ public class CategoryPerformance extends BaseEntity {
     }
 
     public Double getAverageAcc() {
-        return averageAcc;
+        return this.averageAcc;
     }
 
     public void setAverageAcc(Double averageAcc) {
@@ -50,7 +63,7 @@ public class CategoryPerformance extends BaseEntity {
     }
 
     public Double getAp() {
-        return ap;
+        return this.ap;
     }
 
     public void setAp(Double ap) {
@@ -58,7 +71,7 @@ public class CategoryPerformance extends BaseEntity {
     }
 
     public Double getAverageApPerMap() {
-        return averageApPerMap;
+        return this.averageApPerMap;
     }
 
     public void setAverageApPerMap(Double averageApPerMap) {
@@ -66,7 +79,7 @@ public class CategoryPerformance extends BaseEntity {
     }
 
     public int getRankedPlays() {
-        return rankedPlays;
+        return this.rankedPlays;
     }
 
     public void setRankedPlays(int rankedPlays) {
@@ -74,10 +87,18 @@ public class CategoryPerformance extends BaseEntity {
     }
 
     public List<RankHistoryEntry> getLeaderboardHistory() {
-        return leaderboardHistory;
+        return this.leaderboardHistory;
     }
 
     public void setLeaderboardHistory(List<RankHistoryEntry> leaderboardHistory) {
         this.leaderboardHistory = leaderboardHistory;
+    }
+
+    public Long getRank() {
+        return this.rank;
+    }
+
+    public void setRank(Long rank) {
+        this.rank = rank;
     }
 }

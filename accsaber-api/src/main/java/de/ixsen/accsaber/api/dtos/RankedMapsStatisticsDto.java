@@ -8,7 +8,7 @@ public class RankedMapsStatisticsDto {
     private long standardAccMapCount;
     private long techAccMapCount;
 
-    private Map<Double, Long> techynessToMapCount;
+    private Map<Double, Long> complexityToMapCount;
 
     public int getMapCount() {
         return this.mapCount;
@@ -42,11 +42,11 @@ public class RankedMapsStatisticsDto {
         this.techAccMapCount = techAccMapCount;
     }
 
-    public Map<Double, Long> getTechynessToMapCount() {
-        return this.techynessToMapCount;
+    public Map<Double, Long> getcomplexityToMapCount() {
+        return this.complexityToMapCount;
     }
 
-    public void setTechynessToMapCount(Map<Double, Long> techynessToMapCount) {
-        this.techynessToMapCount = techynessToMapCount;
+    public void setcomplexityToMapCount(Map<Double, Long> complexityToMapCount) {
+        this.complexityToMapCount = complexityToMapCount;
     }
 }
