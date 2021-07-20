@@ -3,7 +3,7 @@ package de.ixsen.accsaber.business;
 import de.ixsen.accsaber.business.exceptions.AccsaberOperationException;
 import de.ixsen.accsaber.business.exceptions.ExceptionType;
 import de.ixsen.accsaber.database.model.Category;
-import de.ixsen.accsaber.database.repositories.CategoryRepository;
+import de.ixsen.accsaber.database.repositories.model.CategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

@@ -1,7 +1,7 @@
 package de.ixsen.accsaber.database.model.players;
 
 
-import de.ixsen.accsaber.database.model.maps.RankedMap;
+import de.ixsen.accsaber.database.model.maps.BeatMap;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 
@@ -12,13 +12,12 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OrderBy;
-import javax.persistence.Table;
+import java.io.Serializable;
 import java.time.Instant;
 
 @Entity
 @Audited
-@Table(name = "score")
-public class Score {
+public class ScoreData implements Serializable {
 
     @Id
     @Audited
@@ -45,7 +44,7 @@ public class Score {
     @ManyToOne(fetch = FetchType.LAZY)
     @NotAudited
     @JoinColumn(insertable = false, updatable = false, name = "map_leaderboard_id")
-    private RankedMap rankedMap;
+    private BeatMap beatMap;
 
     @Column(name = "map_leaderboard_id")
     @Audited
@@ -53,7 +52,8 @@ public class Score {
 
     @ManyToOne
     @NotAudited
-    private Player player;
+    @JoinColumn(name = "player_id")
+    private PlayerData player;
 
     @Column(insertable = false, updatable = false)
     private Long rank;
@@ -114,12 +114,12 @@ public class Score {
         this.timeSet = timeSet;
     }
 
-    public RankedMap getMap() {
-        return this.rankedMap;
+    public BeatMap getMap() {
+        return this.beatMap;
     }
 
-    public void setRankedMap(RankedMap map) {
-        this.rankedMap = map;
+    public void setRankedMap(BeatMap map) {
+        this.beatMap = map;
     }
 
     public Long getLeaderboardId() {
@@ -138,11 +138,11 @@ public class Score {
         this.ap = ap;
     }
 
-    public Player getPlayer() {
+    public PlayerData getPlayer() {
         return this.player;
     }
 
-    public void setPlayer(Player player) {
+    public void setPlayer(PlayerData player) {
         this.player = player;
     }
 }

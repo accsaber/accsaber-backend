@@ -1,7 +1,7 @@
 package de.ixsen.accsaber.business.staff;
 
 import de.ixsen.accsaber.database.model.staff.StaffUser;
-import de.ixsen.accsaber.database.repositories.StaffUserRepository;
+import de.ixsen.accsaber.database.repositories.model.StaffUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;

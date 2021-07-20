@@ -1,4 +1,4 @@
-package de.ixsen.accsaber.database.repositories;
+package de.ixsen.accsaber.database.repositories.model;
 
 import de.ixsen.accsaber.database.model.Category;
 import org.springframework.data.jpa.repository.JpaRepository;

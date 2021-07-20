@@ -74,11 +74,11 @@ public class PlayerScoreDto {
         this.levelAuthorName = levelAuthorName;
     }
 
-    public double getcomplexity() {
+    public double getComplexity() {
         return this.complexity;
     }
 
-    public void setcomplexity(double complexity) {
+    public void setComplexity(double complexity) {
         this.complexity = complexity;
     }
 

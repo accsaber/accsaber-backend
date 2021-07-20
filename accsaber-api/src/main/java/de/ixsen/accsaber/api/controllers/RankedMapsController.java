@@ -7,7 +7,7 @@ import de.ixsen.accsaber.api.dtos.RankedMapsStatisticsDto;
 import de.ixsen.accsaber.api.mapping.MappingComponent;
 import de.ixsen.accsaber.business.PlayerService;
 import de.ixsen.accsaber.business.RankedMapService;
-import de.ixsen.accsaber.database.model.maps.RankedMap;
+import de.ixsen.accsaber.database.model.maps.BeatMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -40,7 +40,7 @@ public class RankedMapsController {
 
     @PostMapping
     public ResponseEntity<?> addNewRankedMap(@RequestBody CreateRankedMapDto rankedMapDto) {
-        this.rankedMapService.addNewRankedMap(rankedMapDto.getBeatSaverKey(), rankedMapDto.getLeaderboardId(), rankedMapDto.getDifficulty(), rankedMapDto.getcomplexity());
+        this.rankedMapService.addNewRankedMap(rankedMapDto.getBeatSaverKey(), rankedMapDto.getLeaderboardId(), rankedMapDto.getDifficulty(), rankedMapDto.getComplexity());
         this.playerService.recalculateApForAllPlayers();
         return ResponseEntity.noContent().build();
     }
@@ -54,26 +54,26 @@ public class RankedMapsController {
 
     @GetMapping("/statistics")
     public ResponseEntity<RankedMapsStatisticsDto> getRankedStat() {
-        List<RankedMap> rankedMaps = this.rankedMapService.getRankedMaps();
-        long trueAccCount = rankedMaps.stream().filter(r -> r.getcomplexity() <= 4).count();
-        long techAccCount = rankedMaps.stream().filter(r -> r.getcomplexity() >= 10).count();
+        List<BeatMap> beatMaps = this.rankedMapService.getRankedMaps();
+        long trueAccCount = beatMaps.stream().filter(r -> r.getComplexity() <= 4).count();
+        long techAccCount = beatMaps.stream().filter(r -> r.getComplexity() >= 10).count();
         RankedMapsStatisticsDto rankedMapsStatisticsDto = new RankedMapsStatisticsDto();
-        rankedMapsStatisticsDto.setMapCount(rankedMaps.size());
+        rankedMapsStatisticsDto.setMapCount(beatMaps.size());
         rankedMapsStatisticsDto.setTechAccMapCount(techAccCount);
         rankedMapsStatisticsDto.setTrueAccMapCount(trueAccCount);
-        rankedMapsStatisticsDto.setStandardAccMapCount(rankedMaps.size() - trueAccCount - techAccCount);
-        Map<Double, Long> complexityToMapCount = rankedMaps
+        rankedMapsStatisticsDto.setStandardAccMapCount(beatMaps.size() - trueAccCount - techAccCount);
+        Map<Double, Long> complexityToMapCount = beatMaps
                 .stream()
-                .collect(Collectors.groupingBy(RankedMap::getcomplexity, Collectors.counting()));
-        rankedMapsStatisticsDto.setcomplexityToMapCount(complexityToMapCount);
+                .collect(Collectors.groupingBy(BeatMap::getComplexity, Collectors.counting()));
+        rankedMapsStatisticsDto.setComplexityToMapCount(complexityToMapCount);
 
         return ResponseEntity.ok(rankedMapsStatisticsDto);
     }
 
     @GetMapping("/{leaderboardId}")
     public ResponseEntity<RankedMapDto> getRankedMapDetails(@PathVariable Long leaderboardId) {
-        RankedMap rankedMap = this.rankedMapService.getRankedMap(leaderboardId);
-        RankedMapDto rankedMapDto = this.mappingComponent.getRankedMapMapper().rankedMapToDto(rankedMap);
+        BeatMap beatMap = this.rankedMapService.getRankedMap(leaderboardId);
+        RankedMapDto rankedMapDto = this.mappingComponent.getRankedMapMapper().rankedMapToDto(beatMap);
         return ResponseEntity.ok(rankedMapDto);
     }
 

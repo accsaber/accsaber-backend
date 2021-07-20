@@ -1,6 +1,6 @@
 package de.ixsen.accsaber.database.model;
 
-import de.ixsen.accsaber.database.model.players.Player;
+import de.ixsen.accsaber.database.model.players.PlayerData;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -16,16 +16,16 @@ public class RankHistoryEntry extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "player")
-    private Player player;
+    private PlayerData player;
 
     @Column(name = "date")
     private Date date;
 
-    public Player getPlayer() {
+    public PlayerData getPlayer() {
         return this.player;
     }
 
-    public void setPlayer(Player player) {
+    public void setPlayer(PlayerData player) {
         this.player = player;
     }
 

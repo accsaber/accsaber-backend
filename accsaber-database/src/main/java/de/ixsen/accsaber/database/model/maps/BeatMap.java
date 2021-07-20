@@ -4,10 +4,11 @@ import de.ixsen.accsaber.database.model.Category;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
 @Entity
-public class RankedMap {
+public class BeatMap {
 
     /**
      * Scoresaber LeaderboardID
@@ -17,6 +18,7 @@ public class RankedMap {
     private int maxScore;
 
     @ManyToOne
+    @JoinColumn(name = "song")
     private Song song;
 
     private String difficulty;
@@ -24,6 +26,7 @@ public class RankedMap {
     private double complexity;
 
     @ManyToOne
+    @JoinColumn(name = "category")
     private Category category;
 
     public Long getLeaderboardId() {
@@ -58,16 +61,16 @@ public class RankedMap {
         this.difficulty = difficulty;
     }
 
-    public double getcomplexity() {
+    public double getComplexity() {
         return this.complexity;
     }
 
-    public void setcomplexity(double complexity) {
+    public void setComplexity(double complexity) {
         this.complexity = complexity;
     }
 
     public Category getCategory() {
-        return category;
+        return this.category;
     }
 
     public void setCategory(Category category) {

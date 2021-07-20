@@ -7,11 +7,11 @@ import de.ixsen.accsaber.business.exceptions.ExceptionType;
 import de.ixsen.accsaber.business.playlist.Playlist;
 import de.ixsen.accsaber.business.playlist.PlaylistSong;
 import de.ixsen.accsaber.business.playlist.PlaylistSongDifficulty;
-import de.ixsen.accsaber.database.model.maps.RankedMap;
+import de.ixsen.accsaber.database.model.maps.BeatMap;
 import de.ixsen.accsaber.database.model.maps.Song;
-import de.ixsen.accsaber.database.model.players.Score;
-import de.ixsen.accsaber.database.repositories.RankedMapRepository;
-import de.ixsen.accsaber.database.repositories.ScoreRepository;
+import de.ixsen.accsaber.database.model.players.ScoreData;
+import de.ixsen.accsaber.database.repositories.model.RankedMapRepository;
+import de.ixsen.accsaber.database.repositories.model.ScoreDataRepository;
 import de.ixsen.accsaber.integration.connector.BeatSaverConnector;
 import de.ixsen.accsaber.integration.model.beatsaver.BeatSaverDifficultyDetails;
 import de.ixsen.accsaber.integration.model.beatsaver.BeatSaverSongInfo;
@@ -34,27 +34,27 @@ public class RankedMapService {
 
     private final BeatSaverConnector beatSaverConnector;
     private final RankedMapRepository rankedMapRepository;
-    private final ScoreRepository scoreRepository;
+    private final ScoreDataRepository scoreDataRepository;
 
     private final SongService songService;
 
     @Autowired
     public RankedMapService(RankedMapRepository rankedMapRepository,
-                            ScoreRepository scoreRepository,
+                            ScoreDataRepository scoreDataRepository,
                             BeatSaverConnector beatSaverConnector,
                             SongService songService) {
         this.rankedMapRepository = rankedMapRepository;
-        this.scoreRepository = scoreRepository;
+        this.scoreDataRepository = scoreDataRepository;
         this.beatSaverConnector = beatSaverConnector;
         this.songService = songService;
     }
 
-    public List<RankedMap> getRankedMaps() {
+    public List<BeatMap> getRankedMaps() {
         return this.rankedMapRepository.findAll();
     }
 
-    public RankedMap getRankedMap(Long leaderboardId) {
-        Optional<RankedMap> optionalRankedMap = this.rankedMapRepository.findById(leaderboardId);
+    public BeatMap getRankedMap(Long leaderboardId) {
+        Optional<BeatMap> optionalRankedMap = this.rankedMapRepository.findById(leaderboardId);
         if (optionalRankedMap.isEmpty()) {
             throw new AccsaberOperationException(ExceptionType.RANKED_MAP_NOT_FOUND, "The ranked map with the id could not be found.");
         }
@@ -72,25 +72,25 @@ public class RankedMapService {
 
         BeatSaverDifficultyDetails beatSaverDifficultyDetails = beatSaverSongInfo.getMetadata().getCharacteristics().get(0).getDifficulties().get(difficulty);
 
-        RankedMap rankedMap = new RankedMap();
-        rankedMap.setLeaderboardId(leaderBoardId);
-        rankedMap.setMaxScore(this.calculateMaxScore(beatSaverDifficultyDetails.getNotes()));
-        rankedMap.setSong(song);
-        rankedMap.setcomplexity(complexity);
-        rankedMap.setDifficulty(difficulty);
+        BeatMap beatMap = new BeatMap();
+        beatMap.setLeaderboardId(leaderBoardId);
+        beatMap.setMaxScore(this.calculateMaxScore(beatSaverDifficultyDetails.getNotes()));
+        beatMap.setSong(song);
+        beatMap.setComplexity(complexity);
+        beatMap.setDifficulty(difficulty);
 
-        song.getRankedMaps().add(rankedMap);
+        song.getRankedMaps().add(beatMap);
 
         song = this.songService.saveSong(song);
 
-        List<Score> nowRankedScores = this.scoreRepository.findAllByLeaderboardId(rankedMap.getLeaderboardId());
+        List<ScoreData> nowRankedScores = this.scoreDataRepository.findAllByLeaderboardId(beatMap.getLeaderboardId());
         nowRankedScores.forEach(score -> {
-            score.setRankedMap(rankedMap);
-            score.setAccuracy(score.getScore() / (double) rankedMap.getMaxScore());
-            double ap = APUtils.calculateApByAcc(score.getAccuracy(), rankedMap.getcomplexity());
+            score.setRankedMap(beatMap);
+            score.setAccuracy(score.getScore() / (double) beatMap.getMaxScore());
+            double ap = APUtils.calculateApByAcc(score.getAccuracy(), beatMap.getComplexity());
             score.setAp(ap);
         });
-        this.scoreRepository.saveAll(nowRankedScores);
+        this.scoreDataRepository.saveAll(nowRankedScores);
     }
 
     public byte[] getRankedMapsJson() throws JsonProcessingException {
@@ -99,17 +99,17 @@ public class RankedMapService {
         playlist.setPlaylistAuthor("AccSaber");
         playlist.setImage(this.getPlaylistImage());
 
-        for (RankedMap rankedMap : this.getRankedMaps()) {
-            PlaylistSong playlistSong = playlist.getSongs().stream().filter(s -> s.getHash().equals(rankedMap.getSong().getSongHash())).findFirst().orElseGet(() -> {
+        for (BeatMap beatMap : this.getRankedMaps()) {
+            PlaylistSong playlistSong = playlist.getSongs().stream().filter(s -> s.getHash().equals(beatMap.getSong().getSongHash())).findFirst().orElseGet(() -> {
                 PlaylistSong newPlaylistSong = new PlaylistSong();
-                newPlaylistSong.setHash(rankedMap.getSong().getSongHash());
-                newPlaylistSong.setSongName(rankedMap.getSong().getSongName());
+                newPlaylistSong.setHash(beatMap.getSong().getSongHash());
+                newPlaylistSong.setSongName(beatMap.getSong().getSongName());
 
                 playlist.getSongs().add(newPlaylistSong);
                 return newPlaylistSong;
             });
             PlaylistSongDifficulty playlistSongDifficulty = new PlaylistSongDifficulty();
-            playlistSongDifficulty.setName(rankedMap.getDifficulty());
+            playlistSongDifficulty.setName(beatMap.getDifficulty());
             playlistSongDifficulty.setCharacteristic("Standard");
             playlistSong.getDifficulties().add(playlistSongDifficulty);
         }

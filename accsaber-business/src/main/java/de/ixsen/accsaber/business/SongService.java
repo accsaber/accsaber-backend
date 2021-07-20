@@ -1,7 +1,7 @@
 package de.ixsen.accsaber.business;
 
 import de.ixsen.accsaber.database.model.maps.Song;
-import de.ixsen.accsaber.database.repositories.SongRepository;
+import de.ixsen.accsaber.database.repositories.model.SongRepository;
 import de.ixsen.accsaber.integration.connector.ScoreSaberConnector;
 import de.ixsen.accsaber.integration.model.beatsaver.BeatSaverSongInfo;
 import org.springframework.beans.factory.annotation.Value;

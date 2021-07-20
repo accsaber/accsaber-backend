@@ -7,8 +7,10 @@ import de.ixsen.accsaber.api.mapping.MappingComponent;
 import de.ixsen.accsaber.business.PlayerService;
 import de.ixsen.accsaber.business.RankedMapService;
 import de.ixsen.accsaber.business.ScoreService;
-import de.ixsen.accsaber.database.model.players.Player;
-import de.ixsen.accsaber.database.model.players.Score;
+import de.ixsen.accsaber.database.model.players.PlayerData;
+import de.ixsen.accsaber.database.model.players.ScoreData;
+import de.ixsen.accsaber.database.views.Player;
+import de.ixsen.accsaber.database.views.AccSaberScore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -67,8 +69,8 @@ public class PlayerController {
 
     @GetMapping(path = "/{playerId}/scores")
     public ResponseEntity<ArrayList<PlayerScoreDto>> getPlayerScores(@PathVariable String playerId) {
-        Player player = this.playerService.getPlayer(playerId);
-        List<Score> scoresForPlayer = this.scoreService.getScoresForPlayer(player);
+        PlayerData player = this.playerService.getPlayer(playerId);
+        List<AccSaberScore> scoresForPlayer = this.scoreService.getScoresForPlayer(player);
         ArrayList<PlayerScoreDto> playerScoreDtos = this.mappingComponent.getScoreMapper().rankedScoresToPlayerScores(scoresForPlayer);
 
         return ResponseEntity.ok(playerScoreDtos);
@@ -76,14 +78,14 @@ public class PlayerController {
 
     @GetMapping(path = "/{playerId}/score-history/{leaderboardId}")
     public ResponseEntity<Map<Instant, Double>> getPlayerScoreHistoryForMap(@PathVariable String playerId, @PathVariable long leaderboardId) {
-        Player player = this.playerService.getPlayer(playerId);
+        PlayerData player = this.playerService.getPlayer(playerId);
         int maxScore = this.rankedMapService.getRankedMap(leaderboardId).getMaxScore();
 
-        List<Score> scoreHistoryForPlayer = this.scoreService.getScoreHistoryForPlayer(player, leaderboardId);
+        List<ScoreData> scoreHistoryForPlayer = this.scoreService.getScoreHistoryForPlayer(player, leaderboardId);
         Map<Instant, Double> map = scoreHistoryForPlayer
                 .stream()
                 .filter(score -> score.getScore() != 0)
-                .collect(Collectors.toMap(Score::getTimeSet, score -> score.getScore() / (double) maxScore));
+                .collect(Collectors.toMap(ScoreData::getTimeSet, score -> score.getScore() / (double) maxScore));
         return ResponseEntity.ok(map);
     }
 

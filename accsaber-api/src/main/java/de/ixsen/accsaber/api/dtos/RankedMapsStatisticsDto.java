@@ -42,11 +42,11 @@ public class RankedMapsStatisticsDto {
         this.techAccMapCount = techAccMapCount;
     }
 
-    public Map<Double, Long> getcomplexityToMapCount() {
+    public Map<Double, Long> getComplexityToMapCount() {
         return this.complexityToMapCount;
     }
 
-    public void setcomplexityToMapCount(Map<Double, Long> complexityToMapCount) {
+    public void setComplexityToMapCount(Map<Double, Long> complexityToMapCount) {
         this.complexityToMapCount = complexityToMapCount;
     }
 }

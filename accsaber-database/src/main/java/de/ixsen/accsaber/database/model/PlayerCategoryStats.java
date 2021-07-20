@@ -1,22 +1,20 @@
 package de.ixsen.accsaber.database.model;
 
-import de.ixsen.accsaber.database.model.players.Player;
+import de.ixsen.accsaber.database.model.players.PlayerData;
 import org.hibernate.annotations.ColumnDefault;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
-import javax.persistence.Transient;
 import java.util.List;
 
 @Entity
-public class CategoryPerformance extends BaseEntity {
+public class PlayerCategoryStats extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "player_id")
-    private Player player;
+    private PlayerData player;
 
     @ManyToOne
     @JoinColumn(name = "category_name")
@@ -30,19 +28,14 @@ public class CategoryPerformance extends BaseEntity {
     @ColumnDefault("0")
     private int rankedPlays;
 
-    @Column(insertable = false, updatable = false)
-    @Transient
-    private Long rank;
-
-    // TODO -> rank history for each category?
     @ManyToMany
     private List<RankHistoryEntry> leaderboardHistory;
 
-    public Player getPlayer() {
+    public PlayerData getPlayer() {
         return this.player;
     }
 
-    public void setPlayer(Player player) {
+    public void setPlayer(PlayerData player) {
         this.player = player;
     }
 
@@ -92,13 +85,5 @@ public class CategoryPerformance extends BaseEntity {
 
     public void setLeaderboardHistory(List<RankHistoryEntry> leaderboardHistory) {
         this.leaderboardHistory = leaderboardHistory;
-    }
-
-    public Long getRank() {
-        return this.rank;
-    }
-
-    public void setRank(Long rank) {
-        this.rank = rank;
     }
 }
