@@ -4,12 +4,10 @@ import de.ixsen.accsaber.database.model.players.PlayerData;
 import org.hibernate.annotations.Immutable;
 
 import javax.persistence.Entity;
-import javax.persistence.Table;
 
 @Entity
 @Immutable
-@Table(name = "player")
-public class Player extends PlayerData {
+public class OverallPlayer extends PlayerData {
 
     private Long ranking;
 
@@ -24,16 +22,15 @@ public class Player extends PlayerData {
         return this.ranking;
     }
 
-    public void setRanking(Long ranking) {
+    private void setRanking(Long ranking) {
         this.ranking = ranking;
     }
-
 
     public Double getAverageAcc() {
         return this.averageAcc;
     }
 
-    public void setAverageAcc(Double averageAcc) {
+    private void setAverageAcc(Double averageAcc) {
         this.averageAcc = averageAcc;
     }
 
@@ -41,7 +38,7 @@ public class Player extends PlayerData {
         return this.ap;
     }
 
-    public void setAp(Double ap) {
+    private void setAp(Double ap) {
         this.ap = ap;
     }
 
@@ -49,7 +46,7 @@ public class Player extends PlayerData {
         return this.averageApPerMap;
     }
 
-    public void setAverageApPerMap(Double averageApPerMap) {
+    private void setAverageApPerMap(Double averageApPerMap) {
         this.averageApPerMap = averageApPerMap;
     }
 
@@ -57,7 +54,7 @@ public class Player extends PlayerData {
         return this.rankedPlays;
     }
 
-    public void setRankedPlays(int rankedPlays) {
+    private void setRankedPlays(int rankedPlays) {
         this.rankedPlays = rankedPlays;
     }
 }

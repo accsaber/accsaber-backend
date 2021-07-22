@@ -9,7 +9,7 @@ import de.ixsen.accsaber.business.RankedMapService;
 import de.ixsen.accsaber.business.ScoreService;
 import de.ixsen.accsaber.database.model.players.PlayerData;
 import de.ixsen.accsaber.database.model.players.ScoreData;
-import de.ixsen.accsaber.database.views.Player;
+import de.ixsen.accsaber.database.views.OverallPlayer;
 import de.ixsen.accsaber.database.views.AccSaberScore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -61,8 +61,8 @@ public class PlayerController {
 
     @GetMapping(path = "/{playerId}")
     public ResponseEntity<PlayerDto> getPlayerInfo(@PathVariable String playerId) {
-        Player player = this.playerService.getRankedPlayer(playerId);
-        PlayerDto playerDto = this.mappingComponent.getPlayerMapper().playerToPlayerDto(player);
+        OverallPlayer overallPlayer = this.playerService.getRankedPlayer(playerId);
+        PlayerDto playerDto = this.mappingComponent.getPlayerMapper().playerToPlayerDto(overallPlayer);
 
         return ResponseEntity.ok(playerDto);
     }
@@ -91,8 +91,8 @@ public class PlayerController {
 
     @GetMapping
     public ResponseEntity<ArrayList<PlayerDto>> getPlayers() {
-        List<Player> playerEntities = this.playerService.getAllPlayers();
-        ArrayList<PlayerDto> playerDtos = this.mappingComponent.getPlayerMapper().playersToPlayerDtos(playerEntities);
+        List<OverallPlayer> overallPlayerEntities = this.playerService.getAllPlayers();
+        ArrayList<PlayerDto> playerDtos = this.mappingComponent.getPlayerMapper().playersToPlayerDtos(overallPlayerEntities);
 
         return ResponseEntity.ok(playerDtos);
     }

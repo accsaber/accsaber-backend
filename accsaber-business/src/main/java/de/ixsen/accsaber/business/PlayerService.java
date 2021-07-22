@@ -14,7 +14,7 @@ import de.ixsen.accsaber.database.repositories.model.PlayerDataRepository;
 import de.ixsen.accsaber.database.repositories.model.RankedMapRepository;
 import de.ixsen.accsaber.database.repositories.model.ScoreDataRepository;
 import de.ixsen.accsaber.database.repositories.view.PlayerRepository;
-import de.ixsen.accsaber.database.views.Player;
+import de.ixsen.accsaber.database.views.OverallPlayer;
 import de.ixsen.accsaber.integration.connector.ScoreSaberConnector;
 import de.ixsen.accsaber.integration.model.scoresaber.ScoreSaberPlayerDto;
 import de.ixsen.accsaber.integration.model.scoresaber.ScoreSaberScoreDto;
@@ -72,7 +72,7 @@ public class PlayerService implements HasLogger {
     EntityManager em;
 
     @Transactional
-    public List<Player> getAllPlayers() {
+    public List<OverallPlayer> getAllPlayers() {
         return this.playerRepository.findAll();
     }
 
@@ -89,8 +89,8 @@ public class PlayerService implements HasLogger {
         this.playerDataRepository.save(player);
     }
 
-    public Player getRankedPlayer(String playerId) {
-        Optional<Player> player = this.playerRepository.findPlayerByPlayerId(playerId);
+    public OverallPlayer getRankedPlayer(String playerId) {
+        Optional<OverallPlayer> player = this.playerRepository.findPlayerByPlayerId(playerId);
         if (player.isEmpty()) {
             throw new AccsaberOperationException(ExceptionType.PLAYER_NOT_FOUND, "Player with ID " + playerId + " does not exist.");
         }

@@ -309,4 +309,14 @@
     <changeSet author="ixsen (generated)" id="1626812787184-12">
         <dropDefaultValue columnDataType="varchar(255)" columnName="song" tableName="beat_map"/>
     </changeSet>
+
+
+    <changeSet id="recreate_views" author="ixsen">
+        <dropView viewName="ranked_player"/>
+        <renameView oldViewName="ranked_score" newViewName="acc_saber_score"/>
+
+        <createView viewName="player_overall_stats">
+            f
+        </createView>
+    </changeSet>
 </databaseChangeLog>
