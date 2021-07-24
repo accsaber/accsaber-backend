@@ -2,18 +2,15 @@ package de.ixsen.accsaber.database.model.players;
 
 import de.ixsen.accsaber.database.model.PlayerCategoryStats;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
-import javax.persistence.Table;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Set;
 
 @Entity
-@Table
 public class PlayerData implements Serializable {
 
     @Id
@@ -27,10 +24,9 @@ public class PlayerData implements Serializable {
     @OrderBy("timeSet desc")
     private List<ScoreData> scores;
 
-    @OneToMany
+    @OneToMany(mappedBy = "player")
     private Set<PlayerCategoryStats> playerCategoryStats;
 
-    @Column(name = "is_acc_champ")
     private Boolean isAccChamp;
 
     private String hmd;

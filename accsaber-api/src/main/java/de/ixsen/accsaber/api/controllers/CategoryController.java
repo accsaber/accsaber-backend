@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("map-leaderboards")
+@RequestMapping("categories")
 public class CategoryController {
 
     private final CategoryService categoryService;
@@ -33,7 +33,7 @@ public class CategoryController {
     }
 
     @GetMapping
-    public ResponseEntity<List<CategoryDto>> getLeaderboards() {
+    public ResponseEntity<List<CategoryDto>> getCategories() {
         List<Category> allCategories = this.categoryService.getAllLeaderboards();
         List<CategoryDto> categoryDtos = this.categoryMapper.map(allCategories);
         return ResponseEntity.ok(categoryDtos);

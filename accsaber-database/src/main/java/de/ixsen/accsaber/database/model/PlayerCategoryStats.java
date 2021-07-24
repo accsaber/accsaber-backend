@@ -5,9 +5,7 @@ import org.hibernate.annotations.ColumnDefault;
 
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
-import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
-import java.util.List;
 
 @Entity
 public class PlayerCategoryStats extends BaseEntity {
@@ -23,13 +21,12 @@ public class PlayerCategoryStats extends BaseEntity {
     private Double averageAcc;
 
     private Double ap;
-    private Double averageApPerMap;
 
     @ColumnDefault("0")
     private int rankedPlays;
 
-    @ManyToMany
-    private List<RankHistoryEntry> leaderboardHistory;
+//    @ManyToMany
+//    private List<RankHistoryEntry> leaderboardHistory;
 
     public PlayerData getPlayer() {
         return this.player;
@@ -63,14 +60,6 @@ public class PlayerCategoryStats extends BaseEntity {
         this.ap = ap;
     }
 
-    public Double getAverageApPerMap() {
-        return this.averageApPerMap;
-    }
-
-    public void setAverageApPerMap(Double averageApPerMap) {
-        this.averageApPerMap = averageApPerMap;
-    }
-
     public int getRankedPlays() {
         return this.rankedPlays;
     }
@@ -79,11 +68,11 @@ public class PlayerCategoryStats extends BaseEntity {
         this.rankedPlays = rankedPlays;
     }
 
-    public List<RankHistoryEntry> getLeaderboardHistory() {
-        return this.leaderboardHistory;
-    }
-
-    public void setLeaderboardHistory(List<RankHistoryEntry> leaderboardHistory) {
-        this.leaderboardHistory = leaderboardHistory;
-    }
+//    public List<RankHistoryEntry> getLeaderboardHistory() {
+//        return this.leaderboardHistory;
+//    }
+//
+//    public void setLeaderboardHistory(List<RankHistoryEntry> leaderboardHistory) {
+//        this.leaderboardHistory = leaderboardHistory;
+//    }
 }

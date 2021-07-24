@@ -13,8 +13,8 @@ import de.ixsen.accsaber.database.repositories.model.CategoryRepository;
 import de.ixsen.accsaber.database.repositories.model.PlayerDataRepository;
 import de.ixsen.accsaber.database.repositories.model.RankedMapRepository;
 import de.ixsen.accsaber.database.repositories.model.ScoreDataRepository;
-import de.ixsen.accsaber.database.repositories.view.PlayerRepository;
-import de.ixsen.accsaber.database.views.OverallPlayer;
+import de.ixsen.accsaber.database.repositories.view.OverallAccSaberPlayerRepository;
+import de.ixsen.accsaber.database.views.AccSaberPlayer;
 import de.ixsen.accsaber.integration.connector.ScoreSaberConnector;
 import de.ixsen.accsaber.integration.model.scoresaber.ScoreSaberPlayerDto;
 import de.ixsen.accsaber.integration.model.scoresaber.ScoreSaberScoreDto;
@@ -47,11 +47,11 @@ public class PlayerService implements HasLogger {
     private final RankedMapRepository rankedMapRepository;
     private final String avatarFolder;
     private final CategoryRepository categoryRepository;
-    private final PlayerRepository playerRepository;
+    private final OverallAccSaberPlayerRepository overallAccSaberPlayerRepository;
 
     @Autowired
     public PlayerService(PlayerDataRepository playerDataRepository,
-                         PlayerRepository playerRepository,
+                         OverallAccSaberPlayerRepository overallAccSaberPlayerRepository,
                          ScoreDataRepository scoreDataRepository,
                          RankedMapRepository rankedMapRepository,
                          ScoreSaberConnector scoreSaberConnector,
@@ -59,7 +59,7 @@ public class PlayerService implements HasLogger {
                          CategoryRepository categoryRepository,
                          @Value("${accsaber.image-save-location}") String imageFolder) {
         this.playerDataRepository = playerDataRepository;
-        this.playerRepository = playerRepository;
+        this.overallAccSaberPlayerRepository = overallAccSaberPlayerRepository;
         this.scoreDataRepository = scoreDataRepository;
         this.rankedMapRepository = rankedMapRepository;
         this.scoreSaberConnector = scoreSaberConnector;
@@ -72,8 +72,8 @@ public class PlayerService implements HasLogger {
     EntityManager em;
 
     @Transactional
-    public List<OverallPlayer> getAllPlayers() {
-        return this.playerRepository.findAll();
+    public List<AccSaberPlayer> getAllPlayers() {
+        return this.overallAccSaberPlayerRepository.findAll();
     }
 
     public void signupPlayer(String playerId, String playerName, String hmd) {
@@ -89,8 +89,8 @@ public class PlayerService implements HasLogger {
         this.playerDataRepository.save(player);
     }
 
-    public OverallPlayer getRankedPlayer(String playerId) {
-        Optional<OverallPlayer> player = this.playerRepository.findPlayerByPlayerId(playerId);
+    public AccSaberPlayer getRankedPlayer(String playerId) {
+        Optional<AccSaberPlayer> player = this.overallAccSaberPlayerRepository.findPlayerByPlayerId(playerId);
         if (player.isEmpty()) {
             throw new AccsaberOperationException(ExceptionType.PLAYER_NOT_FOUND, "Player with ID " + playerId + " does not exist.");
         }
@@ -263,7 +263,6 @@ public class PlayerService implements HasLogger {
 
             if (rankedScores.size() == 0) {
                 playerCategoryStats.setAp(playerAp);
-                playerCategoryStats.setAverageApPerMap(playerAp);
                 playerCategoryStats.setRankedPlays(0);
                 playerCategoryStats.setAverageAcc(playerAccSum);
                 return;
@@ -273,7 +272,6 @@ public class PlayerService implements HasLogger {
                 playerAccSum += score.getAccuracy();
             }
             playerCategoryStats.setAp(playerAp);
-            playerCategoryStats.setAverageApPerMap(playerAp / rankedScores.size());
             playerCategoryStats.setAverageAcc(playerAccSum / rankedScores.size());
             playerCategoryStats.setRankedPlays(rankedScores.size());
         }

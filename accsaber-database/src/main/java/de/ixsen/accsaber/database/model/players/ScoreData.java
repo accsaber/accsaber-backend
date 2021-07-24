@@ -55,17 +55,6 @@ public class ScoreData implements Serializable {
     @JoinColumn(name = "player_id")
     private PlayerData player;
 
-    @Column(insertable = false, updatable = false)
-    private Long rank;
-
-    public Long getrank() {
-        return this.rank;
-    }
-
-    public void setrank(Long rank) {
-        this.rank = rank;
-    }
-
     public Long getScoreId() {
         return this.scoreId;
     }
