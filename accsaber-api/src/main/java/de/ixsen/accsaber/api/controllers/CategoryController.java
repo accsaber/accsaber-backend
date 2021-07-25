@@ -1,9 +1,12 @@
 package de.ixsen.accsaber.api.controllers;
 
 import de.ixsen.accsaber.api.dtos.CategoryDto;
+import de.ixsen.accsaber.api.dtos.PlayerDto;
 import de.ixsen.accsaber.api.mapping.CategoryMapper;
+import de.ixsen.accsaber.api.mapping.PlayerMapper;
 import de.ixsen.accsaber.business.CategoryService;
 import de.ixsen.accsaber.database.model.Category;
+import de.ixsen.accsaber.database.views.AccSaberPlayer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -34,27 +38,34 @@ public class CategoryController {
 
     @GetMapping
     public ResponseEntity<List<CategoryDto>> getCategories() {
-        List<Category> allCategories = this.categoryService.getAllLeaderboards();
+        List<Category> allCategories = this.categoryService.getAllCategories();
         List<CategoryDto> categoryDtos = this.categoryMapper.map(allCategories);
         return ResponseEntity.ok(categoryDtos);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public void createNewLeaderboard(CategoryDto categoryDto) {
+    public void createNewCategory(@RequestBody CategoryDto categoryDto) {
         Category newCategory = this.categoryMapper.map(categoryDto);
-        this.categoryService.createNewLeaderboard(newCategory);
+        this.categoryService.createNewCategory(newCategory);
     }
 
-    @DeleteMapping("{leaderboardName}")
+    @DeleteMapping("{categoryName}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteLeaderboard(@PathVariable String leaderboardName) {
-        this.categoryService.deleteLeaderboard(leaderboardName);
+    public void deleteCategory(@PathVariable String categoryName) {
+        this.categoryService.deleteCategory(categoryName);
     }
 
-    @PutMapping("{leaderboardName}")
+    @PutMapping("{categoryName}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void updateLeaderboardDescription(@PathVariable String leaderboardName, @RequestBody CategoryDto categoryDto) {
-        this.categoryService.updateDescription(leaderboardName, categoryDto.getDescription());
+    public void updateCategoryDescription(@PathVariable String categoryName, @RequestBody CategoryDto categoryDto) {
+        this.categoryService.updateDescription(categoryName, categoryDto.getDescription());
+    }
+
+    @GetMapping("{categoryName}/standings")
+    public ResponseEntity<List<PlayerDto>> getStandingsForCategory(@PathVariable String categoryName) {
+        List<AccSaberPlayer> accSaberPlayers = this.categoryService.getStandingsForCategory(categoryName);
+        ArrayList<PlayerDto> playerDtos = PlayerMapper.INSTANCE.playersToPlayerDtos(accSaberPlayers);
+        return ResponseEntity.ok(playerDtos);
     }
 }

@@ -15,7 +15,6 @@ public class AccSaberSchemaFilter implements SchemaFilter {
 
     @Override
     public boolean includeTable(Table table) {
-
         return !table.getName().contains("acc_saber_score") && !table.getName().contains("acc_saber_player");
     }
 

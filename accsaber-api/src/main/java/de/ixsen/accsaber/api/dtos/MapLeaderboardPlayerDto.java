@@ -16,6 +16,8 @@ public class MapLeaderboardPlayerDto {
 
     private String timeSet;
 
+    private String categoryName;
+
     public int getRank() {
         return this.rank;
     }
@@ -86,5 +88,13 @@ public class MapLeaderboardPlayerDto {
 
     public void setTimeSet(String timeSet) {
         this.timeSet = timeSet;
+    }
+
+    public String getCategoryName() {
+        return categoryName;
+    }
+
+    public void setCategoryName(String categoryName) {
+        this.categoryName = categoryName;
     }
 }

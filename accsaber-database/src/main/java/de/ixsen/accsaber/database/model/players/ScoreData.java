@@ -2,22 +2,23 @@ package de.ixsen.accsaber.database.model.players;
 
 
 import de.ixsen.accsaber.database.model.maps.BeatMap;
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.ForeignKey;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OrderBy;
-import java.io.Serializable;
 import java.time.Instant;
 
 @Entity
 @Audited
-public class ScoreData implements Serializable {
+public class ScoreData {
 
     @Id
     @Audited
@@ -43,7 +44,7 @@ public class ScoreData implements Serializable {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @NotAudited
-    @JoinColumn(insertable = false, updatable = false, name = "map_leaderboard_id")
+    @JoinColumn(insertable = false, updatable = false, name = "map_leaderboard_id", foreignKey = @ForeignKey(name = "none"))
     private BeatMap beatMap;
 
     @Column(name = "map_leaderboard_id")
@@ -54,6 +55,9 @@ public class ScoreData implements Serializable {
     @NotAudited
     @JoinColumn(name = "player_id")
     private PlayerData player;
+
+    @ColumnDefault("false")
+    private boolean isRankedScore;
 
     public Long getScoreId() {
         return this.scoreId;
@@ -103,12 +107,12 @@ public class ScoreData implements Serializable {
         this.timeSet = timeSet;
     }
 
-    public BeatMap getMap() {
+    public BeatMap getBeatMap() {
         return this.beatMap;
     }
 
-    public void setRankedMap(BeatMap map) {
-        this.beatMap = map;
+    public void setBeatMap(BeatMap beatMap) {
+        this.beatMap = beatMap;
     }
 
     public Long getLeaderboardId() {
@@ -133,5 +137,13 @@ public class ScoreData implements Serializable {
 
     public void setPlayer(PlayerData player) {
         this.player = player;
+    }
+
+    public boolean isRankedScore() {
+        return this.isRankedScore;
+    }
+
+    public void setRankedScore(boolean rankedScore) {
+        this.isRankedScore = rankedScore;
     }
 }

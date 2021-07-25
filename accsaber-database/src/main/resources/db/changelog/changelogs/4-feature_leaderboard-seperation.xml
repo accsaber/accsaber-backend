@@ -1,5 +1,5 @@
 <?xml version="1.1" encoding="UTF-8" standalone="no"?>
-<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
 
   <changeSet author="ixsen (generated)" id="1627161046829-8">
     <createTable tableName="beat_map">
@@ -145,9 +145,6 @@
   <changeSet author="ixsen (generated)" id="1627161046829-27">
     <addForeignKeyConstraint baseColumnNames="player_data_player_id" baseTableName="player_data_scores" constraintName="FKq3f0v2y78vqyr4vooxn6fvsi9" deferrable="false" initiallyDeferred="false" referencedColumnNames="player_id" referencedTableName="player_data" validate="true"/>
   </changeSet>
-  <changeSet author="ixsen (generated)" id="1627161046829-28">
-    <addForeignKeyConstraint baseColumnNames="map_leaderboard_id" baseTableName="score_data" constraintName="FKsslrgsce6xwkqnjbhoau65ti6" deferrable="false" initiallyDeferred="false" referencedColumnNames="leaderboard_id" referencedTableName="beat_map" validate="true"/>
-  </changeSet>
   <changeSet author="ixsen (generated)" id="1627161046829-29">
     <dropForeignKeyConstraint baseTableName="score_aud" constraintName="FK2643n0n4qla092adroq4f2t1t"/>
   </changeSet>
@@ -248,25 +245,103 @@
     <dropDefaultValue columnDataType="varchar(255)" columnName="song" tableName="beat_map"/>
   </changeSet>
 
+  <changeSet author="ixsen (generated)" id="1627202772898-1">
+    <addDefaultValue columnDataType="double precision" columnName="ap" defaultValueNumeric="0.0" tableName="player_category_stats"/>
+  </changeSet>
+  <changeSet author="ixsen (generated)" id="1627202772898-2">
+    <addDefaultValue columnDataType="double precision" columnName="average_acc" defaultValueNumeric="0.0" tableName="player_category_stats"/>
+  </changeSet>
+  <changeSet author="ixsen (generated)" id="1627203056241-3">
+    <dropForeignKeyConstraint baseTableName="song_beat_maps" constraintName="FK98en6vqmbgwn0epgyfbf3eh82"/>
+  </changeSet>
+  <changeSet author="ixsen (generated)" id="1627203056241-4">
+    <dropForeignKeyConstraint baseTableName="song_beat_maps" constraintName="FKd1flygyaqjy01injb99mbyvb8"/>
+  </changeSet>
+  <changeSet author="ixsen (generated)" id="1627203056241-5">
+    <dropUniqueConstraint constraintName="UK_g16go0yg8me5j2be379cv66ga" tableName="song_beat_maps"/>
+  </changeSet>
+  <changeSet author="ixsen (generated)" id="1627203056241-6">
+    <dropTable tableName="song_beat_maps"/>
+  </changeSet>
+  <changeSet author="ixsen (generated)" id="1627203056241-1">
+    <addDefaultValue columnDataType="double precision" columnName="ap" defaultValueNumeric="0.0" tableName="player_category_stats"/>
+  </changeSet>
+  <changeSet author="ixsen (generated)" id="1627203056241-2">
+    <addDefaultValue columnDataType="double precision" columnName="average_acc" defaultValueNumeric="0.0" tableName="player_category_stats"/>
+  </changeSet>
+
+  <changeSet author="ixsen (generated)" id="1627205350664-3">
+    <addColumn tableName="score_data">
+      <column defaultValueBoolean="false" name="is_ranked_score" type="bit">
+        <constraints nullable="false"/>
+      </column>
+    </addColumn>
+  </changeSet>
+  <changeSet author="ixsen (generated)" id="1627205350664-4">
+    <addColumn tableName="score_data_aud">
+      <column name="is_ranked_score" type="bit"/>
+    </addColumn>
+  </changeSet>
+  <changeSet author="ixsen (generated)" id="1627205350664-5">
+    <dropForeignKeyConstraint baseTableName="player_data_scores" constraintName="FKjnj74oboe6ipd8oey7kbqmfvn"/>
+  </changeSet>
+  <changeSet author="ixsen (generated)" id="1627205350664-6">
+    <dropForeignKeyConstraint baseTableName="player_data_scores" constraintName="FKq3f0v2y78vqyr4vooxn6fvsi9"/>
+  </changeSet>
+  <changeSet author="ixsen (generated)" id="1627205350664-7">
+    <dropUniqueConstraint constraintName="UK_bw0ak909kvfreegggfth6kwmr" tableName="player_data_scores"/>
+  </changeSet>
+  <changeSet author="ixsen (generated)" id="1627205350664-8">
+    <dropTable tableName="player_data_scores"/>
+  </changeSet>
+  <changeSet author="ixsen (generated)" id="1627205350664-1">
+    <update tableName="player_data">
+      <column name="is_acc_champ" valueBoolean="false"/>
+    </update>
+    <addNotNullConstraint columnDataType="boolean" columnName="is_acc_champ" tableName="player_data" validate="true"/>
+  </changeSet>
+  <changeSet author="ixsen (generated)" id="1627205350664-2">
+    <addDefaultValue columnDataType="boolean" columnName="is_acc_champ" defaultValueBoolean="false" tableName="player_data"/>
+  </changeSet>
+  <changeSet author="ixsen (generated)" id="1627213948295-1">
+    <dropDefaultValue columnDataType="boolean" columnName="is_ranked_score" tableName="score_data_aud"/>
+  </changeSet>
 
   <changeSet id="fix-view" author="ixsen">
     <dropView viewName="ranked_player"/>
-    <renameView oldViewName="ranked_score" newViewName="acc_saber_score"/>
-    <createView fullDefinition="false" remarks="VIEW" viewName="overall_acc_saber_player">select pcs.player_id as player_id,
+    <dropView viewName="ranked_score"/>
+    <createView fullDefinition="false" remarks="VIEW" viewName="acc_saber_score">
+      select s.score_id AS score_id,
+      s.accuracy AS accuracy,
+      s.ap AS ap,
+      s.is_ranked_score AS is_ranked_score,
+      s.map_leaderboard_id AS map_leaderboard_id,
+      s.rank_when_scores_set AS rank_when_scores_set,
+      s.score AS score,
+      s.time_set AS time_set,
+      s.unmodifified_score AS unmodifified_score,
+      s.player_id AS player_id,
+      rank() over ( partition by s.map_leaderboard_id order by s.score desc) AS ranking
+      from accsaber_db.score_data s
+      where s.is_ranked_score = 1
+    </createView>
+    <createView fullDefinition="false" remarks="VIEW" viewName="category_acc_saber_player">
+      select pcs.player_id as player_id,
       pcs.ap as ap,
       pd.player_name as player_name,
       pd.avatar_url as avatar_url,
       pcs.average_acc as average_acc,
       pd.hmd as hmd,
       pd.is_acc_champ as is_acc_champ,
-      (pcs.ap / pcs.ranked_plays) as average_acc_per_map,
+      (pcs.ap / pcs.ranked_plays) as average_ap_per_map,
       pcs.ranked_plays as ranked_plays,
-      row_number() over (ORDER BY ap desc ) as ranking
+      pcs.category_name as category_name,
+      row_number() over (PARTITION BY pcs.category_name ORDER BY pcs.ap desc ) as ranking
       from player_category_stats as pcs
       join player_data pd on pcs.player_id = pd.player_id
-      where category_name = 'standard'
     </createView>
-    <createView fullDefinition="false" remarks="VIEW" viewName="category_acc_saber_player">select *, row_number() over (order by player_stats.ap desc ) as ranking
+    <createView fullDefinition="false" remarks="VIEW" viewName="overall_acc_saber_player">
+      select *, row_number() over (order by player_stats.ap desc ) as ranking
       from (select pcs.player_id as player_id,
       sum(ap) as ap,
       pd.player_name as player_name,
@@ -280,5 +355,14 @@
       join player_data pd on pcs.player_id = pd.player_id
       group by player_id) player_stats
     </createView>
+  </changeSet>
+
+  <changeSet author="ixsen (generated)" id="1627214910477-1">
+    <createTable tableName="hibernate_sequences">
+      <column name="sequence_name" type="VARCHAR(255)">
+        <constraints nullable="false" primaryKey="true"/>
+      </column>
+      <column name="next_val" type="BIGINT"/>
+    </createTable>
   </changeSet>
 </databaseChangeLog>

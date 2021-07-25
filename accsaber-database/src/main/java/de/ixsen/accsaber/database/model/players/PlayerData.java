@@ -1,7 +1,10 @@
 package de.ixsen.accsaber.database.model.players;
 
 import de.ixsen.accsaber.database.model.PlayerCategoryStats;
+import org.hibernate.annotations.ColumnDefault;
 
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
@@ -11,7 +14,7 @@ import java.util.List;
 import java.util.Set;
 
 @Entity
-public class PlayerData implements Serializable {
+public class PlayerData{
 
     @Id
     private String playerId;
@@ -20,14 +23,15 @@ public class PlayerData implements Serializable {
 
     private String avatarUrl;
 
-    @OneToMany
+    @OneToMany(mappedBy = "player")
     @OrderBy("timeSet desc")
     private List<ScoreData> scores;
 
-    @OneToMany(mappedBy = "player")
+    @OneToMany(mappedBy = "player", cascade = CascadeType.ALL)
     private Set<PlayerCategoryStats> playerCategoryStats;
 
-    private Boolean isAccChamp;
+    @ColumnDefault("false")
+    private boolean isAccChamp;
 
     private String hmd;
 
@@ -55,11 +59,11 @@ public class PlayerData implements Serializable {
         this.avatarUrl = avatarUrl;
     }
 
-    public Boolean isAccChamp() {
+    public boolean isAccChamp() {
         return this.isAccChamp;
     }
 
-    public void setAccChamp(Boolean accChamp) {
+    public void setAccChamp(boolean accChamp) {
         this.isAccChamp = accChamp;
     }
 
@@ -84,11 +88,11 @@ public class PlayerData implements Serializable {
         score.setPlayer(this);
     }
 
-    public Set<PlayerCategoryStats> getCategoryPerformances() {
+    public Set<PlayerCategoryStats> getPlayerCategoryStats() {
         return this.playerCategoryStats;
     }
 
-    public void setCategoryPerformances(Set<PlayerCategoryStats> playerCategoryStats) {
+    public void setPlayerCategoryStats(Set<PlayerCategoryStats> playerCategoryStats) {
         this.playerCategoryStats = playerCategoryStats;
     }
 }

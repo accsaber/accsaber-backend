@@ -2,8 +2,8 @@ package de.ixsen.accsaber.api.mapping;
 
 
 import de.ixsen.accsaber.api.dtos.MapLeaderboardPlayerDto;
-import de.ixsen.accsaber.database.views.AccSaberScore;
 import de.ixsen.accsaber.database.model.players.ScoreData;
+import de.ixsen.accsaber.database.views.AccSaberScore;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
@@ -14,6 +14,7 @@ import java.util.List;
 public interface MapLeaderboardPlayerMapper {
     MapLeaderboardPlayerMapper INSTANCE = Mappers.getMapper(MapLeaderboardPlayerMapper.class);
 
+    @Mapping(target = "categoryName", source = "beatMap.category.categoryName")
     @Mapping(target = "rank", ignore = true)
     @Mapping(target = "playerName", source = "player.playerName")
     @Mapping(target = "playerId", source = "player.playerId")
@@ -23,6 +24,7 @@ public interface MapLeaderboardPlayerMapper {
 
     List<MapLeaderboardPlayerDto> scoresToMapLeaderboardDtos(List<ScoreData> score);
 
+    @Mapping(target = "categoryName", source = "beatMap.category.categoryName")
     @Mapping(target = "rank", source = "ranking")
     @Mapping(target = "playerName", source = "player.playerName")
     @Mapping(target = "playerId", source = "player.playerId")

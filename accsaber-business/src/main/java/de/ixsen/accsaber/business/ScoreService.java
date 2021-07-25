@@ -32,11 +32,11 @@ public class ScoreService implements HasLogger {
     }
 
     public List<AccSaberScore> getScoresForLeaderboardId(Long leaderboardId) {
-        return this.accSaberScoreRepository.findAllRankedMapsByLeaderboardId(leaderboardId);
+        return this.accSaberScoreRepository.findAllByLeaderboardId(leaderboardId);
     }
 
     public void recalculateApForAllScores() {
-        List<ScoreData> allRankedScores = this.scoreDataRepository.findAllRankedMaps();
+        List<ScoreData> allRankedScores = this.scoreDataRepository.findAllRankedScores();
         Map<Long, BeatMap> rankedMaps = new HashMap<>();
 
         for (BeatMap beatMap : this.rankedMapRepository.findAll()) {

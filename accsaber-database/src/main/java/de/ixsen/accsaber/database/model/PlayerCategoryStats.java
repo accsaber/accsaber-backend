@@ -18,15 +18,14 @@ public class PlayerCategoryStats extends BaseEntity {
     @JoinColumn(name = "category_name")
     private Category category;
 
+    @ColumnDefault("0")
     private Double averageAcc;
 
+    @ColumnDefault("0")
     private Double ap;
 
     @ColumnDefault("0")
     private int rankedPlays;
-
-//    @ManyToMany
-//    private List<RankHistoryEntry> leaderboardHistory;
 
     public PlayerData getPlayer() {
         return this.player;
@@ -67,12 +66,4 @@ public class PlayerCategoryStats extends BaseEntity {
     public void setRankedPlays(int rankedPlays) {
         this.rankedPlays = rankedPlays;
     }
-
-//    public List<RankHistoryEntry> getLeaderboardHistory() {
-//        return this.leaderboardHistory;
-//    }
-//
-//    public void setLeaderboardHistory(List<RankHistoryEntry> leaderboardHistory) {
-//        this.leaderboardHistory = leaderboardHistory;
-//    }
 }

@@ -1,5 +1,11 @@
 package de.ixsen.accsaber.database.views.extenders;
 
+import org.hibernate.annotations.Immutable;
+
+import javax.persistence.MappedSuperclass;
+
+@MappedSuperclass
+@Immutable
 public abstract class WithRankAndStats extends WithRank {
 
     private Double averageAcc;
@@ -10,18 +16,18 @@ public abstract class WithRankAndStats extends WithRank {
     private int rankedPlays;
 
     public Double getAp() {
-        return ap;
+        return this.ap;
     }
 
     public Double getAverageApPerMap() {
-        return averageApPerMap;
+        return this.averageApPerMap;
     }
 
     public int getRankedPlays() {
-        return rankedPlays;
+        return this.rankedPlays;
     }
 
     public Double getAverageAcc() {
-        return averageAcc;
+        return this.averageAcc;
     }
 }

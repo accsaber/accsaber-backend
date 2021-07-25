@@ -18,7 +18,7 @@ public class Song {
     private String songAuthorName;
     private String levelAuthorName;
 
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "song")
     private List<BeatMap> beatMaps;
 
     private String beatSaverKey;

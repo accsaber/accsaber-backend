@@ -35,6 +35,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -86,6 +87,15 @@ public class PlayerService implements HasLogger {
         player.setPlayerName(playerName);
         player.setHmd(hmd);
 
+        Set<PlayerCategoryStats> playerCategoryStatsList = this.categoryRepository.findAll().stream().map(category -> {
+            PlayerCategoryStats playerCategoryStats = new PlayerCategoryStats();
+            playerCategoryStats.setPlayer(player);
+            playerCategoryStats.setCategory(category);
+            return playerCategoryStats;
+        }).collect(Collectors.toSet());
+
+        player.setPlayerCategoryStats(playerCategoryStatsList);
+
         this.playerDataRepository.save(player);
     }
 
@@ -107,8 +117,9 @@ public class PlayerService implements HasLogger {
         return player.get();
     }
 
+    @Transactional
     public void loadPlayerScores() {
-        List<PlayerData> allPlayers = this.playerDataRepository.findAllWithScores();
+        List<PlayerData> allPlayers = this.playerDataRepository.findAll();
         Instant start = Instant.now();
         this.getLogger().info("Loading scores for " + allPlayers.size() + " players.");
         List<BeatMap> beatMaps = this.rankedMapRepository.findAll();
@@ -119,14 +130,12 @@ public class PlayerService implements HasLogger {
         this.getLogger().info("Loading scores finished in {} seconds.", Duration.between(start, Instant.now()).getSeconds());
     }
 
-    @Transactional
     protected void handlePlayer(List<BeatMap> beatMaps, PlayerData player) {
         Optional<ScoreSaberPlayerDto> optPlayerData = this.getScoreSaberPlayerData(player.getPlayerId());
         if (optPlayerData.isEmpty()) {
             this.getLogger().error("Couldn't fetch player with id {}, skipping", player.getPlayerId());
             return;
         }
-
 
         ScoreSaberPlayerDto playerData = optPlayerData.get();
         if (player.getAvatarUrl() == null) {
@@ -180,7 +189,8 @@ public class PlayerService implements HasLogger {
         }
 
         this.scoreDataRepository.saveAll(newlySetScores);
-        this.recalculateApForPlayer(player);
+
+        this.recalculateApForPlayer(player, this.categoryRepository.findAll());
         this.playerDataRepository.save(player);
     }
 
@@ -212,10 +222,12 @@ public class PlayerService implements HasLogger {
         }
     }
 
+    @Transactional
     public void recalculateApForAllPlayers() {
-        List<PlayerData> allPlayers = this.playerDataRepository.findAllWithScores();
+        List<PlayerData> allPlayers = this.playerDataRepository.findAll();
         this.getLogger().trace("Recalculating ap for {} players.", allPlayers.size());
-        allPlayers.forEach(this::recalculateApForPlayer);
+        List<Category> categories = this.categoryRepository.findAll();
+        allPlayers.forEach(player -> this.recalculateApForPlayer(player, categories));
         this.playerDataRepository.saveAll(allPlayers);
     }
 
@@ -243,37 +255,39 @@ public class PlayerService implements HasLogger {
         }
     }
 
-
-    private void recalculateApForPlayer(PlayerData player) {
-        double playerAp = 0.0f;
-        double playerAccSum = 0.0f;
-        var rankedScores = player.getScores().stream().collect(Collectors.groupingBy(score -> score.getMap().getCategory()));
-        for (Category category : this.categoryRepository.findAll()) {
-            PlayerCategoryStats playerCategoryStats = player.getCategoryPerformances()
+    private void recalculateApForPlayer(PlayerData player, List<Category> categories) {
+        var rankedScoreCategoryMap = player.getScores().stream().filter(ScoreData::isRankedScore).collect(Collectors.groupingBy(score -> score.getBeatMap().getCategory()));
+        for (Category category : categories) {
+            double playerAp = 0.0f;
+            double playerAccSum = 0.0f;
+            PlayerCategoryStats playerCategoryStats = player.getPlayerCategoryStats()
                     .stream()
                     .filter(lP -> lP.getCategory().equals(category))
                     .findFirst()
                     .orElseGet(() -> {
                         PlayerCategoryStats newPlayerCategoryStats = new PlayerCategoryStats();
                         newPlayerCategoryStats.setCategory(category);
-//                        newPlayerCategoryStats.setPlayer(player);
+                        newPlayerCategoryStats.setPlayer(player);
+                        player.getPlayerCategoryStats().add(newPlayerCategoryStats);
                         return newPlayerCategoryStats;
                     });
 
-
-            if (rankedScores.size() == 0) {
+            if (rankedScoreCategoryMap.size() == 0) {
                 playerCategoryStats.setAp(playerAp);
-                playerCategoryStats.setRankedPlays(0);
                 playerCategoryStats.setAverageAcc(playerAccSum);
                 return;
             }
-            for (ScoreData score : rankedScores.get(category)) {
-                playerAp += score.getAp();
-                playerAccSum += score.getAccuracy();
+            if (rankedScoreCategoryMap.containsKey(category)) {
+                List<ScoreData> categoryScores = rankedScoreCategoryMap.get(category);
+                for (ScoreData score : categoryScores) {
+                    playerAp += score.getAp();
+                    playerAccSum += score.getAccuracy();
+                }
+
+                playerCategoryStats.setAp(playerAp);
+                playerCategoryStats.setAverageAcc(playerAccSum / categoryScores.size());
+                playerCategoryStats.setRankedPlays(categoryScores.size());
             }
-            playerCategoryStats.setAp(playerAp);
-            playerCategoryStats.setAverageAcc(playerAccSum / rankedScores.size());
-            playerCategoryStats.setRankedPlays(rankedScores.size());
         }
     }
 

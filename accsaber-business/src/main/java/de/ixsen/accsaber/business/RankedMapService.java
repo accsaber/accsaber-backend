@@ -7,9 +7,11 @@ import de.ixsen.accsaber.business.exceptions.ExceptionType;
 import de.ixsen.accsaber.business.playlist.Playlist;
 import de.ixsen.accsaber.business.playlist.PlaylistSong;
 import de.ixsen.accsaber.business.playlist.PlaylistSongDifficulty;
+import de.ixsen.accsaber.database.model.Category;
 import de.ixsen.accsaber.database.model.maps.BeatMap;
 import de.ixsen.accsaber.database.model.maps.Song;
 import de.ixsen.accsaber.database.model.players.ScoreData;
+import de.ixsen.accsaber.database.repositories.model.CategoryRepository;
 import de.ixsen.accsaber.database.repositories.model.RankedMapRepository;
 import de.ixsen.accsaber.database.repositories.model.ScoreDataRepository;
 import de.ixsen.accsaber.integration.connector.BeatSaverConnector;
@@ -37,14 +39,17 @@ public class RankedMapService {
     private final ScoreDataRepository scoreDataRepository;
 
     private final SongService songService;
+    private final CategoryRepository categoryRepository;
 
     @Autowired
     public RankedMapService(RankedMapRepository rankedMapRepository,
                             ScoreDataRepository scoreDataRepository,
+                            CategoryRepository categoryRepository,
                             BeatSaverConnector beatSaverConnector,
                             SongService songService) {
         this.rankedMapRepository = rankedMapRepository;
         this.scoreDataRepository = scoreDataRepository;
+        this.categoryRepository = categoryRepository;
         this.beatSaverConnector = beatSaverConnector;
         this.songService = songService;
     }
@@ -61,7 +66,13 @@ public class RankedMapService {
         return optionalRankedMap.get();
     }
 
-    public void addNewRankedMap(String beatSaverId, Long leaderBoardId, String difficulty, Double complexity) {
+    public void addNewRankedMap(String beatSaverId, Long leaderBoardId, String difficulty, Double complexity, String categoryName) {
+        Optional<Category> optionalCategory = this.categoryRepository.findById(categoryName);
+        if(optionalCategory.isEmpty()){
+            throw new AccsaberOperationException(ExceptionType.CATEGORY_NOT_FOUND, String.format("The category [%s] was not found.", categoryName));
+        }
+        Category category = optionalCategory.get();
+
         BeatSaverSongInfo beatSaverSongInfo = this.beatSaverConnector.getMapInfoByKey(beatSaverId);
 
         if (this.rankedMapRepository.existsById(leaderBoardId)) {
@@ -78,6 +89,7 @@ public class RankedMapService {
         beatMap.setSong(song);
         beatMap.setComplexity(complexity);
         beatMap.setDifficulty(difficulty);
+        beatMap.setCategory(category);
 
         song.getRankedMaps().add(beatMap);
 
@@ -85,10 +97,11 @@ public class RankedMapService {
 
         List<ScoreData> nowRankedScores = this.scoreDataRepository.findAllByLeaderboardId(beatMap.getLeaderboardId());
         nowRankedScores.forEach(score -> {
-            score.setRankedMap(beatMap);
+            score.setBeatMap(beatMap);
             score.setAccuracy(score.getScore() / (double) beatMap.getMaxScore());
             double ap = APUtils.calculateApByAcc(score.getAccuracy(), beatMap.getComplexity());
             score.setAp(ap);
+            score.setRankedScore(true);
         });
         this.scoreDataRepository.saveAll(nowRankedScores);
     }

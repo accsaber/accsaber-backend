@@ -1,12 +1,12 @@
 package de.ixsen.accsaber.api.mapping;
 
-import java.util.List;
-
 import de.ixsen.accsaber.api.dtos.RankedMapDto;
 import de.ixsen.accsaber.database.model.maps.BeatMap;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
+
+import java.util.List;
 
 @Mapper
 public interface RankedMapMapper {
@@ -20,7 +20,8 @@ public interface RankedMapMapper {
     @Mapping(source = "song.songSubName", target = "songSubName")
     @Mapping(source = "song.songAuthorName", target = "songAuthorName")
     @Mapping(source = "song.levelAuthorName", target = "levelAuthorName")
-    @Mapping(source = "song.beatSaverKey", target = "beatsaverKey")
+    @Mapping(source = "song.beatSaverKey", target = "beatSaverKey")
     @Mapping(source = "leaderboardId", target = "leaderboardId")
+    @Mapping(source = "category.categoryName", target = "categoryName")
     RankedMapDto rankedMapToDto(BeatMap beatMap);
 }
