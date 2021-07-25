@@ -4,20 +4,18 @@ import de.ixsen.accsaber.database.model.PlayerCategoryStats;
 import org.hibernate.annotations.ColumnDefault;
 
 import javax.persistence.CascadeType;
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
-import java.io.Serializable;
 import java.util.List;
 import java.util.Set;
 
 @Entity
-public class PlayerData{
+public class PlayerData {
 
     @Id
-    private String playerId;
+    private Long playerId;
 
     private String playerName;
 
@@ -35,11 +33,11 @@ public class PlayerData{
 
     private String hmd;
 
-    public String getPlayerId() {
+    public Long getPlayerId() {
         return this.playerId;
     }
 
-    public void setPlayerId(String playerId) {
+    public void setPlayerId(Long playerId) {
         this.playerId = playerId;
     }
 

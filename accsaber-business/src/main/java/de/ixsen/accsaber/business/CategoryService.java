@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class CategoryService {
@@ -38,7 +37,7 @@ public class CategoryService {
 
 
     public void createNewCategory(Category newCategory) {
-        if (this.categoryRepository.existsById(newCategory.getCategoryName())) {
+        if (this.categoryRepository.existsByCategoryName(newCategory.getCategoryName())) {
             throw new AccsaberOperationException(ExceptionType.CATEGORY_ALREADY_EXISTS, String.format("Category [%s] already exists", newCategory.getCategoryName()));
         }
 
@@ -52,24 +51,6 @@ public class CategoryService {
         }
         this.playerDataRepository.saveAll(allPlayers);
 
-    }
-
-    public void deleteCategory(String categoryName) {
-        if (!this.categoryRepository.existsById(categoryName)) {
-            throw new AccsaberOperationException(ExceptionType.CATEGORY_NOT_FOUND, String.format("Category [%s] was not found", categoryName));
-        }
-        this.categoryRepository.deleteById(categoryName);
-    }
-
-    public void updateDescription(String categoryName, String description) {
-        Optional<Category> optionalCategory = this.categoryRepository.findById(categoryName);
-        if (optionalCategory.isEmpty()) {
-            throw new AccsaberOperationException(ExceptionType.CATEGORY_NOT_FOUND, String.format("Category [%s] was not found", categoryName));
-        }
-
-        Category category = optionalCategory.get();
-        category.setDescription(description);
-        this.categoryRepository.save(category);
     }
 
     public List<AccSaberPlayer> getStandingsForCategory(String categoryName) {

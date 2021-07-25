@@ -2,15 +2,15 @@ package de.ixsen.accsaber.api.dtos;
 
 public class CategoryDto {
 
-    private String name;
+    private String categoryName;
     private String description;
 
-    public String getName() {
-        return name;
+    public String getCategoryName() {
+        return categoryName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setCategoryName(String categoryName) {
+        this.categoryName = categoryName;
     }
 
     public String getDescription() {

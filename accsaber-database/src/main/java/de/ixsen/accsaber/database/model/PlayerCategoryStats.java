@@ -15,7 +15,7 @@ public class PlayerCategoryStats extends BaseEntity {
     private PlayerData player;
 
     @ManyToOne
-    @JoinColumn(name = "category_name")
+    @JoinColumn(name = "category_id")
     private Category category;
 
     @ColumnDefault("0")

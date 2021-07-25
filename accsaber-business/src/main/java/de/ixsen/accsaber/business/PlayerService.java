@@ -77,7 +77,7 @@ public class PlayerService implements HasLogger {
         return this.overallAccSaberPlayerRepository.findAll();
     }
 
-    public void signupPlayer(String playerId, String playerName, String hmd) {
+    public void signupPlayer(Long playerId, String playerName, String hmd) {
         if (this.playerDataRepository.existsById(playerId)) {
             throw new AccsaberOperationException(ExceptionType.PLAYER_ALREADY_EXISTS, String.format("Player with ID %s already exists.", playerId));
         }
@@ -108,7 +108,7 @@ public class PlayerService implements HasLogger {
         return player.get();
     }
 
-    public PlayerData getPlayer(String playerId) {
+    public PlayerData getPlayer(Long playerId) {
         Optional<PlayerData> player = this.playerDataRepository.findById(playerId);
         if (player.isEmpty()) {
             throw new AccsaberOperationException(ExceptionType.PLAYER_NOT_FOUND, "Player with ID " + playerId + " does not exist.");
@@ -246,7 +246,7 @@ public class PlayerService implements HasLogger {
     /**
      * Loads the avatar of a player.
      */
-    private void loadAvatar(String playerId, String avatarUrl) {
+    private void loadAvatar(Long playerId, String avatarUrl) {
         byte[] avatar = this.scoreSaberConnector.loadAvatar(avatarUrl);
         try (FileOutputStream fileOutputStream = new FileOutputStream(this.avatarFolder + "/" + playerId + ".jpg")) {
             fileOutputStream.write(avatar);
@@ -291,12 +291,12 @@ public class PlayerService implements HasLogger {
         }
     }
 
-    private Optional<ScoreSaberPlayerDto> getScoreSaberPlayerData(String playerId) {
+    private Optional<ScoreSaberPlayerDto> getScoreSaberPlayerData(Long playerId) {
         return this.tryGetScoreSaberPlayerData(playerId, 0);
     }
     // TODO recheck whether recursion is the way to go here.
 
-    private Optional<ScoreSaberPlayerDto> tryGetScoreSaberPlayerData(String playerId, int tryCount) {
+    private Optional<ScoreSaberPlayerDto> tryGetScoreSaberPlayerData(Long playerId, int tryCount) {
         try {
             return this.scoreSaberConnector.getPlayerData(playerId);
         } catch (Exception e) {
@@ -310,12 +310,12 @@ public class PlayerService implements HasLogger {
         }
     }
 
-    private ScoreSaberScoreListDto getScoreSaberScore(String playerId, int page) {
+    private ScoreSaberScoreListDto getScoreSaberScore(Long playerId, int page) {
         return this.tryGetScoreSaberScore(playerId, page, 0);
     }
     // TODO recheck whether recursion is the way to go here.
 
-    private ScoreSaberScoreListDto tryGetScoreSaberScore(String playerId, int page, int tryCount) {
+    private ScoreSaberScoreListDto tryGetScoreSaberScore(Long playerId, int page, int tryCount) {
         try {
             return this.scoreSaberConnector.getPlayerScores(playerId, page);
         } catch (Exception e) {

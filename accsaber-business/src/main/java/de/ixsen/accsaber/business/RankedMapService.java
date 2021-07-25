@@ -67,7 +67,7 @@ public class RankedMapService {
     }
 
     public void addNewRankedMap(String beatSaverId, Long leaderBoardId, String difficulty, Double complexity, String categoryName) {
-        Optional<Category> optionalCategory = this.categoryRepository.findById(categoryName);
+        Optional<Category> optionalCategory = this.categoryRepository.findByCategoryName(categoryName);
         if(optionalCategory.isEmpty()){
             throw new AccsaberOperationException(ExceptionType.CATEGORY_NOT_FOUND, String.format("The category [%s] was not found.", categoryName));
         }

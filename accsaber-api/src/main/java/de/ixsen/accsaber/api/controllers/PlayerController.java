@@ -55,7 +55,7 @@ public class PlayerController {
                     .split("\\?")[0];
         }
 
-        this.playerService.signupPlayer(playerId, signupDto.getPlayerName(), signupDto.getHmd());
+        this.playerService.signupPlayer(Long.parseLong(playerId), signupDto.getPlayerName(), signupDto.getHmd());
         return ResponseEntity.noContent().build();
     }
 
@@ -68,7 +68,7 @@ public class PlayerController {
     }
 
     @GetMapping(path = "/{playerId}/scores")
-    public ResponseEntity<ArrayList<PlayerScoreDto>> getPlayerScores(@PathVariable String playerId) {
+    public ResponseEntity<ArrayList<PlayerScoreDto>> getPlayerScores(@PathVariable Long playerId) {
         PlayerData player = this.playerService.getPlayer(playerId);
         List<AccSaberScore> scoresForPlayer = this.scoreService.getScoresForPlayer(player);
         ArrayList<PlayerScoreDto> playerScoreDtos = this.mappingComponent.getScoreMapper().rankedScoresToPlayerScores(scoresForPlayer);
@@ -77,7 +77,7 @@ public class PlayerController {
     }
 
     @GetMapping(path = "/{playerId}/score-history/{leaderboardId}")
-    public ResponseEntity<Map<Instant, Double>> getPlayerScoreHistoryForMap(@PathVariable String playerId, @PathVariable long leaderboardId) {
+    public ResponseEntity<Map<Instant, Double>> getPlayerScoreHistoryForMap(@PathVariable Long playerId, @PathVariable long leaderboardId) {
         PlayerData player = this.playerService.getPlayer(playerId);
         int maxScore = this.rankedMapService.getRankedMap(leaderboardId).getMaxScore();
 

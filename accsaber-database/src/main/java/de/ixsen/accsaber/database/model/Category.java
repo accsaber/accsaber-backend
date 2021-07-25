@@ -1,12 +1,12 @@
 package de.ixsen.accsaber.database.model;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.Id;
 
 @Entity
-public class Category {
+public class Category extends BaseEntity {
 
-    @Id
+    @Column(unique = true, nullable = false)
     private String categoryName;
 
     private String description;

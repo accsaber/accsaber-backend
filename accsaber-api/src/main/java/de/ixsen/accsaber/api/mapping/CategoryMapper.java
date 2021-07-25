@@ -11,7 +11,7 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface CategoryMapper {
 
-    @Mapping(target = "name", source = "categoryName")
+    @Mapping(target = "categoryName", source = "categoryName")
     CategoryDto map(Category category);
 
     @InheritInverseConfiguration

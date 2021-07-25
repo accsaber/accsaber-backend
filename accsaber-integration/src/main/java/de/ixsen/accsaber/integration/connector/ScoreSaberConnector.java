@@ -35,7 +35,7 @@ public class ScoreSaberConnector {
         this.recentRequests = ConcurrentHashMap.newKeySet();
     }
 
-    public Optional<ScoreSaberPlayerDto> getPlayerData(String playerId) throws InterruptedException {
+    public Optional<ScoreSaberPlayerDto> getPlayerData(Long playerId) throws InterruptedException {
         this.handleConnectionLimit();
 
         String requestUrl = URL + "/api/player/" + playerId + "/full";
@@ -57,7 +57,7 @@ public class ScoreSaberConnector {
                 .blockOptional();
     }
 
-    public ScoreSaberScoreListDto getPlayerScores(String playerId, int page) throws InterruptedException {
+    public ScoreSaberScoreListDto getPlayerScores(Long playerId, int page) throws InterruptedException {
         this.handleConnectionLimit();
 
         String requestUrl = URL + "/api/player/" + playerId + "/scores/recent/" + page;

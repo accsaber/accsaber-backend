@@ -50,18 +50,6 @@ public class CategoryController {
         this.categoryService.createNewCategory(newCategory);
     }
 
-    @DeleteMapping("{categoryName}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteCategory(@PathVariable String categoryName) {
-        this.categoryService.deleteCategory(categoryName);
-    }
-
-    @PutMapping("{categoryName}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void updateCategoryDescription(@PathVariable String categoryName, @RequestBody CategoryDto categoryDto) {
-        this.categoryService.updateDescription(categoryName, categoryDto.getDescription());
-    }
-
     @GetMapping("{categoryName}/standings")
     public ResponseEntity<List<PlayerDto>> getStandingsForCategory(@PathVariable String categoryName) {
         List<AccSaberPlayer> accSaberPlayers = this.categoryService.getStandingsForCategory(categoryName);

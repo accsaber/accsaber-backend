@@ -26,7 +26,7 @@ public class BeatMap {
     private double complexity;
 
     @ManyToOne
-    @JoinColumn(name = "category")
+    @JoinColumn(name = "category_id")
     private Category category;
 
     public Long getLeaderboardId() {
