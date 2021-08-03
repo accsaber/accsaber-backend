@@ -104,7 +104,7 @@ public class RankedMapService {
         List<RankedMap> rankedMaps = song.getRankedMaps();
         rankedMaps.remove(map);
         song.setRankedMaps(rankedMaps);
-        this.rankedMapRepository.deleteById(leaderboardId);
+        this.rankedMapRepository.delete(map.get());
         if (rankedMaps.size() == 0) {
             this.songService.removeSong(song.getSongHash());
         }
