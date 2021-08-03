@@ -93,6 +93,27 @@ public class RankedMapService {
         this.scoreRepository.saveAll(nowRankedScores);
     }
 
+    public void removeRankedMap(Long leaderboardId) {
+        Optional<RankedMap> map = this.rankedMapRepository.findById(leaderboardId);
+        if(map.isEmpty()){
+            throw new AccsaberOperationException(ExceptionType.RANKED_MAP_NOT_FOUND,
+                    "The ranked map"  + leaderboardId + " does not currently exist.");
+        }
+
+        Song song = map.get().getSong();
+        List<RankedMap> rankedMaps = song.getRankedMaps();
+        rankedMaps.remove(map);
+        song.setRankedMaps(rankedMaps);
+        this.rankedMapRepository.delete(map.get());
+        if (rankedMaps.size() == 0) {
+            this.songService.removeSong(song.getSongHash());
+        }
+
+        List<Score> unrankedScores = this.scoreRepository.findAllByLeaderboardId(leaderboardId);
+        unrankedScores.forEach(score -> score.setIsRankedMapScore(false));
+        this.scoreRepository.saveAll(unrankedScores);
+    }
+
     public byte[] getRankedMapsJson() throws JsonProcessingException {
         Playlist playlist = new Playlist();
         playlist.setPlaylistTitle("AccSaber Ranked Maps");
