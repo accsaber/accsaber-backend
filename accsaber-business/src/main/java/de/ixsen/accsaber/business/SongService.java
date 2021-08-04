@@ -61,7 +61,7 @@ public class SongService implements HasLogger {
         song.setSongSubName(beatSaverSongInfo.getMetadata().getSongSubName());
         song.setBeatSaverKey(beatSaverSongInfo.getKey());
 
-        song.setRankedMaps(new ArrayList<>());
+        song.setBeatMaps(new ArrayList<>());
 
         this.saveSongCover(beatSaverSongInfo.getHash());
 

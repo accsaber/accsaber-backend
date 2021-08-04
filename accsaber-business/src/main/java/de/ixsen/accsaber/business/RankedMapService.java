@@ -12,7 +12,7 @@ import de.ixsen.accsaber.database.model.maps.BeatMap;
 import de.ixsen.accsaber.database.model.maps.Song;
 import de.ixsen.accsaber.database.model.players.ScoreData;
 import de.ixsen.accsaber.database.repositories.model.CategoryRepository;
-import de.ixsen.accsaber.database.repositories.model.RankedMapRepository;
+import de.ixsen.accsaber.database.repositories.model.BeatMapRepository;
 import de.ixsen.accsaber.database.repositories.model.ScoreDataRepository;
 import de.ixsen.accsaber.integration.connector.BeatSaverConnector;
 import de.ixsen.accsaber.integration.model.beatsaver.BeatSaverDifficultyDetails;
@@ -35,19 +35,19 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 public class RankedMapService {
 
     private final BeatSaverConnector beatSaverConnector;
-    private final RankedMapRepository rankedMapRepository;
+    private final BeatMapRepository beatMapRepository;
     private final ScoreDataRepository scoreDataRepository;
 
     private final SongService songService;
     private final CategoryRepository categoryRepository;
 
     @Autowired
-    public RankedMapService(RankedMapRepository rankedMapRepository,
+    public RankedMapService(BeatMapRepository beatMapRepository,
                             ScoreDataRepository scoreDataRepository,
                             CategoryRepository categoryRepository,
                             BeatSaverConnector beatSaverConnector,
                             SongService songService) {
-        this.rankedMapRepository = rankedMapRepository;
+        this.beatMapRepository = beatMapRepository;
         this.scoreDataRepository = scoreDataRepository;
         this.categoryRepository = categoryRepository;
         this.beatSaverConnector = beatSaverConnector;
@@ -55,11 +55,11 @@ public class RankedMapService {
     }
 
     public List<BeatMap> getRankedMaps() {
-        return this.rankedMapRepository.findAll();
+        return this.beatMapRepository.findAll();
     }
 
     public BeatMap getRankedMap(Long leaderboardId) {
-        Optional<BeatMap> optionalRankedMap = this.rankedMapRepository.findById(leaderboardId);
+        Optional<BeatMap> optionalRankedMap = this.beatMapRepository.findById(leaderboardId);
         if (optionalRankedMap.isEmpty()) {
             throw new AccsaberOperationException(ExceptionType.RANKED_MAP_NOT_FOUND, "The ranked map with the id could not be found.");
         }
@@ -68,14 +68,14 @@ public class RankedMapService {
 
     public void addNewRankedMap(String beatSaverId, Long leaderBoardId, String difficulty, Double complexity, String categoryName) {
         Optional<Category> optionalCategory = this.categoryRepository.findByCategoryName(categoryName);
-        if(optionalCategory.isEmpty()){
+        if (optionalCategory.isEmpty()) {
             throw new AccsaberOperationException(ExceptionType.CATEGORY_NOT_FOUND, String.format("The category [%s] was not found.", categoryName));
         }
         Category category = optionalCategory.get();
 
         BeatSaverSongInfo beatSaverSongInfo = this.beatSaverConnector.getMapInfoByKey(beatSaverId);
 
-        if (this.rankedMapRepository.existsById(leaderBoardId)) {
+        if (this.beatMapRepository.existsById(leaderBoardId)) {
             throw new AccsaberOperationException(ExceptionType.RANKED_MAP_ALREADY_EXISTS, "The ranked map with the leaderboardId " + leaderBoardId + " already exists");
         }
 
@@ -91,7 +91,7 @@ public class RankedMapService {
         beatMap.setDifficulty(difficulty);
         beatMap.setCategory(category);
 
-        song.getRankedMaps().add(beatMap);
+        song.getBeatMaps().add(beatMap);
 
         song = this.songService.saveSong(song);
 
@@ -107,24 +107,24 @@ public class RankedMapService {
     }
 
     public void removeRankedMap(Long leaderboardId) {
-        Optional<RankedMap> map = this.rankedMapRepository.findById(leaderboardId);
-        if(map.isEmpty()){
+        Optional<BeatMap> map = this.beatMapRepository.findById(leaderboardId);
+        if (map.isEmpty()) {
             throw new AccsaberOperationException(ExceptionType.RANKED_MAP_NOT_FOUND,
-                    "The ranked map"  + leaderboardId + " does not currently exist.");
+                    "The ranked map" + leaderboardId + " does not currently exist.");
         }
 
         Song song = map.get().getSong();
-        List<RankedMap> rankedMaps = song.getRankedMaps();
+        List<BeatMap> rankedMaps = song.getBeatMaps();
         rankedMaps.remove(map);
-        song.setRankedMaps(rankedMaps);
-        this.rankedMapRepository.delete(map.get());
+        song.setBeatMaps(rankedMaps);
+        this.beatMapRepository.delete(map.get());
         if (rankedMaps.size() == 0) {
             this.songService.removeSong(song.getSongHash());
         }
 
-        List<Score> unrankedScores = this.scoreRepository.findAllByLeaderboardId(leaderboardId);
-        unrankedScores.forEach(score -> score.setIsRankedMapScore(false));
-        this.scoreRepository.saveAll(unrankedScores);
+        List<ScoreData> unrankedScores = this.scoreDataRepository.findAllByLeaderboardId(leaderboardId);
+        unrankedScores.forEach(score -> score.setRankedScore(false));
+        this.scoreDataRepository.saveAll(unrankedScores);
     }
 
     public byte[] getRankedMapsJson() throws JsonProcessingException {

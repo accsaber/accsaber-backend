@@ -63,11 +63,11 @@ public class Song {
         this.levelAuthorName = levelAuthorName;
     }
 
-    public List<BeatMap> getRankedMaps() {
+    public List<BeatMap> getBeatMaps() {
         return this.beatMaps;
     }
 
-    public void setRankedMaps(List<BeatMap> beatMaps) {
+    public void setBeatMaps(List<BeatMap> beatMaps) {
         this.beatMaps = beatMaps;
     }
 

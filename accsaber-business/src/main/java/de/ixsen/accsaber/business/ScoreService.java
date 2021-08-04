@@ -4,7 +4,7 @@ import de.ixsen.accsaber.database.model.maps.BeatMap;
 import de.ixsen.accsaber.database.model.players.PlayerData;
 import de.ixsen.accsaber.database.views.AccSaberScore;
 import de.ixsen.accsaber.database.model.players.ScoreData;
-import de.ixsen.accsaber.database.repositories.model.RankedMapRepository;
+import de.ixsen.accsaber.database.repositories.model.BeatMapRepository;
 import de.ixsen.accsaber.database.repositories.view.AccSaberScoreRepository;
 import de.ixsen.accsaber.database.repositories.model.ScoreDataRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,13 +22,13 @@ public class ScoreService implements HasLogger {
 
     private final ScoreDataRepository scoreDataRepository;
     private final AccSaberScoreRepository accSaberScoreRepository;
-    private final RankedMapRepository rankedMapRepository;
+    private final BeatMapRepository beatMapRepository;
 
     @Autowired
-    public ScoreService(ScoreDataRepository scoreDataRepository, AccSaberScoreRepository accSaberScoreRepository, RankedMapRepository rankedMapRepository) {
+    public ScoreService(ScoreDataRepository scoreDataRepository, AccSaberScoreRepository accSaberScoreRepository, BeatMapRepository beatMapRepository) {
         this.scoreDataRepository = scoreDataRepository;
         this.accSaberScoreRepository = accSaberScoreRepository;
-        this.rankedMapRepository = rankedMapRepository;
+        this.beatMapRepository = beatMapRepository;
     }
 
     public List<AccSaberScore> getScoresForLeaderboardId(Long leaderboardId) {
@@ -39,7 +39,7 @@ public class ScoreService implements HasLogger {
         List<ScoreData> allRankedScores = this.scoreDataRepository.findAllRankedScores();
         Map<Long, BeatMap> rankedMaps = new HashMap<>();
 
-        for (BeatMap beatMap : this.rankedMapRepository.findAll()) {
+        for (BeatMap beatMap : this.beatMapRepository.findAll()) {
             rankedMaps.put(beatMap.getLeaderboardId(), beatMap);
         }
 

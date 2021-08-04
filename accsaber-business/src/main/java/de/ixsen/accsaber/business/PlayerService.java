@@ -11,7 +11,7 @@ import de.ixsen.accsaber.database.model.players.PlayerData;
 import de.ixsen.accsaber.database.model.players.ScoreData;
 import de.ixsen.accsaber.database.repositories.model.CategoryRepository;
 import de.ixsen.accsaber.database.repositories.model.PlayerDataRepository;
-import de.ixsen.accsaber.database.repositories.model.RankedMapRepository;
+import de.ixsen.accsaber.database.repositories.model.BeatMapRepository;
 import de.ixsen.accsaber.database.repositories.model.ScoreDataRepository;
 import de.ixsen.accsaber.database.repositories.view.OverallAccSaberPlayerRepository;
 import de.ixsen.accsaber.database.views.AccSaberPlayer;
@@ -45,7 +45,7 @@ public class PlayerService implements HasLogger {
     private final ScoreSaberConnector scoreSaberConnector;
     private final BusinessMappingComponent mappingComponent;
     private final ScoreDataRepository scoreDataRepository;
-    private final RankedMapRepository rankedMapRepository;
+    private final BeatMapRepository beatMapRepository;
     private final String avatarFolder;
     private final CategoryRepository categoryRepository;
     private final OverallAccSaberPlayerRepository overallAccSaberPlayerRepository;
@@ -54,7 +54,7 @@ public class PlayerService implements HasLogger {
     public PlayerService(PlayerDataRepository playerDataRepository,
                          OverallAccSaberPlayerRepository overallAccSaberPlayerRepository,
                          ScoreDataRepository scoreDataRepository,
-                         RankedMapRepository rankedMapRepository,
+                         BeatMapRepository beatMapRepository,
                          ScoreSaberConnector scoreSaberConnector,
                          BusinessMappingComponent mappingComponent,
                          CategoryRepository categoryRepository,
@@ -62,7 +62,7 @@ public class PlayerService implements HasLogger {
         this.playerDataRepository = playerDataRepository;
         this.overallAccSaberPlayerRepository = overallAccSaberPlayerRepository;
         this.scoreDataRepository = scoreDataRepository;
-        this.rankedMapRepository = rankedMapRepository;
+        this.beatMapRepository = beatMapRepository;
         this.scoreSaberConnector = scoreSaberConnector;
         this.mappingComponent = mappingComponent;
         this.categoryRepository = categoryRepository;
@@ -122,7 +122,7 @@ public class PlayerService implements HasLogger {
         List<PlayerData> allPlayers = this.playerDataRepository.findAll();
         Instant start = Instant.now();
         this.getLogger().info("Loading scores for " + allPlayers.size() + " players.");
-        List<BeatMap> beatMaps = this.rankedMapRepository.findAll();
+        List<BeatMap> beatMaps = this.beatMapRepository.findAll();
 
         for (PlayerData player : allPlayers) {
             this.handlePlayer(beatMaps, player);

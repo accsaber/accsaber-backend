@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface RankedMapRepository extends JpaRepository<BeatMap, Long> {
+public interface BeatMapRepository extends JpaRepository<BeatMap, Long> {
 
     @Override
     @Query("FROM BeatMap map left join fetch map.song")
