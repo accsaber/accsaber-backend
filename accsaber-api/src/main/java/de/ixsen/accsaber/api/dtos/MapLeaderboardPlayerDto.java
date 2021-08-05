@@ -1,7 +1,5 @@
 package de.ixsen.accsaber.api.dtos;
 
-import java.time.Instant;
-
 public class MapLeaderboardPlayerDto {
     private int rank;
 
@@ -17,6 +15,8 @@ public class MapLeaderboardPlayerDto {
     private double ap;
 
     private String timeSet;
+
+    private String categoryName;
 
     public int getRank() {
         return this.rank;
@@ -88,5 +88,13 @@ public class MapLeaderboardPlayerDto {
 
     public void setTimeSet(String timeSet) {
         this.timeSet = timeSet;
+    }
+
+    public String getCategoryName() {
+        return categoryName;
+    }
+
+    public void setCategoryName(String categoryName) {
+        this.categoryName = categoryName;
     }
 }

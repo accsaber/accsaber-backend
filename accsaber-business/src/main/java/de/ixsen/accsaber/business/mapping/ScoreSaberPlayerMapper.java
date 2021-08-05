@@ -1,6 +1,6 @@
 package de.ixsen.accsaber.business.mapping;
 
-import de.ixsen.accsaber.database.model.players.Player;
+import de.ixsen.accsaber.database.model.players.PlayerData;
 import de.ixsen.accsaber.integration.model.scoresaber.ScoreSaberPlayerInfoDto;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -14,5 +14,5 @@ public interface ScoreSaberPlayerMapper {
 
     @Mapping(target = "playerId", ignore = true)
     @Mapping(target = "avatarUrl", source = "avatar")
-    void scoreSaberPlayerToPlayer(@MappingTarget Player player, ScoreSaberPlayerInfoDto playerDto);
+    void scoreSaberPlayerToPlayer(@MappingTarget PlayerData player, ScoreSaberPlayerInfoDto playerDto);
 }

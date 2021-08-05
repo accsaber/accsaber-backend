@@ -10,10 +10,12 @@ public class RankedMapDto {
     private String difficulty;
 
     private String leaderboardId;
-    private String beatsaverKey;
+    private String beatSaverKey;
     private String songHash;
 
-    private double techyness;
+    private double complexity;
+
+    private String categoryName;
 
     public String getSongName() {
         return this.songName;
@@ -63,12 +65,12 @@ public class RankedMapDto {
         this.leaderboardId = leaderboardId;
     }
 
-    public String getBeatsaverKey() {
-        return this.beatsaverKey;
+    public String getBeatSaverKey() {
+        return this.beatSaverKey;
     }
 
-    public void setBeatsaverKey(String beatsaverKey) {
-        this.beatsaverKey = beatsaverKey;
+    public void setBeatSaverKey(String beatSaverKey) {
+        this.beatSaverKey = beatSaverKey;
     }
 
     public String getSongHash() {
@@ -79,11 +81,19 @@ public class RankedMapDto {
         this.songHash = songHash;
     }
 
-    public double getTechyness() {
-        return this.techyness;
+    public double getComplexity() {
+        return this.complexity;
     }
 
-    public void setTechyness(double techyness) {
-        this.techyness = techyness;
+    public void setComplexity(double complexity) {
+        this.complexity = complexity;
+    }
+
+    public String getCategoryName() {
+        return this.categoryName;
+    }
+
+    public void setCategoryName(String categoryName) {
+        this.categoryName = categoryName;
     }
 }

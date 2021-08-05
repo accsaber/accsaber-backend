@@ -14,9 +14,10 @@ public class PlayerDto {
 
     private double averageAcc;
     private double ap;
+    private double averageApPerMap;
 
     private int rankedPlays;
-    private double averageApPerMap;
+
 
     public int getRank() {
         return this.rank;
@@ -66,6 +67,15 @@ public class PlayerDto {
         this.hmd = hmd;
     }
 
+    public int getRankedPlays() {
+        return this.rankedPlays;
+    }
+
+    public void setRankedPlays(int rankedPlays) {
+        this.rankedPlays = rankedPlays;
+    }
+
+
     public double getAverageAcc() {
         return this.averageAcc;
     }
@@ -82,13 +92,6 @@ public class PlayerDto {
         this.ap = ap;
     }
 
-    public int getRankedPlays() {
-        return this.rankedPlays;
-    }
-
-    public void setRankedPlays(int rankedPlays) {
-        this.rankedPlays = rankedPlays;
-    }
 
     public double getAverageApPerMap() {
         return this.averageApPerMap;

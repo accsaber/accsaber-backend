@@ -1,38 +1,42 @@
 package de.ixsen.accsaber.database.model.players;
 
-import de.ixsen.accsaber.database.model.maps.RankedMap;
+
+import de.ixsen.accsaber.database.model.maps.BeatMap;
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 
 import javax.persistence.Column;
+import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.ForeignKey;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.MappedSuperclass;
 import javax.persistence.OrderBy;
 import java.time.Instant;
 
-@MappedSuperclass
-public class AbstractScore {
+@Entity
+@Audited
+public class ScoreData {
 
     @Id
     @Audited
     private Long scoreId;
 
     private int rankWhenScoresSet;
+
     @Audited
     private int score;
+
     @Audited
     private int unmodififiedScore;
 
     @Audited
     private Double accuracy;
+
     @Audited
     private Double ap;
-
-    @Column(name = "is_ranked_map_score")
-    private Boolean isRankedMapScore = false;
 
     @OrderBy
     @Audited
@@ -40,8 +44,8 @@ public class AbstractScore {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @NotAudited
-    @JoinColumn(insertable = false, updatable = false, name = "map_leaderboard_id")
-    private RankedMap rankedMap;
+    @JoinColumn(insertable = false, updatable = false, name = "map_leaderboard_id", foreignKey = @ForeignKey(name = "none"))
+    private BeatMap beatMap;
 
     @Column(name = "map_leaderboard_id")
     @Audited
@@ -49,8 +53,11 @@ public class AbstractScore {
 
     @ManyToOne
     @NotAudited
-    private Player player;
+    @JoinColumn(name = "player_id")
+    private PlayerData player;
 
+    @ColumnDefault("false")
+    private boolean isRankedScore;
 
     public Long getScoreId() {
         return this.scoreId;
@@ -100,12 +107,12 @@ public class AbstractScore {
         this.timeSet = timeSet;
     }
 
-    public RankedMap getMap() {
-        return this.rankedMap;
+    public BeatMap getBeatMap() {
+        return this.beatMap;
     }
 
-    public void setMap(RankedMap map) {
-        this.rankedMap = map;
+    public void setBeatMap(BeatMap beatMap) {
+        this.beatMap = beatMap;
     }
 
     public Long getLeaderboardId() {
@@ -124,19 +131,19 @@ public class AbstractScore {
         this.ap = ap;
     }
 
-    public Boolean getIsRankedMapScore() {
-        return this.isRankedMapScore;
-    }
-
-    public void setIsRankedMapScore(Boolean rankedMapScore) {
-        this.isRankedMapScore = rankedMapScore;
-    }
-
-    public Player getPlayer() {
+    public PlayerData getPlayer() {
         return this.player;
     }
 
-    public void setPlayer(Player player) {
+    public void setPlayer(PlayerData player) {
         this.player = player;
+    }
+
+    public boolean isRankedScore() {
+        return this.isRankedScore;
+    }
+
+    public void setRankedScore(boolean rankedScore) {
+        this.isRankedScore = rankedScore;
     }
 }

@@ -1,7 +1,7 @@
 package de.ixsen.accsaber.business;
 
 import de.ixsen.accsaber.database.model.staff.StaffUser;
-import de.ixsen.accsaber.database.repositories.StaffUserRepository;
+import de.ixsen.accsaber.database.repositories.model.StaffUserRepository;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

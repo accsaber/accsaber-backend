@@ -18,8 +18,8 @@ public class Song {
     private String songAuthorName;
     private String levelAuthorName;
 
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    private List<RankedMap> rankedMaps;
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "song", orphanRemoval = true)
+    private List<BeatMap> beatMaps;
 
     private String beatSaverKey;
 
@@ -63,12 +63,12 @@ public class Song {
         this.levelAuthorName = levelAuthorName;
     }
 
-    public List<RankedMap> getRankedMaps() {
-        return this.rankedMaps;
+    public List<BeatMap> getBeatMaps() {
+        return this.beatMaps;
     }
 
-    public void setRankedMaps(List<RankedMap> rankedMaps) {
-        this.rankedMaps = rankedMaps;
+    public void setBeatMaps(List<BeatMap> beatMaps) {
+        this.beatMaps = beatMaps;
     }
 
     public String getBeatSaverKey() {

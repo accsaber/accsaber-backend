@@ -4,7 +4,8 @@ public class CreateRankedMapDto {
     private Long leaderboardId;
     private String beatSaverKey;
     private String difficulty;
-    private double techyness;
+    private double complexity;
+    private String categoryName;
 
     public Long getLeaderboardId() {
         return this.leaderboardId;
@@ -30,11 +31,19 @@ public class CreateRankedMapDto {
         this.difficulty = difficulty;
     }
 
-    public double getTechyness() {
-        return this.techyness;
+    public String getCategoryName() {
+        return this.categoryName;
     }
 
-    public void setTechyness(double techyness) {
-        this.techyness = techyness;
+    public void setCategoryName(String categoryName) {
+        this.categoryName = categoryName;
+    }
+
+    public double getComplexity() {
+        return this.complexity;
+    }
+
+    public void setComplexity(double complexity) {
+        this.complexity = complexity;
     }
 }
