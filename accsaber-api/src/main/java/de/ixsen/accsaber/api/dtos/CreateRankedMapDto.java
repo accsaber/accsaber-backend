@@ -2,7 +2,7 @@ package de.ixsen.accsaber.api.dtos;
 
 public class CreateRankedMapDto {
     private Long leaderboardId;
-    private String beatSaverKey;
+    private String songHash;
     private String difficulty;
     private double complexity;
     private String categoryName;
@@ -15,12 +15,12 @@ public class CreateRankedMapDto {
         this.leaderboardId = leaderboardId;
     }
 
-    public String getBeatSaverKey() {
-        return this.beatSaverKey;
+    public String getSongHash() {
+        return this.songHash;
     }
 
-    public void setBeatSaverKey(String beatSaverKey) {
-        this.beatSaverKey = beatSaverKey;
+    public void setSongHash(String songHash) {
+        this.songHash = songHash;
     }
 
     public String getDifficulty() {

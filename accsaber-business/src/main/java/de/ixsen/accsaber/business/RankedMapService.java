@@ -15,8 +15,9 @@ import de.ixsen.accsaber.database.repositories.model.BeatMapRepository;
 import de.ixsen.accsaber.database.repositories.model.CategoryRepository;
 import de.ixsen.accsaber.database.repositories.model.ScoreDataRepository;
 import de.ixsen.accsaber.integration.connector.BeatSaverConnector;
-import de.ixsen.accsaber.integration.model.beatsaver.BeatSaverDifficultyDetails;
+import de.ixsen.accsaber.integration.model.beatsaver.BeatSaverMapDifficulty;
 import de.ixsen.accsaber.integration.model.beatsaver.BeatSaverSongInfo;
+import de.ixsen.accsaber.integration.model.beatsaver.BeatSaverVersion;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
@@ -66,26 +67,38 @@ public class RankedMapService {
         return optionalRankedMap.get();
     }
 
-    public void addNewRankedMap(String beatSaverId, Long leaderBoardId, String difficulty, Double complexity, String categoryName) {
+    public void addNewRankedMap(String songHash, Long leaderBoardId, String difficulty, Double complexity, String categoryName) {
         Optional<Category> optionalCategory = this.categoryRepository.findByCategoryName(categoryName);
         if (optionalCategory.isEmpty()) {
             throw new AccsaberOperationException(ExceptionType.CATEGORY_NOT_FOUND, String.format("The category [%s] was not found.", categoryName));
         }
         Category category = optionalCategory.get();
 
-        BeatSaverSongInfo beatSaverSongInfo = this.beatSaverConnector.getMapInfoByKey(beatSaverId);
+        BeatSaverSongInfo beatSaverSongInfo = this.beatSaverConnector.getMapInfoByHash(songHash);
 
         if (this.beatMapRepository.existsById(leaderBoardId)) {
             throw new AccsaberOperationException(ExceptionType.RANKED_MAP_ALREADY_EXISTS, "The ranked map with the leaderboardId " + leaderBoardId + " already exists");
         }
 
-        Song song = this.songService.getOrCreateSong(beatSaverSongInfo);
+        BeatSaverVersion beatSaverVersion = beatSaverSongInfo.getVersions().stream()
+                .filter(version -> songHash.equalsIgnoreCase(version.getHash()))
+                .findAny().orElse(null);
+        if (beatSaverVersion == null) {
+            throw new AccsaberOperationException(ExceptionType.RANKED_MAP_NOT_FOUND, String.format("BeatSaver did not return requested map with hash %s", songHash));
+        }
 
-        BeatSaverDifficultyDetails beatSaverDifficultyDetails = beatSaverSongInfo.getMetadata().getCharacteristics().get(0).getDifficulties().get(difficulty);
+        Song song = this.songService.getOrCreateSong(beatSaverSongInfo, beatSaverVersion);
+
+        BeatSaverMapDifficulty beatSaverMapDifficulty = beatSaverVersion.getDiffs().stream()
+                .filter(diff -> difficulty.equalsIgnoreCase(diff.getDifficulty()) && "Standard".equalsIgnoreCase(diff.getCharacteristic()))
+                .findAny().orElse(null);
+        if (beatSaverMapDifficulty == null) {
+            throw new AccsaberOperationException(ExceptionType.RANKED_MAP_NOT_FOUND, String.format("Map with hash %s does not have [%s] difficulty as Standard characteristic"));
+        }
 
         BeatMap beatMap = new BeatMap();
         beatMap.setLeaderboardId(leaderBoardId);
-        beatMap.setMaxScore(this.calculateMaxScore(beatSaverDifficultyDetails.getNotes()));
+        beatMap.setMaxScore(this.calculateMaxScore(beatSaverMapDifficulty.getNotes()));
         beatMap.setSong(song);
         beatMap.setComplexity(complexity);
         beatMap.setDifficulty(difficulty);

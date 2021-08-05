@@ -1,11 +1,15 @@
 package de.ixsen.accsaber.business;
 
+import de.ixsen.accsaber.business.exceptions.ExceptionType;
 import de.ixsen.accsaber.database.model.maps.Song;
 import de.ixsen.accsaber.database.repositories.model.SongRepository;
 import de.ixsen.accsaber.integration.connector.ScoreSaberConnector;
 import de.ixsen.accsaber.integration.model.beatsaver.BeatSaverSongInfo;
+import de.ixsen.accsaber.integration.model.beatsaver.BeatSaverVersion;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import de.ixsen.accsaber.business.exceptions.AccsaberOperationException;
+import de.ixsen.accsaber.business.exceptions.ExceptionType;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -35,9 +39,9 @@ public class SongService implements HasLogger {
         return this.songRepository.save(song);
     }
 
-    public Song getOrCreateSong(BeatSaverSongInfo beatSaverSongInfo) {
-        Optional<Song> optionalSong = this.songRepository.findById(beatSaverSongInfo.getHash());
-        return optionalSong.orElseGet(() -> this.createSong(beatSaverSongInfo));
+    public Song getOrCreateSong(BeatSaverSongInfo beatSaverSongInfo, BeatSaverVersion beatSaverVersion) {
+        Optional<Song> optionalSong = this.songRepository.findById(beatSaverVersion.getHash());
+        return optionalSong.orElseGet(() -> this.createSong(beatSaverSongInfo, beatSaverVersion));
     }
 
     public void removeSong(String hash) {
@@ -52,18 +56,18 @@ public class SongService implements HasLogger {
         this.getLogger().info("Loading song covers finished in {} seconds.", Duration.between(start, Instant.now()).getSeconds());
     }
 
-    private Song createSong(BeatSaverSongInfo beatSaverSongInfo) {
+    private Song createSong(BeatSaverSongInfo beatSaverSongInfo, BeatSaverVersion beatSaverVersion) {
         Song song = new Song();
         song.setLevelAuthorName(beatSaverSongInfo.getMetadata().getLevelAuthorName());
         song.setSongAuthorName(beatSaverSongInfo.getMetadata().getSongAuthorName());
-        song.setSongHash(beatSaverSongInfo.getHash());
+        song.setSongHash(beatSaverVersion.getHash());
         song.setSongName(beatSaverSongInfo.getMetadata().getSongName());
         song.setSongSubName(beatSaverSongInfo.getMetadata().getSongSubName());
-        song.setBeatSaverKey(beatSaverSongInfo.getKey());
+        song.setBeatSaverKey(beatSaverSongInfo.getId());
 
         song.setBeatMaps(new ArrayList<>());
 
-        this.saveSongCover(beatSaverSongInfo.getHash());
+        this.saveSongCover(beatSaverVersion.getHash());
 
         return this.songRepository.save(song);
     }

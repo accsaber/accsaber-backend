@@ -9,7 +9,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Service
 public class BeatSaverConnector {
 
-    public static final String URL = "https://beatsaver.com/api";
+    public static final String URL = "https://api.beatsaver.com";
     private final WebClient webClient;
 
 
@@ -20,7 +20,7 @@ public class BeatSaverConnector {
 
     public BeatSaverSongInfo getMapInfoByKey(String key) {
 
-        String requestUrl = URL + "/maps/detail/" + key;
+        String requestUrl = URL + "/maps/id/" + key;
         LoggerFactory.getLogger(this.getClass()).info("RequestUrl {}", requestUrl);
 
         return this.webClient.get().uri(requestUrl)
@@ -30,7 +30,7 @@ public class BeatSaverConnector {
 
     public BeatSaverSongInfo getMapInfoByHash(String hash) {
 
-        String requestUrl = URL + "/maps/by-hash/" + hash;
+        String requestUrl = URL + "/maps/hash/" + hash;
         return this.webClient.get().uri(requestUrl)
                 .exchangeToMono(clientResponse -> clientResponse.bodyToMono(BeatSaverSongInfo.class))
                 .block();

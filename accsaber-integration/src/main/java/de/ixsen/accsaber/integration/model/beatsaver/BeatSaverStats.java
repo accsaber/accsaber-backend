@@ -3,61 +3,51 @@ package de.ixsen.accsaber.integration.model.beatsaver;
 public class BeatSaverStats {
     private int downloads;
 
+    private int downvotes;
+
     private int plays;
 
-    private int downVotes;
+    private double score;
 
-    private int upVotes;
+    private int upvotes;
 
-    private double heat;
-
-    private double rating;
+    public int getDownloads() {
+        return downloads;
+    }
 
     public void setDownloads(int downloads) {
         this.downloads = downloads;
     }
 
-    public int getDownloads() {
-        return this.downloads;
+    public int getDownvotes() {
+        return downvotes;
+    }
+
+    public void setDownvotes(int downvotes) {
+        this.downvotes = downvotes;
+    }
+
+    public int getPlays() {
+        return plays;
     }
 
     public void setPlays(int plays) {
         this.plays = plays;
     }
 
-    public int getPlays() {
-        return this.plays;
+    public double getScore() {
+        return score;
     }
 
-    public void setDownVotes(int downVotes) {
-        this.downVotes = downVotes;
+    public void setScore(double score) {
+        this.score = score;
     }
 
-    public int getDownVotes() {
-        return this.downVotes;
+    public int getUpvotes() {
+        return upvotes;
     }
 
-    public void setUpVotes(int upVotes) {
-        this.upVotes = upVotes;
-    }
-
-    public int getUpVotes() {
-        return this.upVotes;
-    }
-
-    public void setHeat(double heat) {
-        this.heat = heat;
-    }
-
-    public double getHeat() {
-        return this.heat;
-    }
-
-    public void setRating(double rating) {
-        this.rating = rating;
-    }
-
-    public double getRating() {
-        return this.rating;
+    public void setUpvotes(int upvotes) {
+        this.upvotes = upvotes;
     }
 }

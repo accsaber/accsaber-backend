@@ -1,15 +1,9 @@
 package de.ixsen.accsaber.integration.model.beatsaver;
 
-import java.util.List;
-
 public class BeatSaverMetadata {
-    private BeatSaverExistingDifficulties difficulties;
+    private double bpm;
 
     private int duration;
-
-    private String automapper;
-
-    private List<BeatSaverCharacteristics> characteristics;
 
     private String levelAuthorName;
 
@@ -19,80 +13,51 @@ public class BeatSaverMetadata {
 
     private String songSubName;
 
-    private int bpm;
-
-    public void setDifficulties(BeatSaverExistingDifficulties difficulties) {
-        this.difficulties = difficulties;
+    public double getBpm() {
+        return bpm;
     }
 
-    public BeatSaverExistingDifficulties getDifficulties() {
-        return this.difficulties;
+    public void setBpm(double bpm) {
+        this.bpm = bpm;
+    }
+
+    public int getDuration() {
+        return duration;
     }
 
     public void setDuration(int duration) {
         this.duration = duration;
     }
 
-    public int getDuration() {
-        return this.duration;
-    }
-
-    public void setAutomapper(String automapper) {
-        this.automapper = automapper;
-    }
-
-    public String getAutomapper() {
-        return this.automapper;
-    }
-
-    public void setCharacteristics(List<BeatSaverCharacteristics> characteristics) {
-        this.characteristics = characteristics;
-    }
-
-    public List<BeatSaverCharacteristics> getCharacteristics() {
-        return this.characteristics;
+    public String getLevelAuthorName() {
+        return levelAuthorName;
     }
 
     public void setLevelAuthorName(String levelAuthorName) {
         this.levelAuthorName = levelAuthorName;
     }
 
-    public String getLevelAuthorName() {
-        return this.levelAuthorName;
+    public String getSongAuthorName() {
+        return songAuthorName;
     }
 
     public void setSongAuthorName(String songAuthorName) {
         this.songAuthorName = songAuthorName;
     }
 
-    public String getSongAuthorName() {
-        return this.songAuthorName;
+    public String getSongName() {
+        return songName;
     }
 
     public void setSongName(String songName) {
         this.songName = songName;
     }
 
-    public String getSongName() {
-        return this.songName;
+    public String getSongSubName() {
+        return songSubName;
     }
 
     public void setSongSubName(String songSubName) {
         this.songSubName = songSubName;
     }
-
-    public String getSongSubName() {
-        return this.songSubName;
-    }
-
-    public void setBpm(int bpm) {
-        this.bpm = bpm;
-    }
-
-    public int getBpm() {
-        return this.bpm;
-    }
 }
-
-
-
