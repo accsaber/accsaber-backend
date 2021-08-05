@@ -11,8 +11,8 @@ import de.ixsen.accsaber.database.model.Category;
 import de.ixsen.accsaber.database.model.maps.BeatMap;
 import de.ixsen.accsaber.database.model.maps.Song;
 import de.ixsen.accsaber.database.model.players.ScoreData;
-import de.ixsen.accsaber.database.repositories.model.CategoryRepository;
 import de.ixsen.accsaber.database.repositories.model.BeatMapRepository;
+import de.ixsen.accsaber.database.repositories.model.CategoryRepository;
 import de.ixsen.accsaber.database.repositories.model.ScoreDataRepository;
 import de.ixsen.accsaber.integration.connector.BeatSaverConnector;
 import de.ixsen.accsaber.integration.model.beatsaver.BeatSaverDifficultyDetails;
@@ -110,16 +110,17 @@ public class RankedMapService {
         Optional<BeatMap> map = this.beatMapRepository.findById(leaderboardId);
         if (map.isEmpty()) {
             throw new AccsaberOperationException(ExceptionType.RANKED_MAP_NOT_FOUND,
-                    "The ranked map" + leaderboardId + " does not currently exist.");
+                    "The ranked map [" + leaderboardId + "] does not currently exist.");
         }
 
-        Song song = map.get().getSong();
-        List<BeatMap> rankedMaps = song.getBeatMaps();
-        rankedMaps.remove(map);
-        song.setBeatMaps(rankedMaps);
-        this.beatMapRepository.delete(map.get());
-        if (rankedMaps.size() == 0) {
+        BeatMap beatMap = map.get();
+        Song song = beatMap.getSong();
+        song.getBeatMaps().remove(beatMap);
+        beatMap.setSong(null);
+        if (song.getBeatMaps().size() == 0) {
             this.songService.removeSong(song.getSongHash());
+        } else {
+            this.songService.saveSong(song);
         }
 
         List<ScoreData> unrankedScores = this.scoreDataRepository.findAllByLeaderboardId(leaderboardId);

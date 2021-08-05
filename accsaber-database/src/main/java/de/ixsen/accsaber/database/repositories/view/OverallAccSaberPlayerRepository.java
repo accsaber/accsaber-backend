@@ -11,4 +11,5 @@ import java.util.Optional;
 public interface OverallAccSaberPlayerRepository extends ReadOnlyRepository<OverallAccSaberPlayer, String, AccSaberPlayer> {
 
     Optional<AccSaberPlayer> findPlayerByPlayerId(String playerId);
+
 }

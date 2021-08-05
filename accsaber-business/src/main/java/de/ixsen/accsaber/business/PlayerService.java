@@ -287,6 +287,10 @@ public class PlayerService implements HasLogger {
                 playerCategoryStats.setAp(playerAp);
                 playerCategoryStats.setAverageAcc(playerAccSum / categoryScores.size());
                 playerCategoryStats.setRankedPlays(categoryScores.size());
+            } else {
+                playerCategoryStats.setAp(0d);
+                playerCategoryStats.setAverageAcc(0d);
+                playerCategoryStats.setRankedPlays(0);
             }
         }
     }

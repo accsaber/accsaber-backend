@@ -57,6 +57,11 @@ public class CategoryService {
         if (categoryName.equals("overall")) {
             return this.overallAccSaberPlayerRepository.findAll();
         }
+
+        if (!this.categoryRepository.existsByCategoryName(categoryName)) {
+            throw new AccsaberOperationException(ExceptionType.CATEGORY_NOT_FOUND, String.format("The category [%s] was not found.", categoryName));
+        }
+
         return this.categoryAccSaberPlayerRepository.findAllByCategoryName(categoryName);
     }
 }

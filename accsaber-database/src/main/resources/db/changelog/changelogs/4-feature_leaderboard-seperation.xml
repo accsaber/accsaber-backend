@@ -223,7 +223,7 @@
     <dropDefaultValue columnDataType="varchar(255)" columnName="song" tableName="beat_map"/>
   </changeSet>
 
-  <changeSet id="fix-view" author="ixsen">
+  <changeSet id="create-category-stats-and-score-views" author="ixsen">
     <createView fullDefinition="false" remarks="VIEW" viewName="acc_saber_score">
       select s.score_id AS score_id,
       s.accuracy AS accuracy,
@@ -254,6 +254,7 @@
       from player_category_stats as pcs
       join player_data pd on pcs.player_id = pd.player_id
       join category c on c.id = pcs.category_id
+      where pcs.ranked_plays != 0
     </createView>
     <createView fullDefinition="false" remarks="VIEW" viewName="overall_acc_saber_player">
       select *, row_number() over (order by player_stats.ap desc ) as ranking
@@ -268,6 +269,7 @@
       sum(ranked_plays) as ranked_plays
       from player_category_stats pcs
       join player_data pd on pcs.player_id = pd.player_id
+      where pcs.ranked_plays != 0
       group by player_id) player_stats
     </createView>
   </changeSet>
