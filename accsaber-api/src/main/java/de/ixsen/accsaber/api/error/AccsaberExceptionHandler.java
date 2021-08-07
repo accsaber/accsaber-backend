@@ -2,6 +2,7 @@ package de.ixsen.accsaber.api.error;
 
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
+import de.ixsen.accsaber.business.HasLogger;
 import de.ixsen.accsaber.business.exceptions.AccsaberOperationException;
 import de.ixsen.accsaber.business.exceptions.ExceptionType;
 import org.springframework.http.HttpStatus;
@@ -11,7 +12,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 @ControllerAdvice
-public class AccsaberExceptionHandler extends ResponseEntityExceptionHandler {
+public class AccsaberExceptionHandler extends ResponseEntityExceptionHandler implements HasLogger {
 
     @ExceptionHandler(TokenExpiredException.class)
     public ResponseEntity<ErrorDto> handleInvalidToken(JWTVerificationException exception) {
@@ -24,6 +25,7 @@ public class AccsaberExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(AccsaberOperationException.class)
     public ResponseEntity<ErrorDto> handleAccsaberOperationException(AccsaberOperationException exception) {
+        this.getLogger().warn(exception.getMessage());
         ErrorDto errorDto = new ErrorDto();
         errorDto.setErrorCode(exception.getErrorCode());
         errorDto.setMessage(exception.getMessage());

@@ -82,19 +82,14 @@ public class RankedMapService {
 
         BeatSaverVersion beatSaverVersion = beatSaverSongInfo.getVersions().stream()
                 .filter(version -> songHash.equalsIgnoreCase(version.getHash()))
-                .findAny().orElse(null);
-        if (beatSaverVersion == null) {
-            throw new AccsaberOperationException(ExceptionType.RANKED_MAP_NOT_FOUND, String.format("BeatSaver did not return requested map with hash %s", songHash));
-        }
+                .findAny()
+                .orElseThrow(()-> new AccsaberOperationException(ExceptionType.RANKED_MAP_NOT_FOUND, String.format("BeatSaver did not return requested map with hash %s", songHash)));
 
         Song song = this.songService.getOrCreateSong(beatSaverSongInfo, beatSaverVersion);
 
         BeatSaverMapDifficulty beatSaverMapDifficulty = beatSaverVersion.getDiffs().stream()
                 .filter(diff -> difficulty.equalsIgnoreCase(diff.getDifficulty()) && "Standard".equalsIgnoreCase(diff.getCharacteristic()))
-                .findAny().orElse(null);
-        if (beatSaverMapDifficulty == null) {
-            throw new AccsaberOperationException(ExceptionType.RANKED_MAP_NOT_FOUND, String.format("Map with hash %s does not have [%s] difficulty as Standard characteristic"));
-        }
+                .findAny().orElseThrow(() -> new AccsaberOperationException(ExceptionType.RANKED_MAP_NOT_FOUND, String.format("Map with hash %s does not have [%s] difficulty as Standard characteristic", songHash, difficulty)));
 
         BeatMap beatMap = new BeatMap();
         beatMap.setLeaderboardId(leaderBoardId);
