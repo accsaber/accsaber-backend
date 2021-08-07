@@ -1,5 +1,7 @@
 package de.ixsen.accsaber.api.dtos;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class SignupDto {
     private String scoresaberLink;
     private String playerName;

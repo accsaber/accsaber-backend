@@ -1,23 +1,63 @@
 package de.ixsen.accsaber.integration.model.beatsaver;
 
 public class BeatSaverUploader {
-    private String _id;
+    private String avatar;
 
-    private String username;
+    private String hash;
 
-    public void set_id(String _id) {
-        this._id = _id;
+    private int id;
+
+    private String name;
+
+    private BeatSaverUserStats stats;
+
+    private boolean testplay;
+
+    public String getAvatar() {
+        return avatar;
     }
 
-    public String get_id() {
-        return this._id;
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public String getHash() {
+        return hash;
     }
 
-    public String getUsername() {
-        return this.username;
+    public void setHash(String hash) {
+        this.hash = hash;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public BeatSaverUserStats getStats() {
+        return stats;
+    }
+
+    public void setStats(BeatSaverUserStats stats) {
+        this.stats = stats;
+    }
+
+    public boolean isTestplay() {
+        return testplay;
+    }
+
+    public void setTestplay(boolean testplay) {
+        this.testplay = testplay;
     }
 }
