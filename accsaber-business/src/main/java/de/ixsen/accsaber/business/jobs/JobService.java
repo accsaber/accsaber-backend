@@ -17,7 +17,6 @@ import javax.annotation.PostConstruct;
 public class JobService implements HasLogger {
 
     private final PlayerService playerService;
-    private final ScoreService scoreService;
     private final SongService songService;
     private final boolean disableScoreFetching;
     private final boolean disableAvatarFetching;
@@ -32,7 +31,6 @@ public class JobService implements HasLogger {
                       @Value("${accsaber.recalculate-ap-on-startup}") boolean recalculateApOnStartup,
                       @Value("${accsaber.reload-song-covers-on-startup}") boolean reloadSongCoversOnStartup) {
         this.playerService = playerService;
-        this.scoreService = scoreService;
         this.songService = songService;
         this.disableScoreFetching = disableScoreFetching;
         this.disableAvatarFetching = disableAvatarFetching;
@@ -44,7 +42,6 @@ public class JobService implements HasLogger {
     public void onStartUpDone() {
         if (this.recalculateApOnStartup) {
             this.getLogger().info("Recalculating all AP values...");
-            this.scoreService.recalculateApForAllScores();
             this.playerService.recalculateApForAllPlayers();
         }
         if (this.reloadSongCoversOnStartup) {
