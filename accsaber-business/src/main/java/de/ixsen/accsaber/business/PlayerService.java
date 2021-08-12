@@ -118,19 +118,20 @@ public class PlayerService implements HasLogger {
     }
 
     @Transactional
-    public void loadPlayerScores() {
-        List<PlayerData> allPlayers = this.playerDataRepository.findAll();
-        Instant start = Instant.now();
-        this.getLogger().info("Loading scores for " + allPlayers.size() + " players.");
-        List<BeatMap> allRankedMaps = this.beatMapRepository.findAll();
-
-        for (PlayerData player : allPlayers) {
-            this.handlePlayer(allRankedMaps, player);
-        }
-        this.getLogger().info("Loading scores finished in {} seconds.", Duration.between(start, Instant.now()).getSeconds());
+    public List<Long> loadAllPlayerIds() {
+        return this.playerDataRepository.findAllPlayerIds();
     }
 
-    protected void handlePlayer(List<BeatMap> allRankedMaps, PlayerData player) {
+    @Transactional
+    public void handlePlayer(List<BeatMap> allRankedMaps, Long playerId) {
+        Optional<PlayerData> optPlayer = this.playerDataRepository.findById(playerId);
+        if (optPlayer.isEmpty()) {
+            this.getLogger().warn("Previously loaded player with id [{}] was not found in the databse", playerId);
+            return;
+        }
+        PlayerData player = optPlayer.get();
+        Hibernate.initialize(player.getScores());
+
         Optional<ScoreSaberPlayerDto> optPlayerData = this.getScoreSaberPlayerData(player.getPlayerId());
         if (optPlayerData.isEmpty()) {
             this.getLogger().error("Couldn't fetch player with id {}, skipping", player.getPlayerId());

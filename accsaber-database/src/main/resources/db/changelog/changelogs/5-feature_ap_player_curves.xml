@@ -85,12 +85,8 @@
       begin
         update score_data sd, (select leaderboard_id, max_score, complexity from beat_map) map
         set sd.is_ranked_score = true,
-            sd.accuracy        = (sd.score / map.max_score)
-        where sd.map_leaderboard_id = map.leaderboard_id
-          and sd.player_id = id_of_player;
-
-        update score_data sd, (select leaderboard_id, max_score, complexity from beat_map) map
-        set sd.ap = calc_ap(sd.accuracy * 100.0, complexity)
+            sd.accuracy        = (sd.score / map.max_score),
+            sd.ap = calc_ap((sd.score / map.max_score) * 100.0, complexity)
         where sd.map_leaderboard_id = map.leaderboard_id
           and sd.player_id = id_of_player;
 
@@ -155,11 +151,8 @@
       begin
         update score_data sd, (select leaderboard_id, max_score, complexity from beat_map) map
         set sd.is_ranked_score = true,
-            sd.accuracy        = (sd.score / map.max_score)
-        where sd.map_leaderboard_id = map.leaderboard_id;
-
-        update score_data sd, (select leaderboard_id, max_score, complexity from beat_map) map
-        set sd.ap = calc_ap(sd.accuracy * 100.0, map.complexity)
+            sd.accuracy        = (sd.score / map.max_score),
+            sd.ap = calc_ap((sd.score / map.max_score) * 100.0, map.complexity)
         where sd.map_leaderboard_id = map.leaderboard_id;
 
         call recalc_all_weighted_ap();
