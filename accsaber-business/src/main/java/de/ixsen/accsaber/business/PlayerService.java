@@ -143,7 +143,7 @@ public class PlayerService implements HasLogger {
             this.loadAvatar(player.getPlayerId(), playerData.getPlayerInfo().getAvatar());
         }
 
-        this.getLogger().trace("Loading {} scores for {}.", playerData.getScoreStats().getTotalPlayCount(), playerData.getPlayerInfo().getPlayerName());
+        this.getLogger().info("Loading {} scores for {}.", playerData.getScoreStats().getTotalPlayCount(), playerData.getPlayerInfo().getPlayerName());
         this.mappingComponent.getPlayerMapper().scoreSaberPlayerToPlayer(player, playerData.getPlayerInfo());
         int totalPlayCount = playerData.getScoreStats().getTotalPlayCount();
 

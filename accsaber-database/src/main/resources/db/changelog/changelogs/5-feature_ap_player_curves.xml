@@ -1,44 +1,18 @@
 <?xml version="1.1" encoding="UTF-8" standalone="no"?>
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
-  <changeSet author="ixsen (generated)" id="1628351571753-1">
-    <createTable tableName="configuration">
-      <column name="id" type="BIGINT">
-        <constraints nullable="false" primaryKey="true" primaryKeyName="configurationPK"/>
-      </column>
-      <column name="ap_curve_a" type="DOUBLE"/>
-      <column name="ap_curve_b" type="DOUBLE"/>
-      <column name="ap_curve_c" type="DOUBLE"/>
-      <column name="ap_curve_d" type="DOUBLE"/>
-      <column name="ap_curve_e" type="DOUBLE"/>
-      <column name="player_curve_k" type="DOUBLE"/>
-      <column name="player_curve_x1" type="DOUBLE"/>
-      <column name="player_curve_y1" type="DOUBLE"/>
-    </createTable>
-  </changeSet>
-  <changeSet author="ixsen (generated)" id="1628351571753-2">
-    <addColumn tableName="score_data">
-      <column name="weighted_ap" type="double precision"/>
-    </addColumn>
-  </changeSet>
-  <changeSet author="ixsen (generated)" id="1628351571753-3">
-    <addColumn tableName="score_data_aud">
-      <column name="weighted_ap" type="double precision"/>
-    </addColumn>
-  </changeSet>
-
-  <changeSet id="add-default-config" author="ixsen">
-    <insert tableName="configuration">
-      <column name="id" value="0"/>
-      <column name="ap_curve_a" value="1.036"/>
-      <column name="ap_curve_b" value="62"/>
-      <column name="ap_curve_c" value="10"/>
-      <column name="ap_curve_d" value="15.5"/>
-      <column name="ap_curve_e" value="10"/>
-      <column name="player_curve_k" value="0.4"/>
-      <column name="player_curve_x1" value="15"/>
-      <column name="player_curve_y1" value="0.1"/>
-    </insert>
-  </changeSet>
+  <!--  <changeSet id="add-default-config" author="ixsen">-->
+  <!--    <insert tableName="configuration">-->
+  <!--      <column name="id" value="0"/>-->
+  <!--      <column name="ap_curve_a" value="1.036"/>-->
+  <!--      <column name="ap_curve_b" value="62"/>-->
+  <!--      <column name="ap_curve_c" value="10"/>-->
+  <!--      <column name="ap_curve_d" value="15.5"/>-->
+  <!--      <column name="ap_curve_e" value="10"/>-->
+  <!--      <column name="player_curve_k" value="0.4"/>-->
+  <!--      <column name="player_curve_x1" value="15"/>-->
+  <!--      <column name="player_curve_y1" value="0.1"/>-->
+  <!--    </insert>-->
+  <!--  </changeSet>-->
 
   <changeSet author="ixsen (generated)" id="1628412651566-5">
     <createIndex indexName="IX_player_category_statsPK" tableName="player_category_stats" unique="true">
@@ -64,18 +38,21 @@
 
   <changeSet id="add-stored-routines" author="ixsen">
     <sql endDelimiter="/">
-      create function calc_weighted_ap(ap DOUBLE, number INT) RETURNS DOUBLE
+      create function calc_weighted_ap(ap DOUBLE, ranking INT, category_id LONG) RETURNS DOUBLE
       begin
-        select player_curve_y1, player_curve_x1, player_curve_k into @y1, @x1, @k from accsaber_db.configuration;
+        select player_curve_y1, player_curve_x1, player_curve_k into @y1, @x1, @k from category c where c.id = category_id;
         SET @X0 = -(ln((1 - @y1) / (@y1 * exp(@k * @x1) - 1)) / @k);
-        RETURN ap * (1 + exp(-@k * @x0)) / (1 + exp(@k * (number - @x0)));
+        RETURN ap * (1 + exp(-@k * @x0)) / (1 + exp(@k * (ranking - 1 - @x0)));
       end
       /
     </sql>
     <sql endDelimiter="/">
-      create function calc_ap(accuracy DOUBLE, complexity DOUBLE) RETURNS DOUBLE
+      create function calc_ap(accuracy DOUBLE, complexity DOUBLE, category_id LONG) RETURNS DOUBLE
       begin
-        select ap_curve_a, ap_curve_b, ap_curve_c, ap_curve_d, ap_curve_e into @a, @b,@c,@d, @e from configuration;
+        select ap_curve_a, ap_curve_b, ap_curve_c, ap_curve_d, ap_curve_e
+        into @a, @b,@c,@d, @e
+        from category c
+        where c.id = category_id;
         RETURN (pow(@a, (pow((accuracy + (complexity / @e)) / @b, @c))) - 1.0) * @d;
       end;
       /
@@ -83,10 +60,10 @@
     <sql endDelimiter="/">
       create procedure recalc_player_ap(id_of_player LONG)
       begin
-        update score_data sd, (select leaderboard_id, max_score, complexity from beat_map) map
+        update score_data sd, (select leaderboard_id, max_score, complexity, category_id from beat_map) map
         set sd.is_ranked_score = true,
             sd.accuracy        = (sd.score / map.max_score),
-            sd.ap = calc_ap((sd.score / map.max_score) * 100.0, complexity)
+            sd.ap              = calc_ap((sd.score / map.max_score) * 100.0, complexity, map.category_id)
         where sd.map_leaderboard_id = map.leaderboard_id
           and sd.player_id = id_of_player;
 
@@ -99,7 +76,7 @@
       create procedure recalc_weighted_ap_for_player(player_id LONG)
       begin
         update score_data sd, (select recalced_table.score_id,
-                                      calc_weighted_ap(recalced_table.ap, recalced_table.ranking) as weighted_ap,
+                                      calc_weighted_ap(recalced_table.ap, recalced_table.ranking, recalced_table.category_id) as weighted_ap,
                                       recalced_table.player_id,
                                       recalced_table.category_id
                                from (select *,
@@ -116,13 +93,14 @@
     <sql endDelimiter="/">
       create procedure rank_scores(leaderboard_id LONG, maxScore LONG, complexity DOUBLE)
       begin
+        select category_id into @category from beat_map bm where bm.leaderboard_id = leaderboard_id;
+
         update score_data sd
         set sd.is_ranked_score = true,
             sd.accuracy        = (sd.score / maxScore),
-            sd.ap              = calc_ap(sd.accuracy * 100.0, complexity)
+            sd.ap              = calc_ap((sd.score / maxScore) * 100.0, complexity, @category)
         where sd.map_leaderboard_id = leaderboard_id;
 
-        select category_id into @category from beat_map bm where bm.leaderboard_id = leaderboard_id;
         call recalc_weighted_ap(@category);
         call recalc_all_category_stats();
       end;
@@ -132,7 +110,7 @@
       create procedure recalc_weighted_ap(category LONG)
       begin
         update score_data sd, (select recalced_table.score_id,
-                                      calc_weighted_ap(recalced_table.ap, recalced_table.ranking) as weighted_ap,
+                                      calc_weighted_ap(recalced_table.ap, recalced_table.ranking, recalced_table.category_id) as weighted_ap,
                                       recalced_table.player_id,
                                       recalced_table.category_id
                                from (select *,
@@ -149,10 +127,10 @@
     <sql endDelimiter="/">
       create procedure recalc_all_ap()
       begin
-        update score_data sd, (select leaderboard_id, max_score, complexity from beat_map) map
+        update score_data sd, (select leaderboard_id, max_score, complexity, category_id from beat_map) map
         set sd.is_ranked_score = true,
             sd.accuracy        = (sd.score / map.max_score),
-            sd.ap = calc_ap((sd.score / map.max_score) * 100.0, map.complexity)
+            sd.ap              = calc_ap((sd.score / map.max_score) * 100.0, map.complexity, map.category_id)
         where sd.map_leaderboard_id = map.leaderboard_id;
 
         call recalc_all_weighted_ap();
@@ -164,7 +142,7 @@
       create procedure recalc_all_weighted_ap()
       begin
         update score_data sd, (select recalced_table.score_id,
-                                      calc_weighted_ap(recalced_table.ap, recalced_table.ranking) as weighted_ap,
+                                      calc_weighted_ap(recalced_table.ap, recalced_table.ranking, recalced_table.category_id) as weighted_ap,
                                       recalced_table.player_id,
                                       recalced_table.category_id
                                from (select *,
@@ -267,5 +245,53 @@
       end;
       /
     </sql>
+  </changeSet>
+
+
+  <changeSet author="ixsen (generated)" id="1628769787050-2">
+    <addColumn tableName="category">
+      <column defaultValueNumeric="1.036" name="ap_curve_a" type="double precision"/>
+    </addColumn>
+  </changeSet>
+  <changeSet author="ixsen (generated)" id="1628769787050-3">
+    <addColumn tableName="category">
+      <column defaultValueNumeric="62.0" name="ap_curve_b" type="double precision"/>
+    </addColumn>
+  </changeSet>
+  <changeSet author="ixsen (generated)" id="1628769787050-4">
+    <addColumn tableName="category">
+      <column defaultValueNumeric="10.0" name="ap_curve_c" type="double precision"/>
+    </addColumn>
+  </changeSet>
+  <changeSet author="ixsen (generated)" id="1628769787050-5">
+    <addColumn tableName="category">
+      <column defaultValueNumeric="15.5" name="ap_curve_d" type="double precision"/>
+    </addColumn>
+  </changeSet>
+  <changeSet author="ixsen (generated)" id="1628769787050-6">
+    <addColumn tableName="category">
+      <column defaultValueNumeric="10.0" name="ap_curve_e" type="double precision"/>
+    </addColumn>
+  </changeSet>
+  <changeSet author="ixsen (generated)" id="1628769787050-7">
+    <addColumn tableName="category">
+      <column defaultValueNumeric="0.4" name="player_curve_k" type="double precision"/>
+    </addColumn>
+  </changeSet>
+  <changeSet author="ixsen (generated)" id="1628769787050-8">
+    <addColumn tableName="category">
+      <column defaultValueNumeric="15.0" name="player_curve_x1" type="double precision"/>
+    </addColumn>
+  </changeSet>
+  <changeSet author="ixsen (generated)" id="1628769787050-9">
+    <addColumn tableName="category">
+      <column defaultValueNumeric="0.1" name="player_curve_y1" type="double precision"/>
+    </addColumn>
+  </changeSet>
+  <changeSet author="ixsen (generated)" id="1628769787050-10">
+    <dropUniqueConstraint constraintName="IX_player_category_statsPK" tableName="player_category_stats"/>
+  </changeSet>
+  <changeSet author="ixsen (generated)" id="1628769787050-1">
+    <dropDefaultValue columnDataType="varchar(255)" columnName="category_display_name" tableName="category"/>
   </changeSet>
 </databaseChangeLog>
