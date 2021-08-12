@@ -13,16 +13,6 @@ import java.util.List;
 public interface MapLeaderboardPlayerMapper {
     MapLeaderboardPlayerMapper INSTANCE = Mappers.getMapper(MapLeaderboardPlayerMapper.class);
 
-//    @Mapping(target = "categoryName", source = "beatMap.category.categoryName")
-//    @Mapping(target = "rank", ignore = true)
-//    @Mapping(target = "playerName", source = "player.playerName")
-//    @Mapping(target = "playerId", source = "player.playerId")
-//    @Mapping(target = "avatarUrl", source = "player.avatarUrl")
-//    @Mapping(target = "accChamp", source = "player.accChamp")
-//    MapLeaderboardPlayerDto scoreToMapLeaderboardDto(ScoreData score);
-//
-//    List<MapLeaderboardPlayerDto> scoresToMapLeaderboardDtos(List<ScoreData> score);
-
     @Mapping(target = "categoryName", source = "beatMap.category.categoryName")
     @Mapping(target = "rank", source = "ranking")
     @Mapping(target = "playerName", source = "player.playerName")

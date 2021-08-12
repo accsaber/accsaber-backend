@@ -1,19 +1,5 @@
 <?xml version="1.1" encoding="UTF-8" standalone="no"?>
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
-  <!--  <changeSet id="add-default-config" author="ixsen">-->
-  <!--    <insert tableName="configuration">-->
-  <!--      <column name="id" value="0"/>-->
-  <!--      <column name="ap_curve_a" value="1.036"/>-->
-  <!--      <column name="ap_curve_b" value="62"/>-->
-  <!--      <column name="ap_curve_c" value="10"/>-->
-  <!--      <column name="ap_curve_d" value="15.5"/>-->
-  <!--      <column name="ap_curve_e" value="10"/>-->
-  <!--      <column name="player_curve_k" value="0.4"/>-->
-  <!--      <column name="player_curve_x1" value="15"/>-->
-  <!--      <column name="player_curve_y1" value="0.1"/>-->
-  <!--    </insert>-->
-  <!--  </changeSet>-->
-
   <changeSet author="ixsen (generated)" id="1628412651566-5">
     <createIndex indexName="IX_player_category_statsPK" tableName="player_category_stats" unique="true">
       <column name="category_id"/>
