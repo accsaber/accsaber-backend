@@ -25,4 +25,7 @@ public interface PlayerDataRepository extends JpaRepository<PlayerData, Long> {
 
     @Procedure(procedureName = "recalc_player_ap")
     void recalcPlayerAp(Long playerId);
+
+    @Procedure(procedureName = "take_ranking_snapshot")
+    void takeRankSnapshot();
 }

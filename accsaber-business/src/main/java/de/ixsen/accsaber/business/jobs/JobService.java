@@ -27,6 +27,7 @@ public class JobService implements HasLogger {
     private final boolean reloadSongCoversOnStartup;
     private final BeatMapRepository beatMapRepository;
     private final SongService songService;
+    private final boolean disableRankSnapshots;
 
 
     @Autowired
@@ -35,12 +36,14 @@ public class JobService implements HasLogger {
                       BeatMapRepository beatMapRepository,
                       @Value("${accsaber.disable-score-fetching}") boolean disableScoreFetching,
                       @Value("${accsaber.disable-avatar-fetching}") boolean disableAvatarFetching,
+                      @Value("${accsaber.disable-rank-snapshots}") boolean disableRankSnapshots,
                       @Value("${accsaber.recalculate-ap-on-startup}") boolean recalculateApOnStartup,
                       @Value("${accsaber.reload-song-covers-on-startup}") boolean reloadSongCoversOnStartup) {
         this.playerService = playerService;
         this.songService = songService;
         this.beatMapRepository = beatMapRepository;
         this.disableScoreFetching = disableScoreFetching;
+        this.disableRankSnapshots = disableRankSnapshots;
         this.disableAvatarFetching = disableAvatarFetching;
         this.recalculateApOnStartup = recalculateApOnStartup;
         this.reloadSongCoversOnStartup = reloadSongCoversOnStartup;
@@ -81,6 +84,18 @@ public class JobService implements HasLogger {
             this.getLogger().warn("Avatar fetching is disabled.");
         } else {
             this.playerService.loadAvatars();
+        }
+    }
+
+    /**
+     * This method calls the database procedure for taking a snapshot of the current ranks. Current practice is to call this method more than once a day so that
+     */
+    @Scheduled(fixedDelayString = "${accsaber.rank-snapshot-intervall-millis}")
+    public void takeRankingSnapshot() {
+        if (this.disableRankSnapshots) {
+            this.getLogger().warn("Rank snapshot are disabled");
+        } else {
+            this.playerService.takeRankingSnapshot();
         }
     }
 }

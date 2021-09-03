@@ -1,0 +1,146 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+
+  <changeSet author="ixsen (generated)" id="1630240356700-1">
+    <createTable tableName="player_rank_history">
+      <column name="category_id" type="BIGINT">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="player_rank_historyPK"/>
+      </column>
+      <column name="date" type="date">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="player_rank_historyPK"/>
+      </column>
+      <column name="player_id" type="BIGINT">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="player_rank_historyPK"/>
+      </column>
+      <column name="ap" type="DOUBLE">
+        <constraints nullable="false"/>
+      </column>
+      <column name="average_acc" type="DOUBLE">
+        <constraints nullable="false"/>
+      </column>
+      <column name="average_ap_per_map" type="DOUBLE">
+        <constraints nullable="false"/>
+      </column>
+      <column name="ranked_plays" type="INT">
+        <constraints nullable="false"/>
+      </column>
+      <column name="ranking" type="INT">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+  </changeSet>
+  <changeSet author="ixsen (generated)" id="1630240356700-2">
+    <createTable tableName="score_data_history">
+      <column autoIncrement="true" name="id" type="BIGINT">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="score_data_historyPK"/>
+      </column>
+      <column name="accuracy" type="DOUBLE"/>
+      <column name="ap" type="DOUBLE"/>
+      <column name="map_leaderboard_id" type="BIGINT"/>
+      <column name="score" type="INT">
+        <constraints nullable="false"/>
+      </column>
+      <column name="score_id" type="BIGINT"/>
+      <column name="time_set" type="datetime"/>
+      <column name="unmodifified_score" type="INT">
+        <constraints nullable="false"/>
+      </column>
+      <column name="weighted_ap" type="DOUBLE"/>
+      <column name="player_id" type="BIGINT"/>
+    </createTable>
+  </changeSet>
+  <changeSet author="ixsen (generated)" id="1630240356700-3">
+    <addForeignKeyConstraint baseColumnNames="player_id" baseTableName="score_data_history" constraintName="FKn7kwygdx605mo3yj73echol38" deferrable="false" initiallyDeferred="false" referencedColumnNames="player_id" referencedTableName="player_data" validate="true"/>
+  </changeSet>
+  <changeSet author="ixsen (generated)" id="1630240356700-4">
+    <dropTable tableName="hibernate_sequences"/>
+  </changeSet>
+  <changeSet id="1630230551527-5" author="ixsen">
+    <dropForeignKeyConstraint baseTableName="beat_map" constraintName="FKexdwqby34l70m8krf62i02n3d"/>
+    <dropForeignKeyConstraint baseTableName="player_category_stats" constraintName="FKrkyq65r7e9xpgrdomb9w86nkx"/>
+    <addAutoIncrement tableName="category" columnName="id" columnDataType="BIGINT"/>
+    <addForeignKeyConstraint baseColumnNames="category_id" baseTableName="beat_map" constraintName="FKexdwqby34l70m8krf62i02n3d" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="category" validate="true"/>
+    <addForeignKeyConstraint baseColumnNames="category_id" baseTableName="player_category_stats" constraintName="FKrkyq65r7e9xpgrdomb9w86nkx" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="category" validate="true"/>
+  </changeSet>
+  <changeSet author="ixsen (generated)" id="1630241034686-1">
+    <addColumn tableName="player_category_stats">
+      <column name="ranking_last_week" type="integer" defaultValueNumeric="0">
+        <constraints nullable="false"/>
+      </column>
+    </addColumn>
+  </changeSet>
+
+  <changeSet id="score-history-hook-and-rank-history-snapshot-procedure" author="ixsen">
+    <sql endDelimiter="/">
+      CREATE TRIGGER save_score_history
+        BEFORE UPDATE
+        ON score_data
+        FOR EACH ROW
+      begin
+        if old.is_ranked_score = new.is_ranked_score and old.time_set != new.time_set then
+          INSERT INTO score_data_history(score_id, accuracy, ap, map_leaderboard_id, score, time_set, unmodifified_score,
+                                         weighted_ap, player_id)
+            value (OLD.score_id, OLD.accuracy, OLD.ap, OLD.map_leaderboard_id, old.score,
+                   old.time_set, old.unmodifified_score, old.weighted_ap, old.player_id);
+        end if;
+      end;
+      /
+    </sql>
+    <sql endDelimiter="/">
+      create procedure take_ranking_snapshot()
+      begin
+        insert into player_rank_history (date, player_id, ap, average_acc, average_ap_per_map,
+                                         ranked_plays, category_id, ranking)
+        select *
+        from (select current_date                                                           as date,
+                     pcs.player_id                                                          AS player_id,
+                     pcs.ap                                                                 AS ap,
+                     pcs.average_acc                                                        AS average_acc,
+                     pcs.ap / pcs.ranked_plays                                              AS average_ap_per_map,
+                     pcs.ranked_plays                                                       AS ranked_plays,
+                     pcs.category_id                                                        AS category_id,
+                     row_number() over ( partition by pcs.category_id order by pcs.ap desc) AS ranking
+              from (accsaber_db.player_category_stats pcs
+                     join accsaber_db.player_data pd on (pcs.player_id = pd.player_id))
+              where pcs.ranked_plays &lt;&gt; 0) as cur_standings
+        on duplicate key
+          update ap                 = cur_standings.ap,
+                 average_acc=cur_standings.average_acc,
+                 ranked_plays=cur_standings.ranked_plays,
+                 average_ap_per_map = cur_standings.average_ap_per_map,
+                 ranking            = cur_standings.ranking;
+
+        insert into player_rank_history (date, player_id, ap, average_acc, average_ap_per_map,
+                                         ranked_plays, category_id, ranking)
+        select *
+        from (select current_date              as date,
+                     oacp.player_id             AS player_id,
+                     oacp.ap                    AS ap,
+                     oacp.average_acc           AS average_acc,
+                     oacp.ap / oacp.ranked_plays AS average_ap_per_map,
+                     oacp.ranked_plays          AS ranked_plays,
+                     -1                        as category_id,
+                     oacp.ranking               as ranking
+              from (overall_acc_saber_player oacp
+                     join player_data pd on (oacp.player_id = pd.player_id))) as cur_standings
+        on duplicate key
+          update ap                 = cur_standings.ap,
+                 average_acc=cur_standings.average_acc,
+                 ranked_plays=cur_standings.ranked_plays,
+                 average_ap_per_map = cur_standings.average_ap_per_map,
+                 ranking            = cur_standings.ranking;
+
+
+        update player_category_stats category_stats,
+          (select prh.ranking as ranking_delta, prh.player_id, prh.category_id
+           from player_rank_history prh
+           where prh.date = current_date - 7) flan
+        set category_stats.ranking_last_week = flan.ranking_delta
+        where category_stats.player_id = flan.player_id
+          and category_stats.category_id = flan.category_id;
+
+      end;
+      /
+    </sql>
+  </changeSet>
+</databaseChangeLog>
