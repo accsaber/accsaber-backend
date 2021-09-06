@@ -32,6 +32,7 @@ public class PlayerCategoryStats {
     @ColumnDefault("0")
     private int rankedPlays;
 
+    @ColumnDefault("0")
     private int rankingLastWeek;
 
     public PlayerData getPlayer() {

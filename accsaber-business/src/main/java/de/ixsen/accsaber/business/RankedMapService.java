@@ -128,38 +128,9 @@ public class RankedMapService {
         this.scoreDataRepository.saveAll(unrankedScores);
     }
 
-    public byte[] getRankedMapsJson() throws JsonProcessingException {
-        Playlist playlist = new Playlist();
-        playlist.setPlaylistTitle("AccSaber Ranked Maps");
-        playlist.setPlaylistAuthor("AccSaber");
-        playlist.setImage(this.getPlaylistImage());
 
-        for (BeatMap beatMap : this.getRankedMaps()) {
-            PlaylistSong playlistSong = playlist.getSongs().stream().filter(s -> s.getHash().equals(beatMap.getSong().getSongHash())).findFirst().orElseGet(() -> {
-                PlaylistSong newPlaylistSong = new PlaylistSong();
-                newPlaylistSong.setHash(beatMap.getSong().getSongHash());
-                newPlaylistSong.setSongName(beatMap.getSong().getSongName());
 
-                playlist.getSongs().add(newPlaylistSong);
-                return newPlaylistSong;
-            });
-            PlaylistSongDifficulty playlistSongDifficulty = new PlaylistSongDifficulty();
-            playlistSongDifficulty.setName(beatMap.getDifficulty());
-            playlistSongDifficulty.setCharacteristic("Standard");
-            playlistSong.getDifficulties().add(playlistSongDifficulty);
-        }
-        ObjectMapper mapper = new ObjectMapper();
-        return mapper.writeValueAsBytes(playlist);
-    }
 
-    private String getPlaylistImage() {
-        ClassPathResource resource = new ClassPathResource("logo-data");
-        try (Reader reader = new InputStreamReader(resource.getInputStream(), UTF_8)) {
-            return FileCopyUtils.copyToString(reader);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e); // TODO
-        }
-    }
 
     // There has to be a better way to do this
     private int calculateMaxScore(int noteCount) {

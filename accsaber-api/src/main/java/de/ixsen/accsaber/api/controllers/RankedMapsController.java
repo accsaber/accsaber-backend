@@ -6,6 +6,7 @@ import de.ixsen.accsaber.api.dtos.RankedMapDto;
 import de.ixsen.accsaber.api.dtos.RankedMapsStatisticsDto;
 import de.ixsen.accsaber.api.mapping.MappingComponent;
 import de.ixsen.accsaber.business.PlayerService;
+import de.ixsen.accsaber.business.PlaylistService;
 import de.ixsen.accsaber.business.RankedMapService;
 import de.ixsen.accsaber.database.model.maps.BeatMap;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,11 +31,16 @@ public class RankedMapsController {
     private final RankedMapService rankedMapService;
     private final PlayerService playerService;
     private final MappingComponent mappingComponent;
+    private final PlaylistService playlistService;
 
     @Autowired
-    public RankedMapsController(RankedMapService rankedMapService, PlayerService playerService, MappingComponent mappingComponent) {
+    public RankedMapsController(RankedMapService rankedMapService,
+                                PlayerService playerService,
+                                PlaylistService playlistService,
+                                MappingComponent mappingComponent) {
         this.rankedMapService = rankedMapService;
         this.playerService = playerService;
+        this.playlistService = playlistService;
 
         this.mappingComponent = mappingComponent;
     }
@@ -86,7 +92,7 @@ public class RankedMapsController {
 
     @GetMapping("/playlist")
     public ResponseEntity<byte[]> getRankedMapPlaylist() throws JsonProcessingException {
-        byte[] playlistJson = this.rankedMapService.getRankedMapsJson();
+        byte[] playlistJson = this.playlistService.getPlaylist("all");
         return ResponseEntity
                 .ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=accsaber-rankedmaps.json")

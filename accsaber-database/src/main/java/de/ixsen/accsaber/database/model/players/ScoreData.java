@@ -46,6 +46,8 @@ public class ScoreData {
     @ColumnDefault("false")
     private boolean isRankedScore;
 
+    private String mods;
+
     public Long getScoreId() {
         return this.scoreId;
     }
@@ -142,5 +144,11 @@ public class ScoreData {
         this.weightedAp = weightedAp;
     }
 
+    public String getMods() {
+        return this.mods;
+    }
 
+    public void setMods(String mods) {
+        this.mods = mods;
+    }
 }
