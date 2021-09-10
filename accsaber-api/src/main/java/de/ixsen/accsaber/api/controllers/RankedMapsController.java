@@ -45,9 +45,15 @@ public class RankedMapsController {
         this.mappingComponent = mappingComponent;
     }
 
+    // FIXME The recognition should actually try to evaluate if the hash is a valid hash
     @PostMapping
-    public ResponseEntity<?> addNewRankedMap(@RequestBody CreateRankedMapDto rankedMapDto) {
-        this.rankedMapService.addNewRankedMap(rankedMapDto.getSongHash(), rankedMapDto.getLeaderboardId(), rankedMapDto.getDifficulty(), rankedMapDto.getComplexity(), rankedMapDto.getCategoryName());
+    public ResponseEntity<?> addNewRankedMapByKey(@RequestBody CreateRankedMapDto rankedMapDto) {
+        if (rankedMapDto.getId().length() > 10) {
+            this.rankedMapService.addNewRankedMapByHash(rankedMapDto.getId(), rankedMapDto.getDifficulty(), rankedMapDto.getComplexity(), rankedMapDto.getCategoryName());
+        } else {
+            this.rankedMapService.addNewRankedMapByKey(rankedMapDto.getId(), rankedMapDto.getDifficulty(), rankedMapDto.getComplexity(), rankedMapDto.getCategoryName());
+
+        }
         return ResponseEntity.noContent().build();
     }
 

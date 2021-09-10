@@ -1,5 +1,6 @@
 package de.ixsen.accsaber.integration.connector;
 
+import de.ixsen.accsaber.integration.model.beatsaver.BeatSaverScoreInfo;
 import de.ixsen.accsaber.integration.model.beatsaver.BeatSaverSongInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,7 +13,7 @@ import reactor.util.function.Tuple2;
 public class BeatSaverConnector {
 
     public static final String URL = "https://api.beatsaver.com";
-    public static final  Logger logger = LoggerFactory.getLogger(BeatSaverConnector.class);
+    public static final Logger logger = LoggerFactory.getLogger(BeatSaverConnector.class);
     private final WebClient webClient;
 
 
@@ -43,4 +44,16 @@ public class BeatSaverConnector {
                 .block();
     }
 
+    public long getScoreSaberId(String hash, int diff) {
+
+        String requestUrl = String.format("https://beatsaver.com/api/scores/%s/1?difficulty=%d&gameMode=0", hash, diff);
+
+        return this.webClient.get().uri(requestUrl)
+                .exchangeToMono(clientResponse -> clientResponse.bodyToMono(BeatSaverScoreInfo.class))
+                .elapsed()  // map the stream's time into our streams data
+                .doOnNext(tuple -> logger.trace("Getting BeatSaver info took {}ms", tuple.getT1()))
+                .map(Tuple2::getT2)
+                .map(BeatSaverScoreInfo::getUid)
+                .block();
+    }
 }
