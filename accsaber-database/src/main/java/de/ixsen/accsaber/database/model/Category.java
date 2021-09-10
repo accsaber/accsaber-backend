@@ -1,10 +1,12 @@
 package de.ixsen.accsaber.database.model;
 
-import net.bytebuddy.implementation.bind.annotation.Default;
 import org.hibernate.annotations.ColumnDefault;
+import org.springframework.data.annotation.CreatedDate;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.OrderBy;
+import java.time.Instant;
 
 @Entity
 public class Category extends BaseEntity {
@@ -14,6 +16,11 @@ public class Category extends BaseEntity {
     private String description;
     private String categoryDisplayName;
     private boolean countsTowardsOverall;
+
+    @OrderBy
+    @CreatedDate
+    @Column(nullable = false, updatable = false)
+    private Instant createdDate = Instant.now();
 
     @Column(name = "player_curve_y1")
     @ColumnDefault("0.1")
@@ -146,5 +153,13 @@ public class Category extends BaseEntity {
 
     public void setApCurveE(double apCurveE) {
         this.apCurveE = apCurveE;
+    }
+
+    public Instant getCreatedDate() {
+        return this.createdDate;
+    }
+
+    public void setCreatedDate(Instant createdDate) {
+        this.createdDate = createdDate;
     }
 }

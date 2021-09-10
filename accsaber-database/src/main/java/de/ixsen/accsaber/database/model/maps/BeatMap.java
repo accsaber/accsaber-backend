@@ -1,11 +1,15 @@
 package de.ixsen.accsaber.database.model.maps;
 
 import de.ixsen.accsaber.database.model.Category;
+import org.springframework.data.annotation.CreatedDate;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OrderBy;
+import java.time.Instant;
 
 @Entity
 public class BeatMap {
@@ -28,6 +32,11 @@ public class BeatMap {
     @ManyToOne
     @JoinColumn(name = "category_id")
     private Category category;
+
+    @OrderBy
+    @CreatedDate
+    @Column(nullable = false, updatable = false)
+    private Instant dateRanked = Instant.now();
 
     public Long getLeaderboardId() {
         return this.leaderboardId;
@@ -75,5 +84,13 @@ public class BeatMap {
 
     public void setCategory(Category category) {
         this.category = category;
+    }
+
+    public Instant getDateRanked() {
+        return this.dateRanked;
+    }
+
+    public void setDateRanked(Instant dateRanked) {
+        this.dateRanked = dateRanked;
     }
 }

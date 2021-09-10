@@ -144,7 +144,7 @@
 
   <changeSet author="ixsen (generated)" id="1630855234138-2">
     <addColumn tableName="player_data">
-      <column name="join_date" type="date" defaultValueDate="current_date">
+      <column name="join_date" type="datetime" defaultValueComputed="current_timestamp">
         <constraints nullable="false"/>
       </column>
     </addColumn>
@@ -212,5 +212,19 @@
       where pcs.ranked_plays != 0 and ct.counts_towards_overall
       group by player_id) player_stats
     </createView>
+  </changeSet>
+  <changeSet author="ixsen (generated)" id="1631043265177-3">
+    <addColumn tableName="category">
+      <column name="created_date" type="datetime" defaultValueComputed="current_timestamp">
+        <constraints nullable="false"/>
+      </column>
+    </addColumn>
+  </changeSet>
+  <changeSet author="ixsen (generated)" id="1631043265177-4">
+    <addColumn tableName="beat_map">
+      <column name="date_ranked" type="datetime" defaultValueComputed="current_timestamp">
+        <constraints nullable="false"/>
+      </column>
+    </addColumn>
   </changeSet>
 </databaseChangeLog>

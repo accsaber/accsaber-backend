@@ -10,7 +10,7 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
-import java.time.LocalDate;
+import java.time.Instant;
 import java.util.List;
 import java.util.Set;
 
@@ -38,7 +38,7 @@ public class PlayerData {
 
     @CreatedDate
     @Column(nullable = false, updatable = false)
-    private LocalDate joinDate = LocalDate.now();
+    private Instant joinDate = Instant.now();
 
     public Long getPlayerId() {
         return this.playerId;
@@ -101,11 +101,11 @@ public class PlayerData {
         this.playerCategoryStats = playerCategoryStats;
     }
 
-    public LocalDate getJoinDate() {
+    public Instant getJoinDate() {
         return this.joinDate;
     }
 
-    public void setJoinDate(LocalDate joinDate) {
+    public void setJoinDate(Instant joinDate) {
         this.joinDate = joinDate;
     }
 }
