@@ -2,12 +2,15 @@ package de.ixsen.accsaber.database.model.players;
 
 import de.ixsen.accsaber.database.model.PlayerCategoryStats;
 import org.hibernate.annotations.ColumnDefault;
+import org.springframework.data.annotation.CreatedDate;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
+import java.time.Instant;
 import java.util.List;
 import java.util.Set;
 
@@ -32,6 +35,10 @@ public class PlayerData {
     private boolean isAccChamp;
 
     private String hmd;
+
+    @CreatedDate
+    @Column(nullable = false, updatable = false)
+    private Instant joinDate = Instant.now();
 
     public Long getPlayerId() {
         return this.playerId;
@@ -92,5 +99,13 @@ public class PlayerData {
 
     public void setPlayerCategoryStats(Set<PlayerCategoryStats> playerCategoryStats) {
         this.playerCategoryStats = playerCategoryStats;
+    }
+
+    public Instant getJoinDate() {
+        return this.joinDate;
+    }
+
+    public void setJoinDate(Instant joinDate) {
+        this.joinDate = joinDate;
     }
 }

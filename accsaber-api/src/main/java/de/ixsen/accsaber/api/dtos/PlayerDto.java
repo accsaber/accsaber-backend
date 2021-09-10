@@ -3,6 +3,7 @@ package de.ixsen.accsaber.api.dtos;
 public class PlayerDto {
 
     private int rank;
+    private Integer rankLastWeek;
 
     private String playerId;
 
@@ -99,5 +100,13 @@ public class PlayerDto {
 
     public void setAverageApPerMap(double averageApPerMap) {
         this.averageApPerMap = averageApPerMap;
+    }
+
+    public Integer getRankLastWeek() {
+        return this.rankLastWeek;
+    }
+
+    public void setRankLastWeek(Integer rankLastWeek) {
+        this.rankLastWeek = rankLastWeek;
     }
 }

@@ -1,7 +1,9 @@
 package de.ixsen.accsaber.database.model.players;
 
+import de.ixsen.accsaber.database.model.BaseEntity;
 import de.ixsen.accsaber.database.model.maps.BeatMap;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.Immutable;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -14,12 +16,10 @@ import javax.persistence.OrderBy;
 import java.time.Instant;
 
 @Entity
-public class ScoreData {
+@Immutable
+public class ScoreDataHistory extends BaseEntity {
 
-    @Id
     private Long scoreId;
-
-    private int rankWhenScoresSet;
 
     private int score;
 
@@ -43,25 +43,12 @@ public class ScoreData {
     @JoinColumn(name = "player_id")
     private PlayerData player;
 
-    @ColumnDefault("false")
-    private boolean isRankedScore;
-
-    private String mods;
-
     public Long getScoreId() {
         return this.scoreId;
     }
 
     public void setScoreId(Long scoreId) {
         this.scoreId = scoreId;
-    }
-
-    public int getRankWhenScoresSet() {
-        return this.rankWhenScoresSet;
-    }
-
-    public void setRankWhenScoresSet(int rankWhenScoresSet) {
-        this.rankWhenScoresSet = rankWhenScoresSet;
     }
 
     public int getScore() {
@@ -128,14 +115,6 @@ public class ScoreData {
         this.player = player;
     }
 
-    public boolean isRankedScore() {
-        return this.isRankedScore;
-    }
-
-    public void setRankedScore(boolean rankedScore) {
-        this.isRankedScore = rankedScore;
-    }
-
     public Double getWeightedAp() {
         return this.weightedAp;
     }
@@ -144,11 +123,5 @@ public class ScoreData {
         this.weightedAp = weightedAp;
     }
 
-    public String getMods() {
-        return this.mods;
-    }
 
-    public void setMods(String mods) {
-        this.mods = mods;
-    }
 }

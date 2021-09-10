@@ -16,6 +16,7 @@ public abstract class AccSaberPlayer extends WithRankAndStats {
     private String avatarUrl;
     private Boolean isAccChamp;
     private String hmd;
+    private Long rankingLastWeek;
 
     public String getPlayerId() {
         return this.playerId;
@@ -35,5 +36,9 @@ public abstract class AccSaberPlayer extends WithRankAndStats {
 
     public String getHmd() {
         return this.hmd;
+    }
+
+    public Long getRankingLastWeek() {
+        return this.rankingLastWeek;
     }
 }

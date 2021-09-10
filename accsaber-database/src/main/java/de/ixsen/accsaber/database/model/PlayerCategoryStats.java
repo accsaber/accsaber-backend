@@ -32,6 +32,9 @@ public class PlayerCategoryStats {
     @ColumnDefault("0")
     private int rankedPlays;
 
+    @ColumnDefault("0")
+    private int rankingLastWeek;
+
     public PlayerData getPlayer() {
         return this.player;
     }
@@ -70,5 +73,13 @@ public class PlayerCategoryStats {
 
     public void setRankedPlays(int rankedPlays) {
         this.rankedPlays = rankedPlays;
+    }
+
+    public int getRankingLastWeek() {
+        return this.rankingLastWeek;
+    }
+
+    public void setRankingLastWeek(int oneWeekDelta) {
+        this.rankingLastWeek = oneWeekDelta;
     }
 }

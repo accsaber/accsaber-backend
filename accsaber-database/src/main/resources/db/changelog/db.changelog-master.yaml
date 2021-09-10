@@ -9,3 +9,5 @@ databaseChangeLog:
       file: db/changelog/changelogs/4-feature_leaderboard-seperation.xml
   - include:
       file: db/changelog/changelogs/5-feature_ap_player_curves.xml
+  - include:
+      file: db/changelog/changelogs/6-feature_playerrank_score_history.xml

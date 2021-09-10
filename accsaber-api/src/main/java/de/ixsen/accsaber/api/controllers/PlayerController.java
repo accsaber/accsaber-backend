@@ -8,7 +8,9 @@ import de.ixsen.accsaber.business.PlayerService;
 import de.ixsen.accsaber.business.RankedMapService;
 import de.ixsen.accsaber.business.ScoreService;
 import de.ixsen.accsaber.database.model.players.PlayerData;
+import de.ixsen.accsaber.database.model.players.PlayerRankHistory;
 import de.ixsen.accsaber.database.model.players.ScoreData;
+import de.ixsen.accsaber.database.model.players.ScoreDataHistory;
 import de.ixsen.accsaber.database.views.AccSaberPlayer;
 import de.ixsen.accsaber.database.views.AccSaberScore;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,9 +23,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -81,11 +85,14 @@ public class PlayerController {
         PlayerData player = this.playerService.getPlayer(playerId);
         int maxScore = this.rankedMapService.getRankedMap(leaderboardId).getMaxScore();
 
-        List<ScoreData> scoreHistoryForPlayer = this.scoreService.getScoreHistoryForPlayer(player, leaderboardId);
+        List<ScoreDataHistory> scoreHistoryForPlayer = this.scoreService.getScoreHistoryForPlayer(player, leaderboardId);
+        Optional<ScoreData> currentScore = this.scoreService.getScoreByPlayerForLeaderboard(player, leaderboardId);
+
         Map<Instant, Double> map = scoreHistoryForPlayer
                 .stream()
-                .filter(score -> score.getScore() != 0)
-                .collect(Collectors.toMap(ScoreData::getTimeSet, score -> score.getScore() / (double) maxScore));
+                .collect(Collectors.toMap(ScoreDataHistory::getTimeSet, score -> score.getScore() / (double) maxScore));
+        currentScore.ifPresent(scoreData -> map.put(scoreData.getTimeSet(), scoreData.getScore() / (double) maxScore));
+
         return ResponseEntity.ok(map);
     }
 
@@ -95,6 +102,17 @@ public class PlayerController {
         ArrayList<PlayerDto> playerDtos = this.mappingComponent.getPlayerMapper().playersToPlayerDtos(accSaberPlayerEntities);
 
         return ResponseEntity.ok(playerDtos);
+    }
+
+    @GetMapping(path = "/{playerId}/recent-rank-history")
+    public ResponseEntity<Map<LocalDate, Integer>> getRecentPlayerRankHistory(@PathVariable Long playerId) {
+        List<PlayerRankHistory> recentPlayerRankHistory = this.playerService.getRecentPlayerRankHistory(playerId);
+
+        Map<LocalDate, Integer> map = recentPlayerRankHistory
+                .stream()
+                .collect(Collectors.toMap(PlayerRankHistory::getDate, PlayerRankHistory::getRanking));
+
+        return ResponseEntity.ok(map);
     }
 
 }

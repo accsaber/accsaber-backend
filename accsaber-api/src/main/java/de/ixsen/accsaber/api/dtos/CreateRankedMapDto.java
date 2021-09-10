@@ -1,26 +1,17 @@
 package de.ixsen.accsaber.api.dtos;
 
 public class CreateRankedMapDto {
-    private Long leaderboardId;
-    private String songHash;
+    private String id;
     private String difficulty;
     private double complexity;
     private String categoryName;
 
-    public Long getLeaderboardId() {
-        return this.leaderboardId;
+    public String getId() {
+        return this.id;
     }
 
-    public void setLeaderboardId(Long leaderboardId) {
-        this.leaderboardId = leaderboardId;
-    }
-
-    public String getSongHash() {
-        return this.songHash;
-    }
-
-    public void setSongHash(String songHash) {
-        this.songHash = songHash;
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getDifficulty() {

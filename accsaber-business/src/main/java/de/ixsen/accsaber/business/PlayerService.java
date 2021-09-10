@@ -7,10 +7,11 @@ import de.ixsen.accsaber.business.mapping.BusinessMappingComponent;
 import de.ixsen.accsaber.database.model.PlayerCategoryStats;
 import de.ixsen.accsaber.database.model.maps.BeatMap;
 import de.ixsen.accsaber.database.model.players.PlayerData;
+import de.ixsen.accsaber.database.model.players.PlayerRankHistory;
 import de.ixsen.accsaber.database.model.players.ScoreData;
-import de.ixsen.accsaber.database.repositories.model.BeatMapRepository;
 import de.ixsen.accsaber.database.repositories.model.CategoryRepository;
 import de.ixsen.accsaber.database.repositories.model.PlayerDataRepository;
+import de.ixsen.accsaber.database.repositories.model.PlayerRankHistoryRepository;
 import de.ixsen.accsaber.database.repositories.model.ScoreDataRepository;
 import de.ixsen.accsaber.database.repositories.view.OverallAccSaberPlayerRepository;
 import de.ixsen.accsaber.database.views.AccSaberPlayer;
@@ -23,8 +24,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -45,32 +44,29 @@ public class PlayerService implements HasLogger {
     private final ScoreSaberConnector scoreSaberConnector;
     private final BusinessMappingComponent mappingComponent;
     private final ScoreDataRepository scoreDataRepository;
-    private final BeatMapRepository beatMapRepository;
     private final String avatarFolder;
     private final CategoryRepository categoryRepository;
     private final OverallAccSaberPlayerRepository overallAccSaberPlayerRepository;
+    private final PlayerRankHistoryRepository playerRankHistoryRepository;
 
     @Autowired
     public PlayerService(PlayerDataRepository playerDataRepository,
                          OverallAccSaberPlayerRepository overallAccSaberPlayerRepository,
+                         PlayerRankHistoryRepository playerRankHistoryRepository,
                          ScoreDataRepository scoreDataRepository,
-                         BeatMapRepository beatMapRepository,
                          ScoreSaberConnector scoreSaberConnector,
                          BusinessMappingComponent mappingComponent,
                          CategoryRepository categoryRepository,
                          @Value("${accsaber.image-save-location}") String imageFolder) {
         this.playerDataRepository = playerDataRepository;
         this.overallAccSaberPlayerRepository = overallAccSaberPlayerRepository;
+        this.playerRankHistoryRepository = playerRankHistoryRepository;
         this.scoreDataRepository = scoreDataRepository;
-        this.beatMapRepository = beatMapRepository;
         this.scoreSaberConnector = scoreSaberConnector;
         this.mappingComponent = mappingComponent;
         this.categoryRepository = categoryRepository;
         this.avatarFolder = imageFolder + "/avatars";
     }
-
-    @PersistenceContext
-    EntityManager em;
 
     @Transactional
     public List<AccSaberPlayer> getAllPlayers() {
@@ -248,6 +244,16 @@ public class PlayerService implements HasLogger {
         this.getLogger().info("Loading avatars finished in {} seconds.", Duration.between(start, Instant.now()).getSeconds());
 
     }
+
+    public void takeRankingSnapshot() {
+        this.getLogger().trace("Taking snapshot of current ranks");
+        this.playerDataRepository.takeRankSnapshot();
+    }
+
+    public List<PlayerRankHistory> getRecentPlayerRankHistory(Long playerId) {
+        return this.playerRankHistoryRepository.findLastMonthForPlayer(playerId);
+    }
+
 
     /**
      * Loads the avatar of a player.

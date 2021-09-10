@@ -21,13 +21,21 @@ logging:
 accsaber:
   disable-score-fetching: true
   disable-avatar-fetching: true
+  disable-rank-snapshots: true
   recalculate-ap-on-startup: false
   reload-song-covers-on-startup: false
   score-fetch-intervall-millis: 600000
   avatar-fetch-intervall-millis: 86400000
+  rank-snapshot-intervall-millis: 21600000 # every 6 hours
   allowed-origins: # http://localhost:4200,localhost:8080,http://127.0.0.1:4200
   image-save-location: # path/to/folder
+  playlist-url: https://api.accsaber.com/playlists
 
   auth:
     secret: replacethissecretwitharealsecret
     expiration-time: 3_600_000
+
+
+
+# /etc/letsencrypt/live/accsaber.com/fullchain.pem
+#/etc/letsencrypt/live/accsaber.com/privkey.pem

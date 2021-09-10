@@ -14,6 +14,7 @@ public interface PlayerMapper {
 
     PlayerMapper INSTANCE = Mappers.getMapper(PlayerMapper.class);
 
+    @Mapping(target = "rankLastWeek", source = "rankingLastWeek")
     @Mapping(target = "rank", source = "ranking")
     PlayerDto playerToPlayerDto(AccSaberPlayer accSaberPlayer);
 
