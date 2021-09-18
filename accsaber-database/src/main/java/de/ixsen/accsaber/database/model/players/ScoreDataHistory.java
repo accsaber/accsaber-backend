@@ -2,14 +2,12 @@ package de.ixsen.accsaber.database.model.players;
 
 import de.ixsen.accsaber.database.model.BaseEntity;
 import de.ixsen.accsaber.database.model.maps.BeatMap;
-import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Immutable;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.ForeignKey;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OrderBy;
@@ -42,6 +40,8 @@ public class ScoreDataHistory extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "player_id")
     private PlayerData player;
+
+    private String mods;
 
     public Long getScoreId() {
         return this.scoreId;
@@ -123,5 +123,11 @@ public class ScoreDataHistory extends BaseEntity {
         this.weightedAp = weightedAp;
     }
 
+    public String getMods() {
+        return this.mods;
+    }
 
+    public void setMods(String mods) {
+        this.mods = mods;
+    }
 }

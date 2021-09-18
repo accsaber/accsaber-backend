@@ -122,7 +122,7 @@ public class PlayerService implements HasLogger {
     public void handlePlayer(List<BeatMap> allRankedMaps, Long playerId) {
         Optional<PlayerData> optPlayer = this.playerDataRepository.findById(playerId);
         if (optPlayer.isEmpty()) {
-            this.getLogger().warn("Previously loaded player with id [{}] was not found in the databse", playerId);
+            this.getLogger().warn("Previously loaded player with id [{}] was not found in the database", playerId);
             return;
         }
         PlayerData player = optPlayer.get();

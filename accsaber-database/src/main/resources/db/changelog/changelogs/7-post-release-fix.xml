@@ -1,0 +1,315 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+
+  <changeSet id="score-history-hook-and-rank-history-snapshot-procedure" author="ixsen">
+    <addColumn tableName="score_data_history">
+      <column name="mods" type="varchar(255)"/>
+    </addColumn>
+    <addColumn tableName="player_category_stats">
+      <column defaultValueNumeric="0.0" name="average_ap" type="double precision"/>
+    </addColumn>
+
+    <dropView viewName="category_acc_saber_player"/>
+    <createView fullDefinition="false" remarks="VIEW" viewName="category_acc_saber_player">
+      select pcs.player_id                                                          as player_id,
+             pcs.ap                                                                 as ap,
+             pd.player_name                                                         as player_name,
+             pd.avatar_url                                                          as avatar_url,
+             pcs.average_acc                                                        as average_acc,
+             pd.hmd                                                                 as hmd,
+             pd.is_acc_champ                                                        as is_acc_champ,
+             pcs.average_ap                                                         as average_ap_per_map,
+             pcs.ranked_plays                                                       as ranked_plays,
+             c.category_name                                                        as category_name,
+             pcs.ranking_last_week                                                  as ranking_last_week,
+             row_number() over (PARTITION BY pcs.category_id ORDER BY pcs.ap desc ) as ranking
+      from player_category_stats as pcs
+             join player_data pd on pcs.player_id = pd.player_id
+             join category c on c.id = pcs.category_id
+      where pcs.ranked_plays != 0
+    </createView>
+
+    <dropView viewName="overall_acc_saber_player"/>
+    <createView fullDefinition="false" remarks="VIEW" viewName="overall_acc_saber_player">
+      select *, row_number() over (order by player_stats.ap desc ) as ranking
+      from (select pcs.player_id                                                   as player_id,
+                   sum(pcs.ap)                                                     as ap,
+                   pd.player_name                                                  as player_name,
+                   pd.avatar_url                                                   as avatar_url,
+                   sum(pcs.average_acc * pcs.ranked_plays) / sum(pcs.ranked_plays) as average_acc,
+                   pd.hmd                                                          as hmd,
+                   pd.is_acc_champ                                                 as is_acc_champ,
+                   sum(pcs.average_ap * pcs.ranked_plays) / sum(pcs.ranked_plays)  as average_ap_per_map,
+                   sum(pcs.ranked_plays)                                           as ranked_plays,
+                   rh.ranking                                                      as ranking_last_week
+            from player_category_stats pcs
+                   join player_data pd on pcs.player_id = pd.player_id
+                   join category ct on pcs.category_id = ct.id
+                   left outer join player_rank_history rh on pd.player_id = rh.player_id and rh.date = date_sub(current_date, interval 7 DAY) and rh.category_id = -1
+            where pcs.ranked_plays != 0
+              and ct.counts_towards_overall
+            group by player_id) player_stats
+    </createView>
+
+    <sql endDelimiter="/">
+      DROP TRIGGER save_score_history;
+      /
+    </sql>
+    <sql endDelimiter="/">
+      CREATE TRIGGER if not exists save_score_history
+        BEFORE
+      UPDATE
+        ON score_data
+        FOR EACH ROW
+      begin
+        if
+      old.is_ranked_score = new.is_ranked_score and old.time_set != new.time_set then
+          INSERT INTO score_data_history(score_id, accuracy, ap, map_leaderboard_id, score, time_set, unmodifified_score,
+                                         weighted_ap, player_id, mods)
+            value (OLD.score_id, OLD.accuracy, OLD.ap, OLD.map_leaderboard_id, old.score,
+                   old.time_set, old.unmodifified_score, old.weighted_ap, old.player_id, old.mods);
+      end if;
+      end;
+      /
+    </sql>
+
+    <sql endDelimiter="/">
+      drop procedure take_ranking_snapshot;
+      /
+    </sql>
+    <sql endDelimiter="/">
+      create procedure take_ranking_snapshot()
+      begin
+      insert into player_rank_history (date, player_id, ap, average_acc, average_ap_per_map,
+                                       ranked_plays, category_id, ranking)
+      select *
+      from (select current_date as date,
+                     pcs.player_id                                                          AS player_id,
+                     pcs.ap                                                                 AS ap,
+                     pcs.average_acc                                                        AS average_acc,
+                     pcs.average_ap                                                         AS average_ap_per_map,
+                     pcs.ranked_plays                                                       AS ranked_plays,
+                     pcs.category_id                                                        AS category_id,
+                     row_number() over ( partition by pcs.category_id order by pcs.ap desc) AS ranking
+            from (accsaber_db.player_category_stats pcs
+              join accsaber_db.player_data pd on (pcs.player_id = pd.player_id))
+            where pcs.ranked_plays &lt;&gt; 0) as cur_standings on duplicate key
+      update ap = cur_standings.ap,
+        average_acc=cur_standings.average_acc,
+        ranked_plays=cur_standings.ranked_plays,
+        average_ap_per_map = cur_standings.average_ap_per_map,
+        ranking = cur_standings.ranking;
+
+      insert into player_rank_history (date, player_id, ap, average_acc, average_ap_per_map,
+                                       ranked_plays, category_id, ranking)
+      select *
+      from (select current_date as date,
+                     oacp.player_id              AS player_id,
+                     oacp.ap                     AS ap,
+                     oacp.average_acc            AS average_acc,
+                     oacp.average_ap_per_map     AS average_ap_per_map,
+                     oacp.ranked_plays           AS ranked_plays,
+                     -1                          as category_id,
+                     oacp.ranking                as ranking
+            from (overall_acc_saber_player oacp
+              join player_data pd on (oacp.player_id = pd.player_id))) as cur_standings on duplicate key
+      update ap = cur_standings.ap,
+        average_acc=cur_standings.average_acc,
+        ranked_plays=cur_standings.ranked_plays,
+        average_ap_per_map = cur_standings.average_ap_per_map,
+        ranking = cur_standings.ranking;
+
+
+      update player_category_stats category_stats,
+        (select prh.ranking as ranking_delta, prh.player_id, prh.category_id
+        from player_rank_history prh
+        where prh.date = date_sub(current_date, interval 7 DAY)) flan
+      set category_stats.ranking_last_week = flan.ranking_delta
+      where category_stats.player_id = flan.player_id
+        and category_stats.category_id = flan.category_id;
+
+      end;
+      /
+    </sql>
+
+    <sql endDelimiter="/">
+      drop procedure recalc_player_ap;
+      /
+    </sql>
+    <sql endDelimiter="/">
+      create procedure recalc_player_ap(id_of_player LONG)
+      begin
+      update score_data sd, (select leaderboard_id, max_score, complexity, category_id from beat_map) map
+      set sd.is_ranked_score = true,
+        sd.accuracy = (sd.score / map.max_score),
+        sd.ap = calc_ap((sd.score / map.max_score) * 100.0, complexity, map.category_id)
+      where (sd.mods is null or not (sd.mods like "%SC%" or sd.mods like "%PM%") or time_set &lt; "2021-09-13 00:00:00")
+        and sd.map_leaderboard_id = map.leaderboard_id
+        and sd.player_id = id_of_player;
+
+      call recalc_weighted_ap_for_player(id_of_player);
+      call recalc_player_category_stats(id_of_player);
+      end;
+      /
+    </sql>
+
+    <sql endDelimiter="/">
+      drop procedure rank_scores;
+      /
+    </sql>
+    <sql endDelimiter="/">
+      create procedure rank_scores(leaderboard_id LONG, maxScore LONG, complexity DOUBLE)
+      begin
+      select category_id
+      into @category
+      from beat_map bm
+      where bm.leaderboard_id = leaderboard_id;
+
+      update score_data sd
+      set sd.is_ranked_score = true,
+          sd.accuracy        = (sd.score / maxScore),
+          sd.ap              = calc_ap((sd.score / maxScore) * 100.0, complexity, @category)
+      where (sd.mods is null or not (sd.mods like "%SC%" or sd.mods like "%PM%") or time_set &lt; "2021-09-13 00:00:00")
+        and sd.map_leaderboard_id = leaderboard_id;
+
+      call recalc_weighted_ap(@category);
+      call recalc_all_category_stats();
+      end;
+      /
+    </sql>
+
+    <sql endDelimiter="/">
+      drop procedure recalc_all_ap;
+      /
+    </sql>
+    <sql endDelimiter="/">
+      create procedure recalc_all_ap()
+      begin
+      update score_data set is_ranked_score = false where is_ranked_score = true;
+      update score_data sd, (select leaderboard_id, max_score, complexity, category_id from beat_map) map
+      set sd.is_ranked_score = true,
+        sd.accuracy = (sd.score / map.max_score),
+        sd.ap = calc_ap((sd.score / map.max_score) * 100.0, map.complexity, map.category_id)
+      where (sd.mods is null or not (sd.mods like "%SC%" or sd.mods like "%PM%") or time_set &lt; "2021-09-13 00:00:00") and sd.map_leaderboard_id = map.leaderboard_id;
+
+      call recalc_all_weighted_ap();
+      call recalc_all_category_stats();
+      end;
+      /
+    </sql>
+
+    <sql endDelimiter="/">
+      drop procedure recalc_player_category_stats;
+      /
+    </sql>
+    <sql endDelimiter="/">
+      create procedure recalc_player_category_stats(player_id long)
+      begin
+      insert into player_category_stats(ap, average_acc, average_ap, ranked_plays, category_id, player_id)
+      select *
+      from (select sum(sd.weighted_ap) as ap,
+                   avg(sd.accuracy)    as average_acc,
+                   avg(sd.ap)          as average_ap,
+                   count(score_id)     as ranked_plays,
+                   bm.category_id,
+                   sd.player_id
+            from score_data sd
+                   join beat_map bm
+                        on sd.map_leaderboard_id = bm.leaderboard_id
+            where is_ranked_score
+              and sd.player_id = player_id
+            group by least(sd.player_id, bm.category_id), greatest(sd.player_id, bm.category_id)) as new_stats on duplicate key
+      update ap = new_stats.ap,
+        average_acc=new_stats.average_acc,
+        ranked_plays=new_stats.ranked_plays;
+      end;
+      /
+    </sql>
+
+    <sql endDelimiter="/">
+      drop procedure recalc_player_category_stat;
+      /
+    </sql>
+    <sql endDelimiter="/">
+      create procedure recalc_player_category_stat(player_id long, category_id long)
+      begin
+      insert into player_category_stats(ap, average_acc, average_ap, ranked_plays, category_id, player_id)
+      select *
+      from (select sum(sd.weighted_ap) as ap,
+                   avg(sd.accuracy)    as average_acc,
+                   avg(sd.ap)          as average_ap,
+                   count(score_id)     as ranked_plays,
+                   bm.category_id,
+                   sd.player_id
+            from score_data sd
+                   join beat_map bm
+                        on sd.map_leaderboard_id = bm.leaderboard_id
+            where is_ranked_score
+              and sd.player_id = player_id
+              and bm.category_id = category_id
+            group by least(sd.player_id, bm.category_id), greatest(sd.player_id, bm.category_id)) as new_stats on duplicate key
+      update ap = new_stats.ap,
+        average_acc=new_stats.average_acc,
+        ranked_plays=new_stats.ranked_plays;
+      end;
+
+      /
+    </sql>
+
+    <sql endDelimiter="/">
+      drop procedure recalc_specific_category_stats;
+      /
+    </sql>
+    <sql endDelimiter="/">
+      create procedure recalc_specific_category_stats(category_id long)
+      begin
+      insert into player_category_stats(ap, average_acc, average_ap, ranked_plays, category_id, player_id)
+      select *
+      from (select sum(sd.weighted_ap) as ap,
+                   avg(sd.accuracy)    as average_acc,
+                   avg(sd.ap)          as average_ap,
+                   count(score_id)     as ranked_plays,
+                   bm.category_id,
+                   sd.player_id
+            from score_data sd
+                   join beat_map bm
+                        on sd.map_leaderboard_id = bm.leaderboard_id
+            where is_ranked_score
+              and bm.category_id = category_id
+            group by least(sd.player_id, bm.category_id), greatest(sd.player_id, bm.category_id)) as new_stats on duplicate key
+      update ap = new_stats.ap,
+        average_acc=new_stats.average_acc,
+        ranked_plays=new_stats.ranked_plays;
+      end;
+      /
+    </sql>
+
+    <sql endDelimiter="/">
+      drop procedure recalc_all_category_stats;
+      /
+    </sql>
+    <sql endDelimiter="/">
+      create procedure recalc_all_category_stats()
+      begin
+      insert into player_category_stats(ap, average_acc, average_ap, ranked_plays, category_id, player_id)
+      select *
+      from (select sum(sd.weighted_ap) as ap,
+                   avg(sd.accuracy)    as average_acc,
+                   avg(sd.ap)          as average_ap,
+                   count(score_id)     as ranked_plays,
+                   bm.category_id,
+                   sd.player_id
+            from score_data sd
+                   join beat_map bm
+                        on sd.map_leaderboard_id = bm.leaderboard_id
+            where is_ranked_score
+            group by least(sd.player_id, bm.category_id), greatest(sd.player_id, bm.category_id)) as new_stats on duplicate key
+      update ap = new_stats.ap,
+        average_acc=new_stats.average_acc,
+        ranked_plays=new_stats.ranked_plays;
+      end;
+      /
+    </sql>
+
+  </changeSet>
+</databaseChangeLog>
