@@ -95,13 +95,8 @@ public class PlayerService implements HasLogger {
         this.playerDataRepository.save(player);
     }
 
-    public AccSaberPlayer getRankedPlayer(String playerId) {
-        Optional<AccSaberPlayer> player = this.overallAccSaberPlayerRepository.findPlayerByPlayerId(playerId);
-        if (player.isEmpty()) {
-            throw new AccsaberOperationException(ExceptionType.PLAYER_NOT_FOUND, "Player with ID " + playerId + " does not exist.");
-        }
-
-        return player.get();
+    public Optional<AccSaberPlayer> getRankedPlayer(long playerId) {
+        return this.overallAccSaberPlayerRepository.findPlayerByPlayerId(playerId);
     }
 
     public PlayerData getPlayer(Long playerId) {
