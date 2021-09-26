@@ -8,8 +8,8 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface OverallAccSaberPlayerRepository extends ReadOnlyRepository<OverallAccSaberPlayer, String, AccSaberPlayer> {
+public interface OverallAccSaberPlayerRepository extends ReadOnlyRepository<OverallAccSaberPlayer, Long, AccSaberPlayer> {
 
-    Optional<AccSaberPlayer> findPlayerByPlayerId(String playerId);
+    Optional<AccSaberPlayer> findPlayerByPlayerId(Long playerId);
 
 }

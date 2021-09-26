@@ -30,6 +30,9 @@ public class PlayerCategoryStats {
     private Double ap;
 
     @ColumnDefault("0")
+    private Double averageAp;
+
+    @ColumnDefault("0")
     private int rankedPlays;
 
     @ColumnDefault("0")
@@ -81,5 +84,13 @@ public class PlayerCategoryStats {
 
     public void setRankingLastWeek(int oneWeekDelta) {
         this.rankingLastWeek = oneWeekDelta;
+    }
+
+    public Double getAverageAp() {
+        return this.averageAp;
+    }
+
+    public void setAverageAp(Double averageAp) {
+        this.averageAp = averageAp;
     }
 }

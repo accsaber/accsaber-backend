@@ -64,9 +64,15 @@ public class PlayerController {
     }
 
     @GetMapping(path = "/{playerId}")
-    public ResponseEntity<PlayerDto> getPlayerInfo(@PathVariable String playerId) {
-        AccSaberPlayer accSaberPlayer = this.playerService.getRankedPlayer(playerId);
-        PlayerDto playerDto = this.mappingComponent.getPlayerMapper().playerToPlayerDto(accSaberPlayer);
+    public ResponseEntity<PlayerDto> getPlayerInfo(@PathVariable long playerId) {
+        Optional<AccSaberPlayer> accSaberPlayer = this.playerService.getRankedPlayer(playerId);
+        PlayerDto playerDto;
+        if (accSaberPlayer.isEmpty()) {
+            PlayerData player = this.playerService.getPlayer(playerId);
+            playerDto = this.mappingComponent.getPlayerMapper().rawPlayerToDto(player);
+        } else {
+            playerDto = this.mappingComponent.getPlayerMapper().playerToPlayerDto(accSaberPlayer.get());
+        }
 
         return ResponseEntity.ok(playerDto);
     }

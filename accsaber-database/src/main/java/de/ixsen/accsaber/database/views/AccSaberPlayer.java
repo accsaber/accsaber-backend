@@ -11,14 +11,14 @@ import javax.persistence.MappedSuperclass;
 public abstract class AccSaberPlayer extends WithRankAndStats {
 
     @Id
-    private String playerId;
+    private Long playerId;
     private String playerName;
     private String avatarUrl;
     private Boolean isAccChamp;
     private String hmd;
     private Long rankingLastWeek;
 
-    public String getPlayerId() {
+    public Long getPlayerId() {
         return this.playerId;
     }
 

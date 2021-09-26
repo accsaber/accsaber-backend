@@ -29,7 +29,7 @@ accsaber:
   rank-snapshot-intervall-millis: 21600000 # every 6 hours
   allowed-origins: # http://localhost:4200,localhost:8080,http://127.0.0.1:4200
   image-save-location: # path/to/folder
-  playlist-url: https://api.accsaber.com/playlists
+  playlist-url: https://api.accsaber.com/playlists/
 
   auth:
     secret: replacethissecretwitharealsecret

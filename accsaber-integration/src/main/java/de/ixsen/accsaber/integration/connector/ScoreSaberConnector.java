@@ -86,14 +86,6 @@ public class ScoreSaberConnector {
                 .block();
     }
 
-    public byte[] loadCover(String hash) {
-        return this.webClient.get().uri(URL + "/api/static/covers/" + hash.toUpperCase() + ".png")
-                .accept(MediaType.IMAGE_JPEG)
-                .retrieve()
-                .bodyToMono(byte[].class)
-                .block();
-    }
-
     private void handleConnectionLimit() throws InterruptedException {
         this.recentRequests.removeAll(this.recentRequests.stream().filter(instant -> instant.isBefore(Instant.now().minusSeconds(60))).collect(Collectors.toList()));
         if (this.recentRequests.size() > 70 || (this.pauseInstant.isAfter(Instant.now().minusSeconds(30)))) {
