@@ -5,6 +5,7 @@ import de.ixsen.accsaber.integration.model.beatsaver.BeatSaverSongInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.util.function.Tuple2;
@@ -54,6 +55,14 @@ public class BeatSaverConnector {
                 .doOnNext(tuple -> logger.trace("Getting BeatSaver info took {}ms", tuple.getT1()))
                 .map(Tuple2::getT2)
                 .map(BeatSaverScoreInfo::getUid)
+                .block();
+    }
+
+    public byte[] loadCover(String hash) {
+        return this.webClient.get().uri("https://cdn.beatsaver.com/" + hash.toLowerCase() + ".jpg")
+                .accept(MediaType.IMAGE_JPEG)
+                .retrieve()
+                .bodyToMono(byte[].class)
                 .block();
     }
 }

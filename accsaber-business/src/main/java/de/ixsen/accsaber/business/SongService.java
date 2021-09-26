@@ -1,15 +1,12 @@
 package de.ixsen.accsaber.business;
 
-import de.ixsen.accsaber.business.exceptions.ExceptionType;
 import de.ixsen.accsaber.database.model.maps.Song;
 import de.ixsen.accsaber.database.repositories.model.SongRepository;
-import de.ixsen.accsaber.integration.connector.ScoreSaberConnector;
+import de.ixsen.accsaber.integration.connector.BeatSaverConnector;
 import de.ixsen.accsaber.integration.model.beatsaver.BeatSaverSongInfo;
 import de.ixsen.accsaber.integration.model.beatsaver.BeatSaverVersion;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import de.ixsen.accsaber.business.exceptions.AccsaberOperationException;
-import de.ixsen.accsaber.business.exceptions.ExceptionType;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -23,14 +20,14 @@ import java.util.Optional;
 public class SongService implements HasLogger {
 
     private final SongRepository songRepository;
-    private final ScoreSaberConnector scoreSaberConnector;
+    private final BeatSaverConnector beatSaverConnector;
 
     private final String coverFolder;
 
-    public SongService(SongRepository songRepository, ScoreSaberConnector scoreSaberConnector,
+    public SongService(SongRepository songRepository, BeatSaverConnector beatSaverConnector,
                        @Value("${accsaber.image-save-location}") String imageFolder) {
         this.songRepository = songRepository;
-        this.scoreSaberConnector = scoreSaberConnector;
+        this.beatSaverConnector = beatSaverConnector;
 
         this.coverFolder = imageFolder + "/covers";
     }
@@ -73,7 +70,7 @@ public class SongService implements HasLogger {
     }
 
     private void saveSongCover(String hash) {
-        byte[] cover = this.scoreSaberConnector.loadCover(hash);
+        byte[] cover = this.beatSaverConnector.loadCover(hash);
         try (FileOutputStream fileOutputStream = new FileOutputStream(this.coverFolder + "/" + hash.toUpperCase() + ".png")) {
             fileOutputStream.write(cover);
         } catch (IOException e) {
@@ -89,5 +86,3 @@ public class SongService implements HasLogger {
         }
     }
 }
-
-// The update includes song covers and avatars as well as a general layout change
