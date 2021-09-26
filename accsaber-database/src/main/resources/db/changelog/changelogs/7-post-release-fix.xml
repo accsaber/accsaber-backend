@@ -310,6 +310,124 @@
       end;
       /
     </sql>
+  </changeSet>
 
+  <changeSet id="fix-average-ap-not-updating" author="ixsen">
+    <sql endDelimiter="/">
+      drop procedure recalc_player_category_stats;
+      /
+    </sql>
+    <sql endDelimiter="/">
+      create procedure recalc_player_category_stats(player_id long)
+      begin
+      insert into player_category_stats(ap, average_acc, average_ap, ranked_plays, category_id, player_id)
+      select *
+      from (select sum(sd.weighted_ap) as ap,
+                   avg(sd.accuracy)    as average_acc,
+                   avg(sd.ap)          as average_ap,
+                   count(score_id)     as ranked_plays,
+                   bm.category_id,
+                   sd.player_id
+            from score_data sd
+                   join beat_map bm
+                        on sd.map_leaderboard_id = bm.leaderboard_id
+            where is_ranked_score
+              and sd.player_id = player_id
+            group by least(sd.player_id, bm.category_id), greatest(sd.player_id, bm.category_id)) as new_stats on duplicate key
+      update ap = new_stats.ap,
+        average_acc=new_stats.average_acc,
+        ranked_plays=new_stats.ranked_plays,
+        average_ap = new_stats.average_ap;
+      end;
+      /
+    </sql>
+
+    <sql endDelimiter="/">
+      drop procedure recalc_player_category_stat;
+      /
+    </sql>
+    <sql endDelimiter="/">
+      create procedure recalc_player_category_stat(player_id long, category_id long)
+      begin
+      insert into player_category_stats(ap, average_acc, average_ap, ranked_plays, category_id, player_id)
+      select *
+      from (select sum(sd.weighted_ap) as ap,
+                   avg(sd.accuracy)    as average_acc,
+                   avg(sd.ap)          as average_ap,
+                   count(score_id)     as ranked_plays,
+                   bm.category_id,
+                   sd.player_id
+            from score_data sd
+                   join beat_map bm
+                        on sd.map_leaderboard_id = bm.leaderboard_id
+            where is_ranked_score
+              and sd.player_id = player_id
+              and bm.category_id = category_id
+            group by least(sd.player_id, bm.category_id), greatest(sd.player_id, bm.category_id)) as new_stats on duplicate key
+      update ap = new_stats.ap,
+        average_acc=new_stats.average_acc,
+        ranked_plays=new_stats.ranked_plays,
+        average_ap = new_stats.average_ap;
+      end;
+
+      /
+    </sql>
+
+    <sql endDelimiter="/">
+      drop procedure recalc_specific_category_stats;
+      /
+    </sql>
+    <sql endDelimiter="/">
+      create procedure recalc_specific_category_stats(category_id long)
+      begin
+      insert into player_category_stats(ap, average_acc, average_ap, ranked_plays, category_id, player_id)
+      select *
+      from (select sum(sd.weighted_ap) as ap,
+                   avg(sd.accuracy)    as average_acc,
+                   avg(sd.ap)          as average_ap,
+                   count(score_id)     as ranked_plays,
+                   bm.category_id,
+                   sd.player_id
+            from score_data sd
+                   join beat_map bm
+                        on sd.map_leaderboard_id = bm.leaderboard_id
+            where is_ranked_score
+              and bm.category_id = category_id
+            group by least(sd.player_id, bm.category_id), greatest(sd.player_id, bm.category_id)) as new_stats on duplicate key
+      update ap = new_stats.ap,
+        average_acc=new_stats.average_acc,
+        ranked_plays=new_stats.ranked_plays,
+        average_ap = new_stats.average_ap;
+      end;
+      /
+    </sql>
+
+    <sql endDelimiter="/">
+      drop procedure recalc_all_category_stats;
+      /
+    </sql>
+    <sql endDelimiter="/">
+      create procedure recalc_all_category_stats()
+      begin
+      insert into player_category_stats(ap, average_acc, average_ap, ranked_plays, category_id, player_id)
+      select *
+      from (select sum(sd.weighted_ap) as ap,
+                   avg(sd.accuracy)    as average_acc,
+                   avg(sd.ap)          as average_ap,
+                   count(score_id)     as ranked_plays,
+                   bm.category_id,
+                   sd.player_id
+            from score_data sd
+                   join beat_map bm
+                        on sd.map_leaderboard_id = bm.leaderboard_id
+            where is_ranked_score
+            group by least(sd.player_id, bm.category_id), greatest(sd.player_id, bm.category_id)) as new_stats on duplicate key
+      update ap = new_stats.ap,
+        average_acc=new_stats.average_acc,
+        ranked_plays=new_stats.ranked_plays,
+        average_ap = new_stats.average_ap;
+      end;
+      /
+    </sql>
   </changeSet>
 </databaseChangeLog>
