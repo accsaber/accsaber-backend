@@ -1,7 +1,7 @@
 package de.ixsen.accsaber.integration.connector;
 
-import de.ixsen.accsaber.integration.model.scoresaber.ScoreSaberPlayerDto;
-import de.ixsen.accsaber.integration.model.scoresaber.ScoreSaberScoreListDto;
+import de.ixsen.accsaber.integration.model.scoresaber.player.ScoreSaberPlayerDto;
+import de.ixsen.accsaber.integration.model.scoresaber.score.ScoreSaberScoreListDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +23,8 @@ import java.util.stream.Collectors;
 @Service
 public class ScoreSaberConnector {
 
-    public static final String URL = "https://new.scoresaber.com";
+    // TODO make configurable
+    public static final String URL = "https://scoresaber.com/api";
     private final WebClient webClient;
 
     private final Set<Instant> recentRequests;
@@ -38,7 +39,7 @@ public class ScoreSaberConnector {
     public Optional<ScoreSaberPlayerDto> getPlayerData(Long playerId) throws InterruptedException {
         this.handleConnectionLimit();
 
-        String requestUrl = URL + "/api/player/" + playerId + "/full";
+        String requestUrl = String.format("%s/player/%s/full", URL, playerId);
 
         return this.webClient.get().uri(requestUrl)
                 .retrieve()
@@ -57,10 +58,11 @@ public class ScoreSaberConnector {
                 .blockOptional();
     }
 
+    // TODO make page size configurable, remember in player service during calc
     public ScoreSaberScoreListDto getPlayerScores(Long playerId, int page) throws InterruptedException {
         this.handleConnectionLimit();
 
-        String requestUrl = URL + "/api/player/" + playerId + "/scores/recent/" + page;
+        String requestUrl = String.format("%s/player/%s/scores?page=%d&sort=recent&limit=100", URL, playerId, page);
         return this.webClient.get().uri(requestUrl)
                 .retrieve()
                 .bodyToMono(ScoreSaberScoreListDto.class)
@@ -79,7 +81,7 @@ public class ScoreSaberConnector {
     }
 
     public byte[] loadAvatar(String avatarUrl) {
-        return this.webClient.get().uri(URL + avatarUrl)
+        return this.webClient.get().uri(avatarUrl)
                 .accept(MediaType.IMAGE_JPEG)
                 .retrieve()
                 .bodyToMono(byte[].class)
@@ -88,7 +90,7 @@ public class ScoreSaberConnector {
 
     private void handleConnectionLimit() throws InterruptedException {
         this.recentRequests.removeAll(this.recentRequests.stream().filter(instant -> instant.isBefore(Instant.now().minusSeconds(60))).collect(Collectors.toList()));
-        if (this.recentRequests.size() > 70 || (this.pauseInstant.isAfter(Instant.now().minusSeconds(30)))) {
+        if (this.recentRequests.size() > 390 || (this.pauseInstant.isAfter(Instant.now().minusSeconds(30)))) {
             TimeUnit.SECONDS.sleep(1);
             this.handleConnectionLimit();
             return;

@@ -94,10 +94,11 @@ public class PlayerController {
         List<ScoreDataHistory> scoreHistoryForPlayer = this.scoreService.getScoreHistoryForPlayer(player, leaderboardId);
         Optional<ScoreData> currentScore = this.scoreService.getScoreByPlayerForLeaderboard(player, leaderboardId);
 
+        // TODO fix this performance garbage
         Map<Instant, Double> map = scoreHistoryForPlayer
                 .stream()
-                .collect(Collectors.toMap(ScoreDataHistory::getTimeSet, score -> score.getScore() / (double) maxScore));
-        currentScore.ifPresent(scoreData -> map.put(scoreData.getTimeSet(), scoreData.getScore() / (double) maxScore));
+                .collect(Collectors.toMap(ScoreDataHistory::getTimeSet, score -> score.getUnmodififiedScore() / (double) maxScore));
+        currentScore.ifPresent(scoreData -> map.put(scoreData.getTimeSet(), scoreData.getUnmodififiedScore() / (double) maxScore));
 
         return ResponseEntity.ok(map);
     }
