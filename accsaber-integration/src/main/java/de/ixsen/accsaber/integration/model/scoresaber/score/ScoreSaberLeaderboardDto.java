@@ -7,7 +7,7 @@ public class ScoreSaberLeaderboardDto {
     private String songSubName;
     private String songAuthorName;
     private String levelAuthorName;
-    private int difficulty;
+    private ScoreSaberDifficulty difficulty;
     private String difficultyRaw;
     private int maxScore;
     private String coverImage;
@@ -60,11 +60,11 @@ public class ScoreSaberLeaderboardDto {
         this.levelAuthorName = levelAuthorName;
     }
 
-    public int getDifficulty() {
+    public ScoreSaberDifficulty getDifficulty() {
         return this.difficulty;
     }
 
-    public void setDifficulty(int difficulty) {
+    public void setDifficulty(ScoreSaberDifficulty difficulty) {
         this.difficulty = difficulty;
     }
 

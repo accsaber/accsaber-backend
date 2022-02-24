@@ -29,6 +29,7 @@ public class ScoreSaberConnector {
 
     private final Set<Instant> recentRequests;
     private Instant pauseInstant = Instant.MIN;
+    private static int max;
 
     @Autowired
     public ScoreSaberConnector(RestTemplateBuilder restTemplateBuilder) {
@@ -89,8 +90,14 @@ public class ScoreSaberConnector {
     }
 
     private void handleConnectionLimit() throws InterruptedException {
-        this.recentRequests.removeAll(this.recentRequests.stream().filter(instant -> instant.isBefore(Instant.now().minusSeconds(60))).collect(Collectors.toList()));
-        if (this.recentRequests.size() > 390 || (this.pauseInstant.isAfter(Instant.now().minusSeconds(30)))) {
+        this.recentRequests.stream()
+                .filter(instant -> instant.isBefore(Instant.now().minusSeconds(60))).collect(Collectors.toList())
+                .forEach(this.recentRequests::remove);
+        int currentMaxSize = this.recentRequests.size();
+        if (ScoreSaberConnector.max < currentMaxSize) {
+            ScoreSaberConnector.max = currentMaxSize;
+        }
+        if (currentMaxSize > 390 || (this.pauseInstant.isAfter(Instant.now().minusSeconds(10)))) {
             TimeUnit.SECONDS.sleep(1);
             this.handleConnectionLimit();
             return;
@@ -100,5 +107,9 @@ public class ScoreSaberConnector {
 
     private Logger getLogger() {
         return LoggerFactory.getLogger(this.getClass());
+    }
+
+    public static int getMax() {
+        return max;
     }
 }

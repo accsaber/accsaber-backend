@@ -4,6 +4,7 @@ import de.ixsen.accsaber.business.exceptions.AccsaberOperationException;
 import de.ixsen.accsaber.business.exceptions.ExceptionType;
 import de.ixsen.accsaber.business.exceptions.FetchScoreException;
 import de.ixsen.accsaber.business.mapping.BusinessMappingComponent;
+import de.ixsen.accsaber.database.model.Category;
 import de.ixsen.accsaber.database.model.PlayerCategoryStats;
 import de.ixsen.accsaber.database.model.maps.BeatMap;
 import de.ixsen.accsaber.database.model.players.PlayerData;
@@ -13,6 +14,7 @@ import de.ixsen.accsaber.database.repositories.model.CategoryRepository;
 import de.ixsen.accsaber.database.repositories.model.PlayerDataRepository;
 import de.ixsen.accsaber.database.repositories.model.PlayerRankHistoryRepository;
 import de.ixsen.accsaber.database.repositories.model.ScoreDataRepository;
+import de.ixsen.accsaber.database.repositories.view.CategoryAccSaberPlayerRepository;
 import de.ixsen.accsaber.database.repositories.view.OverallAccSaberPlayerRepository;
 import de.ixsen.accsaber.database.views.AccSaberPlayer;
 import de.ixsen.accsaber.integration.connector.ScoreSaberConnector;
@@ -48,10 +50,12 @@ public class PlayerService implements HasLogger {
     private final CategoryRepository categoryRepository;
     private final OverallAccSaberPlayerRepository overallAccSaberPlayerRepository;
     private final PlayerRankHistoryRepository playerRankHistoryRepository;
+    private final CategoryAccSaberPlayerRepository categoryAccSaberPlayerRepository;
 
     @Autowired
     public PlayerService(PlayerDataRepository playerDataRepository,
                          OverallAccSaberPlayerRepository overallAccSaberPlayerRepository,
+                         CategoryAccSaberPlayerRepository categoryAccSaberPlayerRepository,
                          PlayerRankHistoryRepository playerRankHistoryRepository,
                          ScoreDataRepository scoreDataRepository,
                          ScoreSaberConnector scoreSaberConnector,
@@ -60,6 +64,7 @@ public class PlayerService implements HasLogger {
                          @Value("${accsaber.image-save-location}") String imageFolder) {
         this.playerDataRepository = playerDataRepository;
         this.overallAccSaberPlayerRepository = overallAccSaberPlayerRepository;
+        this.categoryAccSaberPlayerRepository = categoryAccSaberPlayerRepository;
         this.playerRankHistoryRepository = playerRankHistoryRepository;
         this.scoreDataRepository = scoreDataRepository;
         this.scoreSaberConnector = scoreSaberConnector;
@@ -97,6 +102,13 @@ public class PlayerService implements HasLogger {
 
     public Optional<AccSaberPlayer> getRankedPlayer(long playerId) {
         return this.overallAccSaberPlayerRepository.findPlayerByPlayerId(playerId);
+    }
+
+    public Optional<AccSaberPlayer> getRankedPlayerForCategory(long playerId, String category) {
+        if (Objects.equals(category, "overall")) {
+            return this.getRankedPlayer(playerId);
+        }
+        return this.categoryAccSaberPlayerRepository.findPlayerByPlayerIdAndCategoryName(playerId, category);
     }
 
     public PlayerData getPlayer(Long playerId) {
@@ -150,7 +162,7 @@ public class PlayerService implements HasLogger {
             this.getLogger().trace("Loading page {} for {}.", page, playerData.getName());
 
             ScoreSaberScoreListDto scoreSaberScores = this.getScoreSaberScore(player.getPlayerId(), page);
-            for (ScoreSaberScoreBundleDto scoreSaberScoreBundleDto : scoreSaberScores) {
+            for (ScoreSaberScoreBundleDto scoreSaberScoreBundleDto : scoreSaberScores.getPlayerScores()) {
                 boolean areScoreIdsIdentical = score != null && score.getScoreId() == scoreSaberScoreBundleDto.getScore().getId();
                 if (areScoreIdsIdentical) {
                     if (Objects.equals(score.getTimeSet(), Instant.parse(scoreSaberScoreBundleDto.getScore().getTimeSet()))) {
@@ -174,7 +186,7 @@ public class PlayerService implements HasLogger {
                 this.getLogger().trace("Player {} has set a score that created a new page, while scores were loading, reloading latest page.", player.getPlayerName());
                 ScoreSaberScoreListDto scoreSaberScores = this.getScoreSaberScore(player.getPlayerId(), newMaxPage);
 
-                for (ScoreSaberScoreBundleDto scoreSaberScoreBundleDto : scoreSaberScores) {
+                for (ScoreSaberScoreBundleDto scoreSaberScoreBundleDto : scoreSaberScores.getPlayerScores()) {
                     this.handleSetScores(player, newlySetScores, scoreSaberScoreBundleDto);
                 }
             }
@@ -196,7 +208,7 @@ public class PlayerService implements HasLogger {
             return;
         }
 
-        this.getLogger().trace("Recalculating player AP after successfully loading new scores");
+        this.getLogger().trace(String.format("Recalculating player AP for %s after successfully loading new scores", player.getPlayerName()));
         this.playerDataRepository.recalcPlayerAp(player.getPlayerId());
 
         if (categoryIds.size() == 3) {
@@ -249,6 +261,10 @@ public class PlayerService implements HasLogger {
         return this.playerRankHistoryRepository.findLastMonthForPlayer(playerId);
     }
 
+    public List<PlayerRankHistory> getRecentPlayerRankHistoryForCategory(Long playerId, String categoryName) {
+        Category category = this.categoryRepository.findByCategoryName(categoryName).orElseThrow(() -> new AccsaberOperationException(ExceptionType.CATEGORY_NOT_FOUND, String.format("Category [%s] does not exist.", categoryName)));
+        return this.playerRankHistoryRepository.findLastMonthForPlayerAndCategory(playerId, category.getId());
+    }
 
     /**
      * Loads the avatar of a player.

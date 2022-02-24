@@ -5,6 +5,7 @@ import de.ixsen.accsaber.business.PlayerService;
 import de.ixsen.accsaber.business.SongService;
 import de.ixsen.accsaber.database.model.maps.BeatMap;
 import de.ixsen.accsaber.database.repositories.model.BeatMapRepository;
+import de.ixsen.accsaber.integration.connector.ScoreSaberConnector;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -15,6 +16,12 @@ import javax.annotation.PostConstruct;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 @Service
 @EnableScheduling
@@ -28,6 +35,7 @@ public class JobService implements HasLogger {
     private final BeatMapRepository beatMapRepository;
     private final SongService songService;
     private final boolean disableRankSnapshots;
+    private final int fetchThreadPool;
 
 
     @Autowired
@@ -38,7 +46,8 @@ public class JobService implements HasLogger {
                       @Value("${accsaber.disable-avatar-fetching}") boolean disableAvatarFetching,
                       @Value("${accsaber.disable-rank-snapshots}") boolean disableRankSnapshots,
                       @Value("${accsaber.recalculate-ap-on-startup}") boolean recalculateApOnStartup,
-                      @Value("${accsaber.reload-song-covers-on-startup}") boolean reloadSongCoversOnStartup) {
+                      @Value("${accsaber.reload-song-covers-on-startup}") boolean reloadSongCoversOnStartup,
+                      @Value("${accsaber.fetch-thread-pool}") int fetchThreadPool) {
         this.playerService = playerService;
         this.songService = songService;
         this.beatMapRepository = beatMapRepository;
@@ -47,6 +56,7 @@ public class JobService implements HasLogger {
         this.disableAvatarFetching = disableAvatarFetching;
         this.recalculateApOnStartup = recalculateApOnStartup;
         this.reloadSongCoversOnStartup = reloadSongCoversOnStartup;
+        this.fetchThreadPool = fetchThreadPool;
     }
 
     @PostConstruct
@@ -71,10 +81,30 @@ public class JobService implements HasLogger {
             this.getLogger().info("Loading scores for " + allPlayerIds.size() + " players.");
             List<BeatMap> allRankedMaps = this.beatMapRepository.findAll();
 
-            for (Long playerId : allPlayerIds) {
-                this.playerService.handlePlayer(allRankedMaps, playerId);
+            ExecutorService execService = Executors.newFixedThreadPool(fetchThreadPool);
+            Set<Future<?>> futures = ConcurrentHashMap.newKeySet();
+            for (int i = 0; i < allPlayerIds.size(); i++) {
+
+                int playerIdIt = i;
+
+                Future<?> future = execService.submit(() -> this.playerService.handlePlayer(allRankedMaps, allPlayerIds.get(playerIdIt)));
+                futures.add(future);
+
             }
-            this.getLogger().info("Loading scores finished in {} seconds.", Duration.between(start, Instant.now()).getSeconds());
+
+            for (Future<?> future : futures) {
+                try {
+                    future.get();
+                } catch (InterruptedException | ExecutionException e) {
+                    this.getLogger().error("Exception while waiting for player fetching", e);
+                }
+            }
+
+            long duration = Duration.between(start, Instant.now()).getSeconds();
+            long minutes = duration / 60;
+            long seconds = duration % 60;
+            this.getLogger().info("Loading scores finished in {} minutes and {} seconds.", minutes, seconds);
+            this.getLogger().info("Maximum amount of fetches per minute was {} with a thread pool of {}.", ScoreSaberConnector.getMax(), fetchThreadPool);
         }
     }
 

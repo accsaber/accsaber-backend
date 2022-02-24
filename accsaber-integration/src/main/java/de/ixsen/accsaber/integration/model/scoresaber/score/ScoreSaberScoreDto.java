@@ -4,7 +4,7 @@ public class ScoreSaberScoreDto {
     private long id;
     private int modifiedScore;
     private int baseScore;
-    private String mods;
+    private String modifiers;
     private String timeSet;
     private Hmd hmd;
 
@@ -32,12 +32,12 @@ public class ScoreSaberScoreDto {
         this.baseScore = baseScore;
     }
 
-    public String getMods() {
-        return this.mods;
+    public String getModifiers() {
+        return this.modifiers;
     }
 
-    public void setMods(String mods) {
-        this.mods = mods;
+    public void setModifiers(String modifiers) {
+        this.modifiers = modifiers;
     }
 
     public String getTimeSet() {

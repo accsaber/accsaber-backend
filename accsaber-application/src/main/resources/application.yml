@@ -5,6 +5,8 @@ spring:
     username: # acc
     password: # acc
     platform: # mariadb
+    hikari:
+      maximum-pool-size: 20
   jpa:
     database: # sql_server
     hibernate:
@@ -30,6 +32,8 @@ accsaber:
   allowed-origins: # http://localhost:4200,localhost:8080,http://127.0.0.1:4200
   image-save-location: # path/to/folder
   playlist-url: https://api.accsaber.com/playlists/
+  image-serving-url: https://cdn.accsaber.com/
+  fetch-thread-pool: 10
 
   auth:
     secret: replacethissecretwitharealsecret
