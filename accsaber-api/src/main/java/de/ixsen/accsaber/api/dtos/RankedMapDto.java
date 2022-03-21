@@ -17,6 +17,8 @@ public class RankedMapDto {
 
     private String categoryDisplayName;
 
+    private String dateRanked;
+
     public String getSongName() {
         return this.songName;
     }
@@ -95,5 +97,13 @@ public class RankedMapDto {
 
     public void setCategoryDisplayName(String categoryDisplayName) {
         this.categoryDisplayName = categoryDisplayName;
+    }
+
+    public String getDateRanked() {
+        return dateRanked;
+    }
+
+    public void setDateRanked(String dateRanked) {
+        this.dateRanked = dateRanked;
     }
 }

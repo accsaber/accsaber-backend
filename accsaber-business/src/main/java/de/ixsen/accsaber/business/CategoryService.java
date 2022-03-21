@@ -35,6 +35,23 @@ public class CategoryService {
         return this.categoryRepository.findAll();
     }
 
+    public List<Category> getAllCategoriesIncludingJointCategories() {
+        Category overall = new Category();
+        overall.setCategoryName("overall");
+        overall.setCategoryDisplayName("Overall Maps");
+        overall.setDescription("This category includes all maps from the categories counting towards the overall leaderboard.");
+
+        Category all = new Category();
+        all.setCategoryName("all");
+        all.setCategoryDisplayName("All Ranked Maps");
+        all.setDescription("This category includes all maps ranked on any category on AccSaber.");
+
+        List<Category> categories = this.categoryRepository.findAll();
+        categories.add(overall);
+        categories.add(all);
+        return categories;
+    }
+
 
     public void createNewCategory(Category newCategory) {
         if (this.categoryRepository.existsByCategoryName(newCategory.getCategoryName())) {

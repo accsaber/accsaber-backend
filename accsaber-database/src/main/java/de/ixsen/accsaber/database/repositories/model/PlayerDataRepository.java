@@ -11,7 +11,7 @@ import java.util.List;
 @Repository
 public interface PlayerDataRepository extends JpaRepository<PlayerData, Long> {
 
-    @Query("select player.playerId from PlayerData player")
+    @Query("select player.playerId from PlayerData player order by player.joinDate desc")
     List<Long> findAllPlayerIds();
 
     @Procedure(procedureName = "recalc_all_ap")

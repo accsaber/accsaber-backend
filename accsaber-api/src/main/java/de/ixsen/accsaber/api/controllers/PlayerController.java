@@ -77,6 +77,20 @@ public class PlayerController {
         return ResponseEntity.ok(playerDto);
     }
 
+    @GetMapping(path = "/{playerId}/{category}")
+    public ResponseEntity<PlayerDto> getPlayerInfoForCateogry(@PathVariable long playerId, @PathVariable String category) {
+        Optional<AccSaberPlayer> accSaberPlayer = this.playerService.getRankedPlayerForCategory(playerId, category);
+        PlayerDto playerDto;
+        if (accSaberPlayer.isEmpty()) {
+            PlayerData player = this.playerService.getPlayer(playerId);
+            playerDto = this.mappingComponent.getPlayerMapper().rawPlayerToDto(player);
+        } else {
+            playerDto = this.mappingComponent.getPlayerMapper().playerToPlayerDto(accSaberPlayer.get());
+        }
+
+        return ResponseEntity.ok(playerDto);
+    }
+
     @GetMapping(path = "/{playerId}/scores")
     public ResponseEntity<ArrayList<PlayerScoreDto>> getPlayerScores(@PathVariable Long playerId) {
         PlayerData player = this.playerService.getPlayer(playerId);
@@ -94,10 +108,11 @@ public class PlayerController {
         List<ScoreDataHistory> scoreHistoryForPlayer = this.scoreService.getScoreHistoryForPlayer(player, leaderboardId);
         Optional<ScoreData> currentScore = this.scoreService.getScoreByPlayerForLeaderboard(player, leaderboardId);
 
+        // TODO fix this performance garbage
         Map<Instant, Double> map = scoreHistoryForPlayer
                 .stream()
-                .collect(Collectors.toMap(ScoreDataHistory::getTimeSet, score -> score.getScore() / (double) maxScore));
-        currentScore.ifPresent(scoreData -> map.put(scoreData.getTimeSet(), scoreData.getScore() / (double) maxScore));
+                .collect(Collectors.toMap(ScoreDataHistory::getTimeSet, score -> score.getUnmodififiedScore() / (double) maxScore));
+        currentScore.ifPresent(scoreData -> map.put(scoreData.getTimeSet(), scoreData.getUnmodififiedScore() / (double) maxScore));
 
         return ResponseEntity.ok(map);
     }
@@ -121,4 +136,14 @@ public class PlayerController {
         return ResponseEntity.ok(map);
     }
 
+    @GetMapping(path = "/{playerId}/{category}/recent-rank-history")
+    public ResponseEntity<Map<LocalDate, Integer>> getRecentPlayerRankHistoryForCategory(@PathVariable Long playerId, @PathVariable String category) {
+        List<PlayerRankHistory> recentPlayerRankHistory = this.playerService.getRecentPlayerRankHistoryForCategory(playerId, category);
+
+        Map<LocalDate, Integer> map = recentPlayerRankHistory
+                .stream()
+                .collect(Collectors.toMap(PlayerRankHistory::getDate, PlayerRankHistory::getRanking));
+
+        return ResponseEntity.ok(map);
+    }
 }

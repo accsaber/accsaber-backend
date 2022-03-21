@@ -4,6 +4,7 @@ import de.ixsen.accsaber.business.exceptions.AccsaberOperationException;
 import de.ixsen.accsaber.business.exceptions.ExceptionType;
 import de.ixsen.accsaber.business.exceptions.FetchScoreException;
 import de.ixsen.accsaber.business.mapping.BusinessMappingComponent;
+import de.ixsen.accsaber.database.model.Category;
 import de.ixsen.accsaber.database.model.PlayerCategoryStats;
 import de.ixsen.accsaber.database.model.maps.BeatMap;
 import de.ixsen.accsaber.database.model.players.PlayerData;
@@ -13,12 +14,13 @@ import de.ixsen.accsaber.database.repositories.model.CategoryRepository;
 import de.ixsen.accsaber.database.repositories.model.PlayerDataRepository;
 import de.ixsen.accsaber.database.repositories.model.PlayerRankHistoryRepository;
 import de.ixsen.accsaber.database.repositories.model.ScoreDataRepository;
+import de.ixsen.accsaber.database.repositories.view.CategoryAccSaberPlayerRepository;
 import de.ixsen.accsaber.database.repositories.view.OverallAccSaberPlayerRepository;
 import de.ixsen.accsaber.database.views.AccSaberPlayer;
 import de.ixsen.accsaber.integration.connector.ScoreSaberConnector;
-import de.ixsen.accsaber.integration.model.scoresaber.ScoreSaberPlayerDto;
-import de.ixsen.accsaber.integration.model.scoresaber.ScoreSaberScoreDto;
-import de.ixsen.accsaber.integration.model.scoresaber.ScoreSaberScoreListDto;
+import de.ixsen.accsaber.integration.model.scoresaber.player.ScoreSaberPlayerDto;
+import de.ixsen.accsaber.integration.model.scoresaber.score.ScoreSaberScoreBundleDto;
+import de.ixsen.accsaber.integration.model.scoresaber.score.ScoreSaberScoreListDto;
 import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -48,10 +50,12 @@ public class PlayerService implements HasLogger {
     private final CategoryRepository categoryRepository;
     private final OverallAccSaberPlayerRepository overallAccSaberPlayerRepository;
     private final PlayerRankHistoryRepository playerRankHistoryRepository;
+    private final CategoryAccSaberPlayerRepository categoryAccSaberPlayerRepository;
 
     @Autowired
     public PlayerService(PlayerDataRepository playerDataRepository,
                          OverallAccSaberPlayerRepository overallAccSaberPlayerRepository,
+                         CategoryAccSaberPlayerRepository categoryAccSaberPlayerRepository,
                          PlayerRankHistoryRepository playerRankHistoryRepository,
                          ScoreDataRepository scoreDataRepository,
                          ScoreSaberConnector scoreSaberConnector,
@@ -60,6 +64,7 @@ public class PlayerService implements HasLogger {
                          @Value("${accsaber.image-save-location}") String imageFolder) {
         this.playerDataRepository = playerDataRepository;
         this.overallAccSaberPlayerRepository = overallAccSaberPlayerRepository;
+        this.categoryAccSaberPlayerRepository = categoryAccSaberPlayerRepository;
         this.playerRankHistoryRepository = playerRankHistoryRepository;
         this.scoreDataRepository = scoreDataRepository;
         this.scoreSaberConnector = scoreSaberConnector;
@@ -99,6 +104,13 @@ public class PlayerService implements HasLogger {
         return this.overallAccSaberPlayerRepository.findPlayerByPlayerId(playerId);
     }
 
+    public Optional<AccSaberPlayer> getRankedPlayerForCategory(long playerId, String category) {
+        if (Objects.equals(category, "overall")) {
+            return this.getRankedPlayer(playerId);
+        }
+        return this.categoryAccSaberPlayerRepository.findPlayerByPlayerIdAndCategoryName(playerId, category);
+    }
+
     public PlayerData getPlayer(Long playerId) {
         Optional<PlayerData> player = this.playerDataRepository.findById(playerId);
         if (player.isEmpty()) {
@@ -131,14 +143,14 @@ public class PlayerService implements HasLogger {
 
         ScoreSaberPlayerDto playerData = optPlayerData.get();
         if (player.getAvatarUrl() == null) {
-            this.loadAvatar(player.getPlayerId(), playerData.getPlayerInfo().getAvatar());
+            this.loadAvatar(player.getPlayerId(), playerData.getProfilePicture());
         }
 
-        this.getLogger().info("Loading {} scores for {}.", playerData.getScoreStats().getTotalPlayCount(), playerData.getPlayerInfo().getPlayerName());
-        this.mappingComponent.getPlayerMapper().scoreSaberPlayerToPlayer(player, playerData.getPlayerInfo());
+        this.getLogger().info("Loading {} scores for {}.", playerData.getScoreStats().getTotalPlayCount(), playerData.getName());
+        this.mappingComponent.getPlayerMapper().scoreSaberPlayerToPlayer(player, playerData);
         int totalPlayCount = playerData.getScoreStats().getTotalPlayCount();
 
-        int pageCount = (int) Math.ceil(totalPlayCount / 8.0);
+        int pageCount = (int) Math.ceil(totalPlayCount / 100.0);
         Iterator<ScoreData> scoreIterator = new ArrayList<>(player.getScores()).iterator();
         ScoreData score = null;
         if (scoreIterator.hasNext()) {
@@ -147,13 +159,13 @@ public class PlayerService implements HasLogger {
 
         List<ScoreData> newlySetScores = new ArrayList<>();
         for (int page = 1; page <= pageCount; page++) {
-            this.getLogger().trace("Loading page {} for {}.", page, playerData.getPlayerInfo().getPlayerName());
+            this.getLogger().trace("Loading page {} for {}.", page, playerData.getName());
 
-            ScoreSaberScoreListDto scoreSaberScore = this.getScoreSaberScore(player.getPlayerId(), page);
-            for (ScoreSaberScoreDto scoreSaberScoreDto : scoreSaberScore.getScores()) {
-                boolean areScoreIdsIdentical = score != null && score.getScoreId() == scoreSaberScoreDto.getScoreId();
+            ScoreSaberScoreListDto scoreSaberScores = this.getScoreSaberScore(player.getPlayerId(), page);
+            for (ScoreSaberScoreBundleDto scoreSaberScoreBundleDto : scoreSaberScores.getPlayerScores()) {
+                boolean areScoreIdsIdentical = score != null && score.getScoreId() == scoreSaberScoreBundleDto.getScore().getId();
                 if (areScoreIdsIdentical) {
-                    if (Objects.equals(score.getTimeSet(), Instant.parse(scoreSaberScoreDto.getTimeSet()))) {
+                    if (Objects.equals(score.getTimeSet(), Instant.parse(scoreSaberScoreBundleDto.getScore().getTimeSet()))) {
                         page = pageCount + 1;
                         break;
                     } else if (scoreIterator.hasNext()) {
@@ -163,19 +175,19 @@ public class PlayerService implements HasLogger {
                     }
                 }
 
-                this.handleSetScores(player, newlySetScores, scoreSaberScoreDto);
+                this.handleSetScores(player, newlySetScores, scoreSaberScoreBundleDto);
             }
         }
 
         optPlayerData = this.getScoreSaberPlayerData(player.getPlayerId());
         if (optPlayerData.isPresent()) {
-            int newMaxPage = (int) Math.ceil(playerData.getScoreStats().getTotalPlayCount() / 8.0);
+            int newMaxPage = (int) Math.ceil(playerData.getScoreStats().getTotalPlayCount() / 100.0);
             if (pageCount < newMaxPage && score == null) {
                 this.getLogger().trace("Player {} has set a score that created a new page, while scores were loading, reloading latest page.", player.getPlayerName());
-                ScoreSaberScoreListDto scoreSaberScore = this.getScoreSaberScore(player.getPlayerId(), newMaxPage);
+                ScoreSaberScoreListDto scoreSaberScores = this.getScoreSaberScore(player.getPlayerId(), newMaxPage);
 
-                for (ScoreSaberScoreDto scoreSaberScoreDto : scoreSaberScore.getScores()) {
-                    this.handleSetScores(player, newlySetScores, scoreSaberScoreDto);
+                for (ScoreSaberScoreBundleDto scoreSaberScoreBundleDto : scoreSaberScores.getPlayerScores()) {
+                    this.handleSetScores(player, newlySetScores, scoreSaberScoreBundleDto);
                 }
             }
         }
@@ -196,7 +208,7 @@ public class PlayerService implements HasLogger {
             return;
         }
 
-        this.getLogger().trace("Recalculating player AP after successfully loading new scores");
+        this.getLogger().trace(String.format("Recalculating player AP for %s after successfully loading new scores", player.getPlayerName()));
         this.playerDataRepository.recalcPlayerAp(player.getPlayerId());
 
         if (categoryIds.size() == 3) {
@@ -208,14 +220,14 @@ public class PlayerService implements HasLogger {
         }
     }
 
-    private void handleSetScores(PlayerData player, List<ScoreData> newlySetScores, ScoreSaberScoreDto scoreSaberScoreDto) {
-        Optional<ScoreData> optScore = player.getScores().stream().filter(score -> score.getScoreId() == scoreSaberScoreDto.getScoreId()).findFirst();
+    private void handleSetScores(PlayerData player, List<ScoreData> newlySetScores, ScoreSaberScoreBundleDto scoreSaberScoreBundleDto) {
+        Optional<ScoreData> optScore = player.getScores().stream().filter(score -> score.getScoreId() == scoreSaberScoreBundleDto.getScore().getId()).findFirst();
 
         ScoreData score;
         if (optScore.isPresent()) {
-            score = this.mappingComponent.getScoreMapper().scoreSaberScoreDtoToExistingScore(optScore.get(), scoreSaberScoreDto);
+            score = this.mappingComponent.getScoreMapper().scoreSaberScoreDtoToExistingScore(optScore.get(), scoreSaberScoreBundleDto);
         } else {
-            score = this.mappingComponent.getScoreMapper().scoreSaberScoreDtoToScore(scoreSaberScoreDto);
+            score = this.mappingComponent.getScoreMapper().scoreSaberScoreDtoToScore(scoreSaberScoreBundleDto);
             player.addScore(score);
         }
 
@@ -249,6 +261,10 @@ public class PlayerService implements HasLogger {
         return this.playerRankHistoryRepository.findLastMonthForPlayer(playerId);
     }
 
+    public List<PlayerRankHistory> getRecentPlayerRankHistoryForCategory(Long playerId, String categoryName) {
+        Category category = this.categoryRepository.findByCategoryName(categoryName).orElseThrow(() -> new AccsaberOperationException(ExceptionType.CATEGORY_NOT_FOUND, String.format("Category [%s] does not exist.", categoryName)));
+        return this.playerRankHistoryRepository.findLastMonthForPlayerAndCategory(playerId, category.getId());
+    }
 
     /**
      * Loads the avatar of a player.
