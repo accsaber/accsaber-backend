@@ -2,12 +2,9 @@ package de.ixsen.accsaber.integration.connector
 
 import de.ixsen.accsaber.integration.model.scoresaber.player.ScoreSaberPlayerDto
 import de.ixsen.accsaber.integration.model.scoresaber.score.ScoreSaberScoreListDto
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.UnsupportedMediaTypeException
-import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import reactor.core.publisher.Mono
 import java.time.Instant
@@ -17,10 +14,8 @@ import java.util.function.Consumer
 import java.util.stream.Collectors
 
 @Service
-class ScoreSaberConnector {
+class ScoreSaberConnector : AbstractConnector() {
 
-    private val logger: Logger = LoggerFactory.getLogger(this.javaClass)
-    private val webClient: WebClient = WebClient.create()
     private val recentRequests: MutableSet<Instant> = ConcurrentHashMap.newKeySet()
     private var pauseInstant = Instant.MIN
 
@@ -32,8 +27,7 @@ class ScoreSaberConnector {
     fun getPlayerData(playerId: Long?): ScoreSaberPlayerDto? {
         handleConnectionLimit()
         val requestUrl = String.format("%s/player/%s/full", url, playerId)
-        return webClient.get().uri(requestUrl)
-            .retrieve()
+        return getRequest(requestUrl)
             .bodyToMono(ScoreSaberPlayerDto::class.java)
             .onErrorResume(WebClientResponseException.NotFound::class.java) { notFound: WebClientResponseException.NotFound? -> Mono.empty() }
             .doOnError(WebClientResponseException.TooManyRequests::class.java) { tooManyRequests: WebClientResponseException.TooManyRequests? ->
@@ -54,8 +48,7 @@ class ScoreSaberConnector {
     fun getPlayerScores(playerId: Long?, page: Int): ScoreSaberScoreListDto? {
         handleConnectionLimit()
         val requestUrl = String.format("%s/player/%s/scores?page=%d&sort=recent&limit=100", url, playerId, page)
-        return webClient.get().uri(requestUrl)
-            .retrieve()
+        return getRequest(requestUrl)
             .bodyToMono(ScoreSaberScoreListDto::class.java)
             .onErrorResume(WebClientResponseException.NotFound::class.java) { notFound: WebClientResponseException.NotFound? -> Mono.empty() }
             .doOnError(WebClientResponseException.TooManyRequests::class.java) { tooManyRequests: WebClientResponseException.TooManyRequests? ->
@@ -72,9 +65,7 @@ class ScoreSaberConnector {
     }
 
     fun loadAvatar(avatarUrl: String): ByteArray? {
-        return webClient.get().uri(avatarUrl)
-            .accept(MediaType.IMAGE_JPEG)
-            .retrieve()
+        return getRequest(avatarUrl, MediaType.IMAGE_JPEG)
             .bodyToMono(ByteArray::class.java)
             .block()
     }

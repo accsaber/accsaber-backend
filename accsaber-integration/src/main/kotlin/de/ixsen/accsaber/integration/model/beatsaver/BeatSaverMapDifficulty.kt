@@ -1,5 +1,8 @@
 package de.ixsen.accsaber.integration.model.beatsaver
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class BeatSaverMapDifficulty(
     var bombs: Int? = null,
     var characteristic: String? = null,

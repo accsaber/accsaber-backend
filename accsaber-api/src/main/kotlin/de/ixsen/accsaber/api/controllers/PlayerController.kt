@@ -80,7 +80,7 @@ class PlayerController @Autowired constructor(
 
         // TODO fix this performance garbage
         val map = mutableMapOf<Instant, Double>()
-        scoreHistoryForPlayer.associateTo(map) { it.timeSet to it.unmodififiedScore.toDouble() }
+        scoreHistoryForPlayer.associateTo(map) { it.timeSet to it.unmodififiedScore.toDouble() / maxScore.toDouble() }
         currentScore.ifPresent { scoreData: ScoreData -> map[scoreData.timeSet] = scoreData.unmodififiedScore / maxScore.toDouble() }
         return ResponseEntity.ok(map)
     }

@@ -27,10 +27,10 @@ class RankedMapsController @Autowired constructor(
     // FIXME The recognition should actually try to evaluate if the hash is a valid hash
     @PostMapping
     fun addNewRankedMapByKey(@RequestBody rankedMapDto: CreateRankedMapDto): ResponseEntity<*> {
-        if (rankedMapDto.id.length > 10) {
-            rankedMapService.addNewRankedMapByHash(rankedMapDto.id, rankedMapDto.difficulty, rankedMapDto.complexity, rankedMapDto.categoryName)
+        if (rankedMapDto.id!!.length > 10) {
+            rankedMapService.addNewRankedMapByHash(rankedMapDto.id, rankedMapDto.difficulty!!, rankedMapDto.complexity!!, rankedMapDto.categoryName!!)
         } else {
-            rankedMapService.addNewRankedMapByKey(rankedMapDto.id, rankedMapDto.difficulty, rankedMapDto.complexity, rankedMapDto.categoryName)
+            rankedMapService.addNewRankedMapByKey(rankedMapDto.id, rankedMapDto.difficulty!!, rankedMapDto.complexity!!, rankedMapDto.categoryName!!)
         }
         return ResponseEntity.noContent().build<Any>()
     }
