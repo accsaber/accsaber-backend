@@ -1,12 +1,3 @@
-TODO for going forward:
-- Update dependncies
-- Clean up all code
-- Add caching to slow functions
-- Try to fix all // TODOs and // FIXMEs
-- Pull db dump from prod
-- Add pagination
-
-
 # AccSaber Backend
 
 ## Requirements
