@@ -29,7 +29,7 @@
     <maven.compiler.source>11</maven.compiler.source>
     <maven.compiler.target>11</maven.compiler.target>
 
-    <liquibase.version>4.12.0</liquibase.version>
+    <liquibase.version>4.8.0</liquibase.version>
 
     <org.mapstruct.version>1.5.2.Final</org.mapstruct.version>
     <java-jwt.version>4.0.0</java-jwt.version>
