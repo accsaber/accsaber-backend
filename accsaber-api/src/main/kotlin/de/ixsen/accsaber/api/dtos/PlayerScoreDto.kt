@@ -16,4 +16,5 @@ class PlayerScoreDto {
     var beatsaverKey: String? = null
     var timeSet: String? = null
     var categoryDisplayName: String? = null
+    var mods: String? = null
 }

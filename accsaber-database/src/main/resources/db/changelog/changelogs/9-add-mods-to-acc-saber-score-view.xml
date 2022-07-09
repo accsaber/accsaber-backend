@@ -1,0 +1,24 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+
+  <changeSet id="re-enabling-pro-mode" author="ixsen">
+    <dropView viewName="acc_saber_score"/>
+    <createView fullDefinition="false" remarks="VIEW" viewName="acc_saber_score">
+      select s.score_id             AS score_id,
+             s.accuracy             AS accuracy,
+             s.ap                   AS ap,
+             s.weighted_ap          AS weighted_ap,
+             s.is_ranked_score      AS is_ranked_score,
+             s.map_leaderboard_id   AS map_leaderboard_id,
+             s.rank_when_scores_set AS rank_when_scores_set,
+             s.score                AS score,
+             s.time_set             AS time_set,
+             s.unmodifified_score   AS unmodifified_score,
+             s.player_id            AS player_id,
+             s.mods                 AS mods,
+             rank()                    over ( partition by s.map_leaderboard_id order by s.score desc) AS ranking
+      from accsaber_db.score_data s
+      where s.is_ranked_score = 1
+    </createView>
+  </changeSet>
+</databaseChangeLog>

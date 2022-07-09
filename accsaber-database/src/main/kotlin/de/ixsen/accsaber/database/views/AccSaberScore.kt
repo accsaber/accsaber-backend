@@ -30,4 +30,6 @@ class AccSaberScore : WithRankAndWeightedAp() {
     @ManyToOne
     @JoinColumn(name = "player_id")
     val player: PlayerData? = null
+
+    val mods: String? = null;
 }

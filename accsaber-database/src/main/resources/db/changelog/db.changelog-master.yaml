@@ -15,3 +15,5 @@ databaseChangeLog:
       file: db/changelog/changelogs/7-post-release-fix.xml
   - include:
       file: db/changelog/changelogs/8-re-enabling-pm.xml
+  - include:
+      file: db/changelog/changelogs/9-add-mods-to-acc-saber-score-view.xml
