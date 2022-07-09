@@ -2,6 +2,7 @@ package de.ixsen.accsaber.business
 
 import de.ixsen.accsaber.business.exceptions.AccsaberOperationException
 import de.ixsen.accsaber.business.exceptions.ExceptionType
+import de.ixsen.accsaber.database.model.Category
 import de.ixsen.accsaber.database.model.players.PlayerData
 import de.ixsen.accsaber.database.model.players.ScoreData
 import de.ixsen.accsaber.database.model.players.ScoreDataHistory
@@ -14,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.lang.Long.max
 import java.util.*
 
 @Service
@@ -35,8 +37,22 @@ class ScoreService @Autowired constructor(
         return accSaberScoreRepository.findAllByLeaderboardId(beatMap.leaderboardId, PageRequest.of(page, pageSize))
     }
 
+    @Transactional(readOnly = true)
+    fun getScoresForMapHashAroundPlayer(mapHash: String, characteristic: String, difficulty: String, playerId: String): List<AccSaberScore> {
+        val beatMap = beatMapRepository.findBySongAndDifficulty(mapHash, difficulty)
+            .orElseThrow { AccsaberOperationException(ExceptionType.RANKED_MAP_NOT_FOUND, "The map was not found.") }
+
+        val playerScore = this.accSaberScoreRepository.findByLeaderboardIdAndPlayer(beatMap.leaderboardId, playerId.toLong()) ?: return listOf()
+
+        return accSaberScoreRepository.findAllByLeaderboardIdAround(beatMap.leaderboardId, max(playerScore.ranking!! - 6, 0L))
+    }
+
     fun getScoresForPlayer(player: PlayerData): List<AccSaberScore> {
         return accSaberScoreRepository.findAllByPlayerOrderByApDesc(player)
+    }
+
+    fun getScoresForPlayer(player: PlayerData, category: Category): List<AccSaberScore> {
+        return accSaberScoreRepository.findAllByPlayerAndCategoryOrderByApDesc(player, category)
     }
 
     fun getScoreHistoryForPlayer(player: PlayerData, leaderboardId: Long): List<ScoreDataHistory> {

@@ -3,39 +3,41 @@ package de.ixsen.accsaber.api.controllers
 import de.ixsen.accsaber.api.dtos.PlayerDto
 import de.ixsen.accsaber.api.dtos.PlayerScoreDto
 import de.ixsen.accsaber.api.dtos.SignupDto
-import de.ixsen.accsaber.api.mapping.MappingComponent
+import de.ixsen.accsaber.api.mapping.PlayerMapper
+import de.ixsen.accsaber.api.mapping.ScoreMapper
+import de.ixsen.accsaber.business.CategoryService
 import de.ixsen.accsaber.business.PlayerService
 import de.ixsen.accsaber.business.RankedMapService
 import de.ixsen.accsaber.business.ScoreService
 import de.ixsen.accsaber.business.exceptions.AccsaberOperationException
 import de.ixsen.accsaber.business.exceptions.ExceptionType
-import de.ixsen.accsaber.database.model.players.PlayerRankHistory
 import de.ixsen.accsaber.database.model.players.ScoreData
-import de.ixsen.accsaber.database.model.players.ScoreDataHistory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.time.Instant
 import java.time.LocalDate
-import java.util.*
-import java.util.function.Function
-import java.util.stream.Collectors
 
 @RestController
 @RequestMapping("players")
 class PlayerController @Autowired constructor(
     private val playerService: PlayerService,
-    private val mappingComponent: MappingComponent,
+    private val categoryService: CategoryService,
+    private val playerMapper: PlayerMapper,
+    private val scoreMapper: ScoreMapper,
     private val scoreService: ScoreService,
     private val rankedMapService: RankedMapService
 ) {
     @PostMapping
     fun addNewPlayer(@RequestBody signupDto: SignupDto): ResponseEntity<*> {
-        val playerId = Regex("scoresaber\\.com/u/(\\d{16,22})[^0-9]?", RegexOption.IGNORE_CASE)
+        val playerId = Regex("(scoresaber\\.com/u/)?(\\d{16,22})[^0-9]?", RegexOption.IGNORE_CASE)
             .find(signupDto.scoresaberLink)
-            ?.groupValues?.get(1) ?: throw AccsaberOperationException(ExceptionType.PLAYER_NOT_FOUND, "Player with the signupUrl ${signupDto.scoresaberLink} was not found.")
+            ?.groupValues?.get(2) ?: throw AccsaberOperationException(
+            ExceptionType.PLAYER_NOT_FOUND,
+            "Player with the signupUrl ${signupDto.scoresaberLink} was not found."
+        )
 
-        playerService.signupPlayer(playerId.toLong(), signupDto.playerName, signupDto.hmd)
+        playerService.signupPlayer(playerId.toLong(), signupDto.playerName)
         return ResponseEntity.noContent().build<Any>()
     }
 
@@ -44,9 +46,9 @@ class PlayerController @Autowired constructor(
         val accSaberPlayer = playerService.getRankedPlayer(playerId)
         val playerDto = if (accSaberPlayer == null) {
             val player = playerService.getPlayer(playerId)
-            mappingComponent.playerMapper.rawPlayerToDto(player)
+            this.playerMapper.rawPlayerToDto(player)
         } else {
-            mappingComponent.playerMapper.playerToPlayerDto(accSaberPlayer)
+            this.playerMapper.playerToPlayerDto(accSaberPlayer)
         }
         return ResponseEntity.ok(playerDto)
     }
@@ -54,11 +56,11 @@ class PlayerController @Autowired constructor(
     @GetMapping(path = ["/{playerId}/{category}"])
     fun getPlayerInfoForCategory(@PathVariable playerId: Long, @PathVariable category: String): ResponseEntity<PlayerDto> {
         val accSaberPlayer = playerService.getRankedPlayerForCategory(playerId, category)
-        val playerDto  = if (accSaberPlayer == null) {
+        val playerDto = if (accSaberPlayer == null) {
             val player = playerService.getPlayer(playerId)
-            mappingComponent.playerMapper.rawPlayerToDto(player)
+            this.playerMapper.rawPlayerToDto(player)
         } else {
-            mappingComponent.playerMapper.playerToPlayerDto(accSaberPlayer)
+            this.playerMapper.playerToPlayerDto(accSaberPlayer)
         }
         return ResponseEntity.ok(playerDto)
     }
@@ -67,7 +69,16 @@ class PlayerController @Autowired constructor(
     fun getPlayerScores(@PathVariable playerId: Long): ResponseEntity<ArrayList<PlayerScoreDto>> {
         val player = playerService.getPlayer(playerId)
         val scoresForPlayer = scoreService.getScoresForPlayer(player)
-        val playerScoreDtos = mappingComponent.scoreMapper.rankedScoresToPlayerScores(scoresForPlayer)
+        val playerScoreDtos = this.scoreMapper.rankedScoresToPlayerScores(scoresForPlayer)
+        return ResponseEntity.ok(playerScoreDtos)
+    }
+
+    @GetMapping(path = ["/{playerId}/{categoryName}/scores"])
+    fun getPlayerCategoryScores(@PathVariable playerId: Long, @PathVariable categoryName: String): ResponseEntity<ArrayList<PlayerScoreDto>> {
+        val player = playerService.getPlayer(playerId)
+        val category = this.categoryService.getCategoryByName(categoryName)
+        val scoresForPlayer = scoreService.getScoresForPlayer(player, category)
+        val playerScoreDtos = this.scoreMapper.rankedScoresToPlayerScores(scoresForPlayer)
         return ResponseEntity.ok(playerScoreDtos)
     }
 
@@ -87,10 +98,10 @@ class PlayerController @Autowired constructor(
 
     @GetMapping
     fun getPlayers(): ResponseEntity<ArrayList<PlayerDto>> {
-            val accSaberPlayerEntities = playerService.getAllPlayers()
-            val playerDtos = mappingComponent.playerMapper.playersToPlayerDtos(accSaberPlayerEntities)
-            return ResponseEntity.ok(playerDtos)
-        }
+        val accSaberPlayerEntities = playerService.getAllPlayers()
+        val playerDtos = this.playerMapper.playersToPlayerDtos(accSaberPlayerEntities)
+        return ResponseEntity.ok(playerDtos)
+    }
 
     // FIXME Caching
     @GetMapping(path = ["/{playerId}/recent-rank-history"])
@@ -105,5 +116,10 @@ class PlayerController @Autowired constructor(
         val recentPlayerRankHistory = playerService.getRecentPlayerRankHistoryForCategory(playerId, category)
         val map = recentPlayerRankHistory.associate { it.date to it.ranking }
         return ResponseEntity.ok(map)
+    }
+
+    @PutMapping("/recalc-ap")
+    fun recalculateApForAllPlayers(){
+        this.playerService.recalculateApForAllPlayers();
     }
 }

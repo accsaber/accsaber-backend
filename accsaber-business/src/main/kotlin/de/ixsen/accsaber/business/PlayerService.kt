@@ -55,12 +55,12 @@ class PlayerService @Autowired constructor(
     @Transactional
     fun getAllPlayers(): List<AccSaberPlayer> = overallAccSaberPlayerRepository.findAll()
 
-    fun signupPlayer(playerId: Long, playerName: String, hmd: String) {
+    fun signupPlayer(playerId: Long, playerName: String) {
         if (playerDataRepository.existsById(playerId)) {
             throw AccsaberOperationException(ExceptionType.PLAYER_ALREADY_EXISTS, String.format("Player with ID %s already exists.", playerId))
         }
         val player = PlayerData(
-            playerId, playerName, hmd
+            playerId, playerName
         )
 
         val playerCategoryStatsList = categoryRepository.findAll().stream()

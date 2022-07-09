@@ -4,7 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException
 import de.ixsen.accsaber.api.dtos.CreateRankedMapDto
 import de.ixsen.accsaber.api.dtos.RankedMapDto
 import de.ixsen.accsaber.api.dtos.RankedMapsStatisticsDto
-import de.ixsen.accsaber.api.mapping.MappingComponent
+import de.ixsen.accsaber.api.dtos.UpdateComplexityDto
+import de.ixsen.accsaber.api.mapping.RankedMapMapper
 import de.ixsen.accsaber.business.PlayerService
 import de.ixsen.accsaber.business.PlaylistService
 import de.ixsen.accsaber.business.RankedMapService
@@ -13,8 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-import java.util.function.Function
-import java.util.stream.Collectors
 
 @RestController
 @RequestMapping("/ranked-maps")
@@ -22,37 +21,47 @@ class RankedMapsController @Autowired constructor(
     private val rankedMapService: RankedMapService,
     private val playerService: PlayerService,
     private val playlistService: PlaylistService,
-    private val mappingComponent: MappingComponent
+    private val rankedMapMapper: RankedMapMapper,
 ) {
     // FIXME The recognition should actually try to evaluate if the hash is a valid hash
     @PostMapping
     fun addNewRankedMapByKey(@RequestBody rankedMapDto: CreateRankedMapDto): ResponseEntity<*> {
         if (rankedMapDto.id!!.length > 10) {
-            rankedMapService.addNewRankedMapByHash(rankedMapDto.id, rankedMapDto.difficulty!!, rankedMapDto.complexity!!, rankedMapDto.categoryName!!)
+            this.rankedMapService.addNewRankedMapByHash(rankedMapDto.id, rankedMapDto.difficulty!!, rankedMapDto.complexity!!, rankedMapDto.categoryName!!)
         } else {
-            rankedMapService.addNewRankedMapByKey(rankedMapDto.id, rankedMapDto.difficulty!!, rankedMapDto.complexity!!, rankedMapDto.categoryName!!)
+            this.rankedMapService.addNewRankedMapByKey(rankedMapDto.id, rankedMapDto.difficulty!!, rankedMapDto.complexity!!, rankedMapDto.categoryName!!)
         }
         return ResponseEntity.noContent().build<Any>()
+    }
+
+    @PutMapping("{leaderboardId}")
+    fun updateComplexity(@RequestBody updateComplexityDto: UpdateComplexityDto, @PathVariable leaderboardId: String){
+        this.rankedMapService.updateComplexity(updateComplexityDto.leaderboardId, updateComplexityDto.complexity)
+    }
+
+    @PutMapping
+    fun updateComplexities(@RequestBody updateComplexityDtos: List<UpdateComplexityDto>){
+        updateComplexityDtos.forEach { this.rankedMapService.updateComplexity(it.leaderboardId, it.complexity) }
     }
 
     @get:GetMapping
     val allRankedMaps: ResponseEntity<List<RankedMapDto>>
         get() {
-            val rankedMapDtos = mappingComponent
-                .rankedMapMapper.rankedMapsToDtos(rankedMapService.rankedMaps)
+            val rankedMapDtos = this
+                .rankedMapMapper.rankedMapsToDtos(this.rankedMapService.rankedMaps)
             return ResponseEntity.ok(rankedMapDtos)
         }
 
     @DeleteMapping("/{leaderboardId}")
     fun removeRankedMap(@PathVariable leaderboardId: Long): ResponseEntity<*> {
-        rankedMapService.removeRankedMap(leaderboardId)
+        this.rankedMapService.removeRankedMap(leaderboardId)
         playerService.recalculateApForAllPlayers()
         return ResponseEntity.noContent().build<Any>()
     }
 
     @GetMapping("/statistics")
     fun getRnkedStat(): ResponseEntity<RankedMapsStatisticsDto> {
-        val beatMaps = rankedMapService.rankedMaps
+        val beatMaps = this.rankedMapService.rankedMaps
         val trueAccCount = beatMaps.stream().filter { r: BeatMap -> r.complexity <= 4 }.count()
         val techAccCount = beatMaps.stream().filter { r: BeatMap -> r.complexity >= 10 }.count()
 
@@ -67,8 +76,8 @@ class RankedMapsController @Autowired constructor(
 
     @GetMapping("/{leaderboardId}")
     fun getRankedMapDetails(@PathVariable leaderboardId: Long): ResponseEntity<RankedMapDto> {
-        val beatMap = rankedMapService.getRankedMap(leaderboardId)
-        val rankedMapDto = mappingComponent.rankedMapMapper.rankedMapToDto(beatMap)
+        val beatMap = this.rankedMapService.getRankedMap(leaderboardId)
+        val rankedMapDto = this.rankedMapMapper.rankedMapToDto(beatMap)
         return ResponseEntity.ok(rankedMapDto)
     }
 

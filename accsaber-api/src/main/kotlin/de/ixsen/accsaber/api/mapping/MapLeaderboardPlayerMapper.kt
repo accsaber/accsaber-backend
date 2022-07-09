@@ -7,7 +7,7 @@ import org.mapstruct.Mapper
 import org.mapstruct.Mapping
 import org.mapstruct.factory.Mappers
 
-@Mapper
+@Mapper(componentModel = "spring")
 interface MapLeaderboardPlayerMapper {
     @Mapping(target = "categoryName", source = "beatMap.category.categoryName")
     @Mapping(target = "rank", source = "ranking")

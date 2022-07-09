@@ -1,4 +1,4 @@
-package de.ixsen.accsaber.api.controllers
+package de.ixsen.accsaber.api.controllers.staff
 
 import de.ixsen.accsaber.api.dtos.staff.StaffUserDto
 import de.ixsen.accsaber.business.staff.StaffService

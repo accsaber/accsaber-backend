@@ -139,4 +139,12 @@ class RankedMapService @Autowired constructor(
         }
         return score.toInt()
     }
+
+    fun updateComplexity(leaderboardId: String, complexity: Double) {
+        val beatMap = this.beatMapRepository.findById(leaderboardId.toLong())
+            .orElseThrow { AccsaberOperationException(ExceptionType.RANKED_MAP_NOT_FOUND, "The ranked map [$leaderboardId] does not currently exist.") }
+
+        beatMap.complexity = complexity
+        this.beatMapRepository.save(beatMap)
+    }
 }

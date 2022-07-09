@@ -7,7 +7,7 @@ import org.mapstruct.Mapper
 import org.mapstruct.Mapping
 import org.mapstruct.factory.Mappers
 
-@Mapper
+@Mapper(componentModel = "spring")
 interface RankedMapMapper {
     fun rankedMapsToDtos(BeatMap: List<BeatMap>): List<RankedMapDto>
 

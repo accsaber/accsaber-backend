@@ -8,7 +8,7 @@ import org.mapstruct.Mapper
 import org.mapstruct.Mapping
 import org.mapstruct.factory.Mappers
 
-@Mapper
+@Mapper(componentModel = "spring")
 interface PlayerMapper {
     @Mapping(target = "rankLastWeek", source = "rankingLastWeek")
     @Mapping(target = "rank", source = "ranking")

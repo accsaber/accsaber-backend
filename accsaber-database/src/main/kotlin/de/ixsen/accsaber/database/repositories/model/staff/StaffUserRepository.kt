@@ -1,4 +1,4 @@
-package de.ixsen.accsaber.database.repositories.model
+package de.ixsen.accsaber.database.repositories.model.staff
 
 import de.ixsen.accsaber.database.model.staff.StaffUser
 import org.springframework.data.jpa.repository.JpaRepository

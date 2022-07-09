@@ -23,22 +23,22 @@ class CategoryService @Autowired constructor(
     fun getAllCategories(): List<Category> = categoryRepository.findAll()
 
     fun getAllCategoriesIncludingJointCategories(): List<Category> {
-            val overall = Category(
-                "overall",
-                "This category includes all maps from the categories counting towards the overall leaderboard.",
-                "Overall Maps", true
-            )
+        val overall = Category(
+            "overall",
+            "This category includes all maps from the categories counting towards the overall leaderboard.",
+            "Overall Maps", true
+        )
 
-            val all = Category(
-                "all", "This category includes all maps ranked on any category on AccSaber.",
-                "All Ranked Maps", true
-            )
+        val all = Category(
+            "all", "This category includes all maps ranked on any category on AccSaber.",
+            "All Ranked Maps", true
+        )
 
-            val categories = categoryRepository.findAll()
-            categories.add(overall)
-            categories.add(all)
-            return categories
-        }
+        val categories = categoryRepository.findAll()
+        categories.add(overall)
+        categories.add(all)
+        return categories
+    }
 
     fun createNewCategory(newCategory: Category) {
         if (categoryRepository.existsByCategoryName(newCategory.categoryName)) {
@@ -61,5 +61,10 @@ class CategoryService @Autowired constructor(
             throw AccsaberOperationException(ExceptionType.CATEGORY_NOT_FOUND, String.format("The category [%s] was not found.", categoryName))
         }
         return categoryAccSaberPlayerRepository.findAllByCategoryName(categoryName)
+    }
+
+    fun getCategoryByName(categoryName: String): Category {
+        return categoryRepository.findByCategoryName(categoryName)
+            .orElseThrow { AccsaberOperationException(ExceptionType.CATEGORY_NOT_FOUND, String.format("Category [%s] does not exist.", categoryName)) }
     }
 }

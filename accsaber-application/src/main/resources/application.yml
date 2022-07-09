@@ -37,6 +37,8 @@ accsaber:
 
   connector-user-agent:  AccSaber
 
+  enable-curve-query:  false
+
   auth:
     secret: replacethissecretwitharealsecret
     expiration-time: 3_600_000

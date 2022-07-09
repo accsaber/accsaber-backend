@@ -19,6 +19,6 @@ interface BeatMapRepository : JpaRepository<BeatMap, Long> {
     @Query("FROM BeatMap map left join fetch map.song where map.category = ?1")
     fun findAllForCategory(category: Category): List<BeatMap>
 
-    @Query("FROM BeatMap map where map.song = ?1 and map.difficulty = ?2")
-    fun findBySongAndDifficulty(song: String, difficulty: String): Optional<BeatMap>
+    @Query("FROM BeatMap map where map.song.songHash = ?1 and map.difficulty = ?2")
+    fun findBySongAndDifficulty(hash: String, difficulty: String): Optional<BeatMap>
 }

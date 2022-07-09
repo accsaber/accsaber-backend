@@ -19,7 +19,7 @@ class BeatMap(
     @JoinColumn(name = "song")
     val song: Song,
     val difficulty: String,
-    val complexity: Double,
+    var complexity: Double,
 
     @ManyToOne
     @JoinColumn(name = "category_id")

@@ -13,3 +13,5 @@ databaseChangeLog:
       file: db/changelog/changelogs/6-feature_playerrank_score_history.xml
   - include:
       file: db/changelog/changelogs/7-post-release-fix.xml
+  - include:
+      file: db/changelog/changelogs/8-re-enabling-pm.xml

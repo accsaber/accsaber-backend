@@ -7,7 +7,7 @@ import org.mapstruct.Mapper
 import org.mapstruct.Mapping
 import org.mapstruct.factory.Mappers
 
-@Mapper
+@Mapper(componentModel = "spring")
 interface ScoreMapper {
     @Mapping(target = "songHash", source = "beatMap.song.songHash")
     @Mapping(target = "complexity", source = "beatMap.complexity")
