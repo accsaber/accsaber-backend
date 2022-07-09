@@ -20,13 +20,12 @@ class PlaylistController @Autowired constructor(
     private val categoryService: CategoryService,
     private val playlistInfoMapper: PlaylistInfoMapper
 ) {
-    @get:GetMapping
-    val playlists: ResponseEntity<ArrayList<PlaylistInfoDto>>
-        get() {
-            val allCategories = categoryService.getAllCategoriesIncludingJointCategories()
-            val playlistInfoDtos = playlistInfoMapper.map(allCategories)
-            return ResponseEntity.ok(playlistInfoDtos)
-        }
+    @GetMapping
+    fun playlists(): ResponseEntity<ArrayList<PlaylistInfoDto>> {
+        val allCategories = categoryService.getAllCategoriesIncludingJointCategories()
+        val playlistInfoDtos = playlistInfoMapper.map(allCategories)
+        return ResponseEntity.ok(playlistInfoDtos)
+    }
 
     @GetMapping("{categoryName}")
     @Throws(JsonProcessingException::class)

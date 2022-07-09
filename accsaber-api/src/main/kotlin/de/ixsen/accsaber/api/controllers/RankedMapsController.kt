@@ -6,6 +6,7 @@ import de.ixsen.accsaber.api.dtos.RankedMapDto
 import de.ixsen.accsaber.api.dtos.RankedMapsStatisticsDto
 import de.ixsen.accsaber.api.dtos.UpdateComplexityDto
 import de.ixsen.accsaber.api.mapping.RankedMapMapper
+import de.ixsen.accsaber.business.CategoryService
 import de.ixsen.accsaber.business.PlayerService
 import de.ixsen.accsaber.business.PlaylistService
 import de.ixsen.accsaber.business.RankedMapService
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/ranked-maps")
 class RankedMapsController @Autowired constructor(
     private val rankedMapService: RankedMapService,
+    private val categoryService: CategoryService,
     private val playerService: PlayerService,
     private val playlistService: PlaylistService,
     private val rankedMapMapper: RankedMapMapper,
@@ -35,22 +37,29 @@ class RankedMapsController @Autowired constructor(
     }
 
     @PutMapping("{leaderboardId}")
-    fun updateComplexity(@RequestBody updateComplexityDto: UpdateComplexityDto, @PathVariable leaderboardId: String){
+    fun updateComplexity(@RequestBody updateComplexityDto: UpdateComplexityDto, @PathVariable leaderboardId: String) {
         this.rankedMapService.updateComplexity(updateComplexityDto.leaderboardId, updateComplexityDto.complexity)
     }
 
     @PutMapping
-    fun updateComplexities(@RequestBody updateComplexityDtos: List<UpdateComplexityDto>){
+    fun updateComplexities(@RequestBody updateComplexityDtos: List<UpdateComplexityDto>) {
         updateComplexityDtos.forEach { this.rankedMapService.updateComplexity(it.leaderboardId, it.complexity) }
     }
 
-    @get:GetMapping
-    val allRankedMaps: ResponseEntity<List<RankedMapDto>>
-        get() {
-            val rankedMapDtos = this
-                .rankedMapMapper.rankedMapsToDtos(this.rankedMapService.rankedMaps)
-            return ResponseEntity.ok(rankedMapDtos)
-        }
+    @GetMapping
+    fun getAllRankedMaps(): ResponseEntity<List<RankedMapDto>> {
+        val rankedMapDtos = this
+            .rankedMapMapper.rankedMapsToDtos(this.rankedMapService.getAllRankedMaps())
+        return ResponseEntity.ok(rankedMapDtos)
+    }
+
+    @GetMapping("/category/{categoryName}")
+    fun getAllRankedMapsForCategory(@PathVariable categoryName: String): ResponseEntity<List<RankedMapDto>> {
+        val category = categoryService.getCategoryByName(categoryName)
+        val categoryRankedMaps = this.rankedMapService.getAllRankedMapsForCategory(category)
+        val rankedMapDtos = this.rankedMapMapper.rankedMapsToDtos(categoryRankedMaps)
+        return ResponseEntity.ok(rankedMapDtos)
+    }
 
     @DeleteMapping("/{leaderboardId}")
     fun removeRankedMap(@PathVariable leaderboardId: Long): ResponseEntity<*> {
@@ -61,7 +70,7 @@ class RankedMapsController @Autowired constructor(
 
     @GetMapping("/statistics")
     fun getRnkedStat(): ResponseEntity<RankedMapsStatisticsDto> {
-        val beatMaps = this.rankedMapService.rankedMaps
+        val beatMaps = this.rankedMapService.getAllRankedMaps()
         val trueAccCount = beatMaps.stream().filter { r: BeatMap -> r.complexity <= 4 }.count()
         val techAccCount = beatMaps.stream().filter { r: BeatMap -> r.complexity >= 10 }.count()
 
@@ -81,14 +90,13 @@ class RankedMapsController @Autowired constructor(
         return ResponseEntity.ok(rankedMapDto)
     }
 
-    @get:Throws(JsonProcessingException::class)
-    @get:GetMapping("/playlist")
-    val rankedMapPlaylist: ResponseEntity<ByteArray>
-        get() {
-            val playlistJson = playlistService.getPlaylist("all")
-            return ResponseEntity
-                .ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=accsaber-rankedmaps.json")
-                .body(playlistJson)
-        }
+    @Throws(JsonProcessingException::class)
+    @GetMapping("/playlist")
+    fun rankedMapPlaylist(): ResponseEntity<ByteArray> {
+        val playlistJson = playlistService.getPlaylist("all")
+        return ResponseEntity
+            .ok()
+            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=accsaber-rankedmaps.json")
+            .body(playlistJson)
+    }
 }

@@ -2,6 +2,7 @@ package de.ixsen.accsaber.business
 
 import de.ixsen.accsaber.business.exceptions.AccsaberOperationException
 import de.ixsen.accsaber.business.exceptions.ExceptionType
+import de.ixsen.accsaber.database.model.Category
 import de.ixsen.accsaber.database.model.maps.BeatMap
 import de.ixsen.accsaber.database.model.players.ScoreData
 import de.ixsen.accsaber.database.repositories.model.BeatMapRepository
@@ -23,8 +24,13 @@ class RankedMapService @Autowired constructor(
     private val beatSaverConnector: BeatSaverConnector,
     private val songService: SongService
 ) {
-    val rankedMaps: List<BeatMap>
-        get() = beatMapRepository.findAll()
+    fun getAllRankedMaps(): List<BeatMap> {
+        return beatMapRepository.findAll()
+    }
+
+    fun getAllRankedMapsForCategory(category: Category): List<BeatMap> {
+        return this.beatMapRepository.findAllForCategory(category)
+    }
 
     fun getRankedMap(leaderboardId: Long): BeatMap {
         val optionalRankedMap = beatMapRepository.findById(leaderboardId)
