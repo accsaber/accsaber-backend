@@ -21,6 +21,15 @@
       <groupId>de.ixsen</groupId>
       <artifactId>accsaber-api</artifactId>
     </dependency>
+
+    <dependency>
+      <groupId>org.jetbrains.kotlin</groupId>
+      <artifactId>kotlin-reflect</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jetbrains.kotlin</groupId>
+      <artifactId>kotlin-stdlib</artifactId>
+    </dependency>
   </dependencies>
 
   <build>

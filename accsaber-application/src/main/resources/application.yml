@@ -35,11 +35,10 @@ accsaber:
   image-serving-url: https://cdn.accsaber.com/
   fetch-thread-pool: 10
 
+  connector-user-agent:  AccSaber
+
+  enable-curve-query:  false
+
   auth:
     secret: replacethissecretwitharealsecret
     expiration-time: 3_600_000
-
-
-
-# /etc/letsencrypt/live/accsaber.com/fullchain.pem
-#/etc/letsencrypt/live/accsaber.com/privkey.pem
