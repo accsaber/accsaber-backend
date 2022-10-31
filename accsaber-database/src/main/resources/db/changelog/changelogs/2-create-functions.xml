@@ -10,12 +10,17 @@ DECLARE
    y1 double precision;
    x1 double precision;
    k  double precision;
+   x0 double precision;
 BEGIN
    SELECT player_curve_y1, player_curve_x1, player_curve_k
    INTO y1, x1, k
    FROM category c
    WHERE c.id = category_id;
-   RETURN 1;
+
+   SELECT-(ln((1 - y1) / (y1 * exp(k * x1) - 1)) / k)
+   INTO x0;
+
+   RETURN ap * (1 + exp(-k * x0)) / (1 + exp(k * (ranking - 1 - x0)));
 END;
 $weighted_ap$ LANGUAGE plpgsql;
 /
@@ -50,8 +55,8 @@ DECLARE
 BEGIN
    UPDATE score_data
    SET is_ranked_score = true,
-       accuracy        = (score / map.max_score),
-       ap              = calc_ap((score / map.max_score) * 100.0, complexity, map.category_id)
+       accuracy        = (score::NUMERIC / map.max_score),
+       ap              = calc_ap((score::NUMERIC / map.max_score) * 100.0, complexity, map.category_id)
    FROM (select leaderboard_id, max_score, complexity, category_id from beat_map) as map
    WHERE (mods is null OR mods not like '%SC%')
      AND map_leaderboard_id = map.leaderboard_id
@@ -119,7 +124,7 @@ BEGIN
    WHERE is_ranked_score = true;
 
    UPDATE score_data AS sd
-   SET is_ranked_score = true, accuracy = (sd.score / map.max_score), ap = calc_ap((sd.score / map.max_score) * 100.0, map.complexity, map.category_id)
+   SET is_ranked_score = true, accuracy = (sd.score::NUMERIC / map.max_score), ap = calc_ap((sd.score::NUMERIC / map.max_score) * 100.0, map.complexity, map.category_id)
       FROM (select leaderboard_id, max_score, complexity, category_id from beat_map) as map
    WHERE (sd.mods is null or sd.mods not like '%SC%') and sd.map_leaderboard_id = map.leaderboard_id;
 
