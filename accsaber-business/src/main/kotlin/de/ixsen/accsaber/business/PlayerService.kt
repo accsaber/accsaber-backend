@@ -214,7 +214,7 @@ class PlayerService @Autowired constructor(
 
     fun takeRankingSnapshot() {
         this.getLogger().trace("Taking snapshot of current ranks")
-        playerDataRepository.takeRankSnapshot()
+        this.playerDataRepository.takeRankSnapshot()
     }
 
     fun getRecentPlayerRankHistory(playerId: Long): List<PlayerRankHistory> {
@@ -225,6 +225,10 @@ class PlayerService @Autowired constructor(
         val category = categoryRepository.findByCategoryName(categoryName)
             .orElseThrow { AccsaberOperationException(ExceptionType.CATEGORY_NOT_FOUND, String.format("Category [%s] does not exist.", categoryName)) }
         return playerRankHistoryRepository.findLastMonthForPlayerAndCategory(playerId, category.id)
+    }
+
+    fun refreshMaterializedViews() {
+        this.playerDataRepository.refreshMaterializedViews()
     }
 
     /**

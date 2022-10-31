@@ -1,0 +1,13 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+
+  <changeSet id="database-optimisation" author="ixsen">
+    <createIndex tableName="score_data" indexName="is_ranked_score_index">
+      <column name="is_ranked_score"/>
+    </createIndex>
+
+    <createIndex tableName="score_data" indexName="map_leaderboard_id_index">
+      <column name="map_leaderboard_id"/>
+    </createIndex>
+  </changeSet>
+</databaseChangeLog>

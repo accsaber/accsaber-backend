@@ -24,5 +24,8 @@ interface PlayerDataRepository : JpaRepository<PlayerData, Long> {
     fun recalcPlayerAp(playerId: Long)
 
     @Procedure(procedureName = "take_ranking_snapshot")
-    fun takeRankSnapshot()
+    fun takeRankSnapshot(): Void
+
+    @Procedure(procedureName = "refresh_materialized_views")
+    fun refreshMaterializedViews(): Void
 }

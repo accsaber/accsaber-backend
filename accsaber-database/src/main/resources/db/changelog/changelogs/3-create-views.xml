@@ -1,0 +1,82 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+   <changeSet id="1" author="1">
+      <sql endDelimiter="/">
+         CREATE
+         MATERIALIZED VIEW acc_saber_score AS
+         SELECT sd.score_id,
+                sd.accuracy,
+                sd.ap,
+                sd.weighted_ap,
+                sd.is_ranked_score,
+                sd.rank_when_scores_set,
+                sd.score,
+                sd.time_set,
+                sd.unmodifified_score,
+                sd.player_id,
+                sd.mods,
+                rank() OVER (PARTITION BY sd.map_leaderboard_id ORDER BY sd.score DESC) AS ranking, sng.song_name,
+                sng.song_author_name,
+                sng.level_author_name,
+                sng.song_sub_name,
+                bm.complexity,
+                sng.song_hash,
+                bm.difficulty,
+                bm.leaderboard_id,
+                sng.beat_saver_key,
+                c.category_display_name,
+                c.category_name
+         FROM score_data sd
+                 JOIN beat_map bm on bm.leaderboard_id = sd.map_leaderboard_id
+                 JOIN song sng on bm.song = sng.song_hash
+                 JOIN category c on bm.category_id = c.id
+         WHERE sd.is_ranked_score = true
+            /
+      </sql>
+
+      <sql endDelimiter="/">
+         CREATE
+         MATERIALIZED VIEW category_acc_saber_player AS
+         select pcs.player_id         as player_id,
+                pcs.ap                as ap,
+                pd.player_name        as player_name,
+                pd.avatar_url         as avatar_url,
+                pcs.average_acc       as average_acc,
+                pd.hmd                as hmd,
+                pd.is_acc_champ       as is_acc_champ,
+                pcs.average_ap        as average_ap_per_map,
+                pcs.ranked_plays      as ranked_plays,
+                c.category_name       as category_name,
+                pcs.ranking_last_week as ranking_last_week,
+                row_number()             over (PARTITION BY pcs.category_id ORDER BY pcs.ap desc ) as ranking
+         from player_category_stats as pcs
+                 join player_data pd on pcs.player_id = pd.player_id
+                 join category c on c.id = pcs.category_id
+         where pcs.ranked_plays != 0;
+         /
+      </sql>
+
+      <sql endDelimiter="/">
+         CREATE
+         MATERIALIZED VIEW overall_acc_saber_player AS
+         select *, row_number() over (order by player_stats.ap desc ) as ranking
+         from (select pcs.player_id                                                   as player_id,
+                      sum(pcs.ap)                                                     as ap,
+                      pd.player_name                                                  as player_name,
+                      pd.avatar_url                                                   as avatar_url,
+                      sum(pcs.average_acc * pcs.ranked_plays) / sum(pcs.ranked_plays) as average_acc,
+                      pd.hmd                                                          as hmd,
+                      pd.is_acc_champ                                                 as is_acc_champ,
+                      sum(pcs.average_ap * pcs.ranked_plays) / sum(pcs.ranked_plays)  as average_ap_per_map,
+                      sum(pcs.ranked_plays)                                           as ranked_plays,
+                      rh.ranking                                                      as ranking_last_week
+               from player_category_stats pcs
+                       join player_data pd on pcs.player_id = pd.player_id
+                       join category ct on pcs.category_id = ct.id
+                       left outer join player_rank_history rh on pd.player_id = rh.player_id and rh.date = current_date - 7 and rh.category_id = -1
+               where pcs.ranked_plays != 0 and ct.counts_towards_overall
+               group by (pcs.player_id, pd.player_id, rh.ranking)) player_stats;
+         /
+      </sql>
+   </changeSet>
+</databaseChangeLog>

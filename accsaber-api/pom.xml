@@ -2,47 +2,47 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <parent>
-    <artifactId>accsaber</artifactId>
-    <groupId>de.ixsen</groupId>
-    <version>2.0.0</version>
-  </parent>
-  <modelVersion>4.0.0</modelVersion>
-
-  <artifactId>accsaber-api</artifactId>
-
-  <dependencies>
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-web</artifactId>
-    </dependency>
-
-    <dependency>
+   <parent>
+      <artifactId>accsaber</artifactId>
       <groupId>de.ixsen</groupId>
-      <artifactId>accsaber-business</artifactId>
-    </dependency>
+      <version>3.0.0</version>
+   </parent>
+   <modelVersion>4.0.0</modelVersion>
 
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-security</artifactId>
-    </dependency>
+   <artifactId>accsaber-api</artifactId>
 
-    <dependency>
-      <groupId>com.auth0</groupId>
-      <artifactId>java-jwt</artifactId>
-    </dependency>
+   <dependencies>
+      <dependency>
+         <groupId>org.springframework.boot</groupId>
+         <artifactId>spring-boot-starter-web</artifactId>
+      </dependency>
 
-    <dependency>
-      <groupId>org.jetbrains.kotlin</groupId>
-      <artifactId>kotlin-reflect</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.jetbrains.kotlin</groupId>
-      <artifactId>kotlin-stdlib</artifactId>
-    </dependency>
-  </dependencies>
+      <dependency>
+         <groupId>de.ixsen</groupId>
+         <artifactId>accsaber-business</artifactId>
+      </dependency>
 
-  <build>
-    <sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>
-  </build>
+      <dependency>
+         <groupId>org.springframework.boot</groupId>
+         <artifactId>spring-boot-starter-security</artifactId>
+      </dependency>
+
+      <dependency>
+         <groupId>com.auth0</groupId>
+         <artifactId>java-jwt</artifactId>
+      </dependency>
+
+      <dependency>
+         <groupId>org.jetbrains.kotlin</groupId>
+         <artifactId>kotlin-reflect</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>org.jetbrains.kotlin</groupId>
+         <artifactId>kotlin-stdlib</artifactId>
+      </dependency>
+   </dependencies>
+
+   <build>
+      <sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>
+   </build>
 </project>

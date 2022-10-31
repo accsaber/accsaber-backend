@@ -9,15 +9,8 @@ import org.mapstruct.factory.Mappers
 
 @Mapper(componentModel = "spring")
 interface ScoreMapper {
-    @Mapping(target = "songHash", source = "beatMap.song.songHash")
-    @Mapping(target = "complexity", source = "beatMap.complexity")
-    @Mapping(target = "songName", source = "beatMap.song.songName")
-    @Mapping(target = "songAuthorName", source = "beatMap.song.songAuthorName")
     @Mapping(target = "rank", source = "ranking")
-    @Mapping(target = "levelAuthorName", source = "beatMap.song.levelAuthorName")
-    @Mapping(target = "difficulty", source = "beatMap.difficulty")
-    @Mapping(target = "beatsaverKey", source = "beatMap.song.beatSaverKey")
-    @Mapping(target = "categoryDisplayName", source = "beatMap.category.categoryDisplayName")
+    @Mapping(target = "beatsaverKey", source = "beatSaverKey")
     fun rankedScoreToPlayerScore(accSaberScore: AccSaberScore): PlayerScoreDto
     fun rankedScoresToPlayerScores(accSaberScores: List<AccSaberScore>): ArrayList<PlayerScoreDto>
 

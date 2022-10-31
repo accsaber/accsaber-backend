@@ -2,72 +2,72 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <parent>
-    <artifactId>accsaber</artifactId>
-    <groupId>de.ixsen</groupId>
-    <version>2.0.0</version>
-  </parent>
-  <modelVersion>4.0.0</modelVersion>
+   <parent>
+      <artifactId>accsaber</artifactId>
+      <groupId>de.ixsen</groupId>
+      <version>3.0.0</version>
+   </parent>
+   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>accsaber-database</artifactId>
+   <artifactId>accsaber-database</artifactId>
 
-  <dependencies>
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-data-jpa</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.mariadb.jdbc</groupId>
-      <artifactId>mariadb-java-client</artifactId>
-    </dependency>
-
-
-    <dependency>
-      <groupId>org.liquibase</groupId>
-      <artifactId>liquibase-core</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-security</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.jetbrains.kotlin</groupId>
-      <artifactId>kotlin-reflect</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.jetbrains.kotlin</groupId>
-      <artifactId>kotlin-stdlib</artifactId>
-    </dependency>
-
-  </dependencies>
-
-  <build>
-    <sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>
-
-    <plugins>
-      <plugin>
-        <groupId>org.liquibase</groupId>
-        <artifactId>liquibase-maven-plugin</artifactId>
-        <configuration>
-          <propertyFile>src/main/resources/liquibase.properties</propertyFile>
-        </configuration>
-        <dependencies>
-          <dependency>
-            <groupId>org.liquibase.ext</groupId>
-            <artifactId>liquibase-hibernate5</artifactId>
-            <version>${liquibase.version}</version>
-          </dependency>
-          <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-jpa</artifactId>
-            <version>${spring.version}</version>
-          </dependency>
-        </dependencies>
-      </plugin>
+   <dependencies>
+      <dependency>
+         <groupId>org.springframework.boot</groupId>
+         <artifactId>spring-boot-starter-data-jpa</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>org.postgresql</groupId>
+         <artifactId>postgresql</artifactId>
+      </dependency>
 
 
-    </plugins>
-  </build>
+      <dependency>
+         <groupId>org.liquibase</groupId>
+         <artifactId>liquibase-core</artifactId>
+      </dependency>
+
+      <dependency>
+         <groupId>org.springframework.boot</groupId>
+         <artifactId>spring-boot-starter-security</artifactId>
+      </dependency>
+
+      <dependency>
+         <groupId>org.jetbrains.kotlin</groupId>
+         <artifactId>kotlin-reflect</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>org.jetbrains.kotlin</groupId>
+         <artifactId>kotlin-stdlib</artifactId>
+      </dependency>
+
+   </dependencies>
+
+   <build>
+      <sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>
+
+      <plugins>
+         <plugin>
+            <groupId>org.liquibase</groupId>
+            <artifactId>liquibase-maven-plugin</artifactId>
+            <configuration>
+               <propertyFile>src/main/resources/liquibase.properties</propertyFile>
+            </configuration>
+            <dependencies>
+               <dependency>
+                  <groupId>org.liquibase.ext</groupId>
+                  <artifactId>liquibase-hibernate5</artifactId>
+                  <version>${liquibase.version}</version>
+               </dependency>
+               <dependency>
+                  <groupId>org.springframework.boot</groupId>
+                  <artifactId>spring-boot-starter-data-jpa</artifactId>
+                  <version>${spring.version}</version>
+               </dependency>
+            </dependencies>
+         </plugin>
+
+
+      </plugins>
+   </build>
 </project>

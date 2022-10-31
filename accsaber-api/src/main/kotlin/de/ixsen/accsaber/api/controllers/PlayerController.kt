@@ -76,8 +76,7 @@ class PlayerController @Autowired constructor(
     @GetMapping(path = ["/{playerId}/{categoryName}/scores"])
     fun getPlayerCategoryScores(@PathVariable playerId: Long, @PathVariable categoryName: String): ResponseEntity<ArrayList<PlayerScoreDto>> {
         val player = playerService.getPlayer(playerId)
-        val category = this.categoryService.getCategoryByName(categoryName)
-        val scoresForPlayer = scoreService.getScoresForPlayer(player, category)
+        val scoresForPlayer = scoreService.getScoresForPlayer(player, categoryName)
         val playerScoreDtos = this.scoreMapper.rankedScoresToPlayerScores(scoresForPlayer)
         return ResponseEntity.ok(playerScoreDtos)
     }
@@ -119,7 +118,7 @@ class PlayerController @Autowired constructor(
     }
 
     @PutMapping("/recalc-ap")
-    fun recalculateApForAllPlayers(){
-        this.playerService.recalculateApForAllPlayers();
+    fun recalculateApForAllPlayers() {
+        this.playerService.recalculateApForAllPlayers()
     }
 }
