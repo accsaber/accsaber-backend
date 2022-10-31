@@ -125,6 +125,7 @@ BEGIN
 
    CALL recalc_all_weighted_ap();
    CALL recalc_all_category_stats();
+   CALL refresh_materialized_views();
 END;
 $$ LANGUAGE plpgsql;
 /
