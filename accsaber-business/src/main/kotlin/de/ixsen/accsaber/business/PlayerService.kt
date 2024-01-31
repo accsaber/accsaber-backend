@@ -46,11 +46,7 @@ class PlayerService @Autowired constructor(
     private val categoryRepository: CategoryRepository,
     @Value("\${accsaber.image-save-location}") imageFolder: String
 ) : HasLogger {
-    private val avatarFolder: String
-
-    init {
-        avatarFolder = "$imageFolder/avatars"
-    }
+    private val avatarFolder: String = "$imageFolder/avatars"
 
     @Transactional
     fun getAllPlayers(): List<AccSaberPlayer> = overallAccSaberPlayerRepository.findAll()
@@ -93,7 +89,7 @@ class PlayerService @Autowired constructor(
         return playerDataRepository.findAllPlayerIds()
     }
 
-    @Transactional
+    @Transactional(Transactional.TxType.REQUIRES_NEW)
     fun handlePlayer(allRankedMaps: List<BeatMap>, playerId: Long?) {
         val optPlayer = playerDataRepository.findById(playerId!!)
         if (optPlayer.isEmpty) {

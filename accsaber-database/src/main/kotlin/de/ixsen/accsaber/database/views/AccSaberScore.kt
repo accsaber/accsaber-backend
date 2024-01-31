@@ -13,7 +13,7 @@ class AccSaberScore : WithRankAndWeightedAp() {
     val scoreId: Long? = null
     val rankWhenScoresSet = 0
     val score = 0
-    val unmodififiedScore = 0
+    val unmodifiedScore = 0
     val accuracy: Double? = null
 
     @OrderBy

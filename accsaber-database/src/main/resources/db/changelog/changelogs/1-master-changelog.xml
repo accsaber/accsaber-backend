@@ -128,7 +128,7 @@
             <constraints nullable="false"/>
          </column>
          <column name="time_set" type="TIMESTAMP WITHOUT TIME ZONE"/>
-         <column name="unmodifified_score" type="INTEGER">
+         <column name="unmodified_score" type="INTEGER">
             <constraints nullable="false"/>
          </column>
          <column name="weighted_ap" type="FLOAT8"/>
@@ -151,7 +151,7 @@
             <constraints nullable="false"/>
          </column>
          <column name="time_set" type="TIMESTAMP WITHOUT TIME ZONE"/>
-         <column name="unmodifified_score" type="INTEGER">
+         <column name="unmodified_score" type="INTEGER">
             <constraints nullable="false"/>
          </column>
          <column name="weighted_ap" type="FLOAT8"/>

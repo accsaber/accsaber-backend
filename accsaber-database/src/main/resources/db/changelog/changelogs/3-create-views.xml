@@ -12,7 +12,7 @@
                 sd.rank_when_scores_set,
                 sd.score,
                 sd.time_set,
-                sd.unmodifified_score,
+                sd.unmodified_score,
                 sd.player_id,
                 sd.mods,
                 rank() OVER (PARTITION BY sd.map_leaderboard_id ORDER BY sd.score DESC) AS ranking, sng.song_name,

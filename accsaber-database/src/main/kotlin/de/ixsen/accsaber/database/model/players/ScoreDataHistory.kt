@@ -11,7 +11,7 @@ import javax.persistence.*
 class ScoreDataHistory(
     val scoreId: Long,
     val score: Int,
-    val unmodififiedScore: Int,
+    val unmodifiedScore: Int,
     val accuracy: Double,
     val ap: Double,
     val weightedAp: Double,

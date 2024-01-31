@@ -230,7 +230,7 @@ BEGIN
                       ON sd.map_leaderboard_id = bm.leaderboard_id
          WHERE is_ranked_score
            AND sd.player_id = player_id_param
-         GROUP BY least(sd.player_id, bm.category_id), greatest(sd.player_id, bm.category_id)) as new_stats ON CONFLICT (player_id, category_id)
+         GROUP BY least(sd.player_id, bm.category_id), greatest(sd.player_id, bm.category_id), bm.category_id, sd.player_id) as new_stats ON CONFLICT (player_id, category_id)
               DO UPDATE SET
                ap           = excluded.ap,
                average_acc  = excluded.average_acc,
@@ -259,7 +259,7 @@ $$ LANGUAGE plpgsql;
          WHERE is_ranked_score
            AND sd.player_id = player_id_param
            AND bm.category_id = category_id_param
-         GROUP by least(sd.player_id, bm.category_id), greatest(sd.player_id, bm.category_id)) as new_stats
+         GROUP by least(sd.player_id, bm.category_id), greatest(sd.player_id, bm.category_id), bm.category_id, sd.player_id) as new_stats
       ON CONFLICT (player_id, category_id)
         DO UPDATE SET ap         = excluded.ap,
                     average_acc  = excluded.average_acc,
@@ -288,7 +288,7 @@ BEGIN
                       ON sd.map_leaderboard_id = bm.leaderboard_id
          WHERE is_ranked_score
            AND bm.category_id = category_id_param
-         GROUP by least(sd.player_id, bm.category_id), greatest(sd.player_id, bm.category_id)) AS new_stats
+         GROUP by least(sd.player_id, bm.category_id), greatest(sd.player_id, bm.category_id), bm.category_id, sd.player_id) AS new_stats
       ON CONFLICT (player_id, category_id)
         DO UPDATE SET ap         = excluded.ap,
                     average_acc  = excluded.average_acc,
@@ -342,8 +342,9 @@ $$ LANGUAGE plpgsql;
 <sql endDelimiter="/">
    CREATE FUNCTION save_score_history() RETURNS TRIGGER AS $$
    BEGIN
-      INSERT INTO score_data_history(score_id, accuracy, ap, map_leaderboard_id, score, time_set, unmodifified_score, weighted_ap, player_id, mods)
-      values (OLD.score_id, OLD.accuracy, OLD.ap, OLD.map_leaderboard_id, old.score, old.time_set, old.unmodifified_score, old.weighted_ap, old.player_id, old.mods);
+      INSERT INTO score_data_history(score_id, accuracy, ap, map_leaderboard_id, score, time_set, unmodified_score, weighted_ap, player_id, mods)
+      values (OLD.score_id, OLD.accuracy, OLD.ap, OLD.map_leaderboard_id, old.score, old.time_set, old.unmodified_score, old.weighted_ap, old.player_id, old.mods);
+      RETURN null;
    END;
    $$ LANGUAGE plpgsql;
    /
