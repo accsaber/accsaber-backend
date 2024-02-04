@@ -361,6 +361,26 @@ END;
    /
 </sql>
 
+<sql endDelimiter="/">
+    CREATE PROCEDURE recalc_weighted_ap(category BIGINT) AS $$
+    BEGIN
+    UPDATE score_data sd
+    SET weighted_ap = wt.weighted_ap
+        FROM (SELECT recalced_table.score_id,
+                 calc_weighted_ap(recalced_table.ap, recalced_table.ranking, recalced_table.category_id) AS weighted_ap,
+                 recalced_table.player_id,
+                 recalced_table.category_id
+          FROM (SELECT *,
+                       row_number() over (PARTITION BY least(sd.player_id, category_id),greatest(sd.player_id, category_id) ORDER BY ap DESC ) AS ranking
+                FROM score_data sd
+                         JOIN beat_map bm ON sd.map_leaderboard_id = bm.leaderboard_id
+                WHERE sd.is_ranked_score
+                  AND bm.category_id = category) recalced_table) AS wt
+    WHERE sd.score_id = wt.score_id;
+    END
+$$ LANGUAGE plpgsql;
+    /
+</sql>
 </changeSet>
 </databaseChangeLog>
 <!-- @formatter:on -->
