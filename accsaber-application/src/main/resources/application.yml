@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: # jdbc:mariadb://127.0.0.1:3306/accsaber_db
+    url: # jdbc:postgresql://localhost/accsaber
     username: # acc
     password: # acc
     hikari:
