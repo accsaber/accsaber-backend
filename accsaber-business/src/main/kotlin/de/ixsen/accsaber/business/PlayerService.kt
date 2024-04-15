@@ -209,7 +209,7 @@ class PlayerService @Autowired constructor(
     }
 
     fun takeRankingSnapshot() {
-        this.getLogger().trace("Taking snapshot of current ranks")
+        this.getLogger().info("Taking snapshot of current ranks")
         this.playerDataRepository.takeRankSnapshot()
     }
 

@@ -5,3 +5,5 @@ databaseChangeLog:
       file: db/changelog/changelogs/2-create-functions.xml
   - include:
       file: db/changelog/changelogs/3-create-views.xml
+  - include:
+      file: db/changelog/changelogs/4-fix-score-history-trigger.xml
