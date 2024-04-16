@@ -13,7 +13,7 @@
    <groupId>de.ixsen</groupId>
    <artifactId>accsaber</artifactId>
    <packaging>pom</packaging>
-   <version>3.0.3</version>
+   <version>3.1.0</version>
 
    <modules>
       <module>accsaber-application</module>
