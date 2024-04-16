@@ -105,14 +105,11 @@ class RankedMapService @Autowired constructor(
     }
 
     fun removeRankedMap(leaderboardId: Long) {
-        val map = beatMapRepository.findById(leaderboardId)
-        if (map.isEmpty) {
-            throw AccsaberOperationException(
-                ExceptionType.RANKED_MAP_NOT_FOUND,
-                "The ranked map [$leaderboardId] does not currently exist."
-            )
+        val optionalMap = beatMapRepository.findById(leaderboardId)
+        if (optionalMap.isEmpty) {
+            throw AccsaberOperationException(ExceptionType.RANKED_MAP_NOT_FOUND, "The ranked map [$leaderboardId] does not currently exist.")
         }
-        val beatMap = map.get()
+        val beatMap = optionalMap.get()
         val song = beatMap.song
         song.beatMaps.remove(beatMap)
         if (song.beatMaps.size == 0) {

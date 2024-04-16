@@ -1,0 +1,21 @@
+databaseChangeLog:
+  - include:
+      file: db/changelog/changelogs/1-master-changelog.xml
+  - include:
+      file: db/changelog/changelogs/2-feature_profile-page.xml
+  - include:
+      file: db/changelog/changelogs/3-feature_staff-login.xml
+  - include:
+      file: db/changelog/changelogs/4-feature_leaderboard-seperation.xml
+  - include:
+      file: db/changelog/changelogs/5-feature_ap_player_curves.xml
+  - include:
+      file: db/changelog/changelogs/6-feature_playerrank_score_history.xml
+  - include:
+      file: db/changelog/changelogs/7-post-release-fix.xml
+  - include:
+      file: db/changelog/changelogs/8-re-enabling-pm.xml
+  - include:
+      file: db/changelog/changelogs/9-add-mods-to-acc-saber-score-view.xml
+  - include:
+      file: db/changelog/changelogs/10-remove-timed-mod-ban.xml

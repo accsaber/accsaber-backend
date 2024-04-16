@@ -18,7 +18,7 @@ interface ScoreSaberScoreMapper {
     @Mapping(target = "accuracy", ignore = true)
     @Mapping(target = "mods", source = "score.modifiers")
     @Mapping(target = "leaderboardId", source = "leaderboard.id")
-    @Mapping(target = "unmodififiedScore", source = "score.baseScore")
+    @Mapping(target = "unmodifiedScore", source = "score.baseScore")
     @Mapping(target = "score", source = "score.modifiedScore")
     @Mapping(target = "timeSet", source = "score.timeSet")
     @Mapping(target = "scoreId", source = "score.id")
@@ -34,7 +34,7 @@ interface ScoreSaberScoreMapper {
     @Mapping(target = "scoreId", ignore = true)
     @Mapping(target = "mods", source = "score.modifiers")
     @Mapping(target = "leaderboardId", source = "leaderboard.id")
-    @Mapping(target = "unmodififiedScore", source = "score.baseScore")
+    @Mapping(target = "unmodifiedScore", source = "score.baseScore")
     @Mapping(target = "score", source = "score.modifiedScore")
     @Mapping(target = "timeSet", source = "score.timeSet")
     fun scoreSaberScoreDtoToExistingScore(@MappingTarget score: ScoreData, player: ScoreSaberScoreBundleDto): ScoreData

@@ -9,7 +9,7 @@ import org.mapstruct.factory.Mappers
 
 @Mapper(componentModel = "spring")
 interface MapLeaderboardPlayerMapper {
-    @Mapping(target = "categoryName", source = "beatMap.category.categoryName")
+    @Mapping(target = "categoryName", source = "categoryName")
     @Mapping(target = "rank", source = "ranking")
     @Mapping(target = "playerName", source = "player.playerName")
     @Mapping(target = "playerId", source = "player.playerId")

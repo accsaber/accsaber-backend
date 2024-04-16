@@ -1,0 +1,14 @@
+# Use postgres/example user/password credentials
+version: '3.1'
+
+services:
+
+  accsaber_postgres_db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: acc
+      POSTGRES_PASSWORD: acc
+      POSTGRES_DB: accsaber_db
+    ports:
+      - 5432:5432

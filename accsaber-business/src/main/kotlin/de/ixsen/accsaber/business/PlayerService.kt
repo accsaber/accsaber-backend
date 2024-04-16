@@ -46,11 +46,7 @@ class PlayerService @Autowired constructor(
     private val categoryRepository: CategoryRepository,
     @Value("\${accsaber.image-save-location}") imageFolder: String
 ) : HasLogger {
-    private val avatarFolder: String
-
-    init {
-        avatarFolder = "$imageFolder/avatars"
-    }
+    private val avatarFolder: String = "$imageFolder/avatars"
 
     @Transactional
     fun getAllPlayers(): List<AccSaberPlayer> = overallAccSaberPlayerRepository.findAll()
@@ -93,7 +89,7 @@ class PlayerService @Autowired constructor(
         return playerDataRepository.findAllPlayerIds()
     }
 
-    @Transactional
+    @Transactional(Transactional.TxType.REQUIRES_NEW)
     fun handlePlayer(allRankedMaps: List<BeatMap>, playerId: Long?) {
         val optPlayer = playerDataRepository.findById(playerId!!)
         if (optPlayer.isEmpty) {
@@ -213,8 +209,8 @@ class PlayerService @Autowired constructor(
     }
 
     fun takeRankingSnapshot() {
-        this.getLogger().trace("Taking snapshot of current ranks")
-        playerDataRepository.takeRankSnapshot()
+        this.getLogger().info("Taking snapshot of current ranks")
+        this.playerDataRepository.takeRankSnapshot()
     }
 
     fun getRecentPlayerRankHistory(playerId: Long): List<PlayerRankHistory> {
@@ -225,6 +221,10 @@ class PlayerService @Autowired constructor(
         val category = categoryRepository.findByCategoryName(categoryName)
             .orElseThrow { AccsaberOperationException(ExceptionType.CATEGORY_NOT_FOUND, String.format("Category [%s] does not exist.", categoryName)) }
         return playerRankHistoryRepository.findLastMonthForPlayerAndCategory(playerId, category.id)
+    }
+
+    fun refreshMaterializedViews() {
+        this.playerDataRepository.refreshMaterializedViews()
     }
 
     /**

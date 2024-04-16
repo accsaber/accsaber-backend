@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.io.ClassPathResource
 import org.springframework.stereotype.Service
 import org.springframework.util.FileCopyUtils
-import org.springframework.util.StringUtils
 import java.io.File
 import java.io.IOException
 import java.io.InputStreamReader
@@ -47,7 +46,7 @@ class PlaylistService @Autowired constructor(
     @Throws(JsonProcessingException::class)
     private fun getRankedMapsJson(maps: List<BeatMap>, category: String, categoryDisplayName: String): ByteArray {
         val playlist = Playlist(
-            "AccSaber ${categoryDisplayName.capitalise()}} Ranked Maps",
+            "AccSaber ${categoryDisplayName.capitalise()} Ranked Maps",
             "AccSaber",
             getPlaylistImageData(category),
             playlistUrl + category,

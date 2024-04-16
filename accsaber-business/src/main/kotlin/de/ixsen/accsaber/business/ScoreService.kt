@@ -2,7 +2,6 @@ package de.ixsen.accsaber.business
 
 import de.ixsen.accsaber.business.exceptions.AccsaberOperationException
 import de.ixsen.accsaber.business.exceptions.ExceptionType
-import de.ixsen.accsaber.database.model.Category
 import de.ixsen.accsaber.database.model.players.PlayerData
 import de.ixsen.accsaber.database.model.players.ScoreData
 import de.ixsen.accsaber.database.model.players.ScoreDataHistory
@@ -51,8 +50,8 @@ class ScoreService @Autowired constructor(
         return accSaberScoreRepository.findAllByPlayerOrderByApDesc(player)
     }
 
-    fun getScoresForPlayer(player: PlayerData, category: Category): List<AccSaberScore> {
-        return accSaberScoreRepository.findAllByPlayerAndCategoryOrderByApDesc(player, category)
+    fun getScoresForPlayer(player: PlayerData, categoryName: String): List<AccSaberScore> {
+        return accSaberScoreRepository.findAllByPlayerAndCategoryOrderByApDesc(player, categoryName)
     }
 
     fun getScoreHistoryForPlayer(player: PlayerData, leaderboardId: Long): List<ScoreDataHistory> {

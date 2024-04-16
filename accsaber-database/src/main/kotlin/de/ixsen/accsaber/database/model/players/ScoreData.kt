@@ -11,7 +11,7 @@ class ScoreData(
     var scoreId: Long,
     var rankWhenScoresSet: Int,
     var score: Int,
-    var unmodififiedScore: Int,
+    var unmodifiedScore: Int,
     var accuracy: Double? = null,
     var ap: Double? = null,
     var weightedAp: Double? = null,

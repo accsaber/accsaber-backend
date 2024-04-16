@@ -1,0 +1,386 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<!--  @formatter:off    -->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+<changeSet id="1" author="2">
+
+<sql endDelimiter="/">
+CREATE FUNCTION calc_weighted_ap(ap DOUBLE PRECISION, ranking BIGINT, category_id BIGINT)
+   RETURNS DOUBLE PRECISION AS $weighted_ap$
+DECLARE
+   y1 double precision;
+   x1 double precision;
+   k  double precision;
+   x0 double precision;
+BEGIN
+   SELECT player_curve_y1, player_curve_x1, player_curve_k
+   INTO y1, x1, k
+   FROM category c
+   WHERE c.id = category_id;
+
+   SELECT-(ln((1 - y1) / (y1 * exp(k * x1) - 1)) / k)
+   INTO x0;
+
+   RETURN ap * (1 + exp(-k * x0)) / (1 + exp(k * (ranking - 1 - x0)));
+END;
+$weighted_ap$ LANGUAGE plpgsql;
+/
+</sql>
+
+
+<sql endDelimiter="/">
+CREATE FUNCTION calc_ap(accuracy DOUBLE PRECISION, complexity DOUBLE PRECISION, category_id BIGINT)
+   RETURNS DOUBLE PRECISION AS $ap$
+DECLARE
+   a double precision;
+   b double precision;
+   c double precision;
+   d double precision;
+   e double precision;
+BEGIN
+   SELECT ap_curve_a, ap_curve_b, ap_curve_c, ap_curve_d, ap_curve_e
+   INTO a, b,c,d, e
+   FROM category c
+   WHERE c.id = category_id;
+   RETURN (pow(a, (pow((accuracy + (complexity / e)) / b, c))) - 1.0) * d;
+END;
+$ap$ LANGUAGE plpgsql;
+/
+</sql>
+
+
+<sql endDelimiter="/">
+CREATE PROCEDURE recalc_player_ap(id_of_player BIGINT) AS $$
+DECLARE
+   map double precision;
+BEGIN
+   UPDATE score_data
+   SET is_ranked_score = true,
+       accuracy        = (score::NUMERIC / map.max_score),
+       ap              = calc_ap((score::NUMERIC / map.max_score) * 100.0, complexity, map.category_id)
+   FROM (select leaderboard_id, max_score, complexity, category_id from beat_map) as map
+   WHERE (mods is null OR mods not like '%SC%')
+     AND map_leaderboard_id = map.leaderboard_id
+     AND player_id = id_of_player;
+
+   CALL recalc_weighted_ap_for_player(id_of_player);
+   CALL recalc_player_category_stats(id_of_player);
+END;
+$$ LANGUAGE plpgsql;
+/
+</sql>
+
+
+<sql endDelimiter="/">
+CREATE PROCEDURE recalc_weighted_ap_for_player(player_id_param BIGINT) AS $$
+BEGIN
+   UPDATE score_data as sData
+   SET weighted_ap = wt.weighted_ap
+      FROM (select recalced_table.score_id,
+                 calc_weighted_ap(recalced_table.ap, recalced_table.ranking, recalced_table.category_id) AS weighted_ap,
+                 recalced_table.player_id,
+                 recalced_table.category_id
+          FROM (SELECT *, row_number() OVER (PARTITION BY least(sd.player_id, category_id),greatest(sd.player_id, category_id) ORDER BY ap DESC ) as ranking
+                FROM score_data sd
+                         JOIN beat_map bm ON sd.map_leaderboard_id = bm.leaderboard_id
+                WHERE sd.is_ranked_score
+                  AND sd.player_id = player_id_param) recalced_table) AS wt
+   WHERE sData.score_id = wt.score_id;
+END;
+$$ LANGUAGE plpgsql;
+/
+</sql>
+
+
+<sql endDelimiter="/">
+CREATE PROCEDURE rank_scores(leaderboard_id_param BIGINT, maxScore BIGINT, complexity DOUBLE PRECISION) AS $$
+DECLARE
+   category int;
+BEGIN
+   SELECT category_id
+   INTO category
+   FROM beat_map bm
+   WHERE bm.leaderboard_id = leaderboard_id_param;
+
+   UPDATE score_data sd
+   SET is_ranked_score = true,
+       accuracy        = (sd.score / maxScore),
+       ap              = calc_ap((sd.score / maxScore) * 100.0, complexity, category)
+   WHERE (sd.mods is null or sd.mods not like '%SC%')
+     AND sd.map_leaderboard_id = leaderboard_id_param;
+
+   CALL recalc_weighted_ap(category);
+   CALL recalc_all_category_stats();
+END;
+$$ LANGUAGE plpgsql;
+/
+</sql>
+
+
+<sql endDelimiter="/">
+CREATE PROCEDURE recalc_all_ap() AS $$
+BEGIN
+   UPDATE score_data
+   SET is_ranked_score = false
+   WHERE is_ranked_score = true;
+
+   UPDATE score_data AS sd
+   SET is_ranked_score = true, accuracy = (sd.score::NUMERIC / map.max_score), ap = calc_ap((sd.score::NUMERIC / map.max_score) * 100.0, map.complexity, map.category_id)
+      FROM (select leaderboard_id, max_score, complexity, category_id from beat_map) as map
+   WHERE (sd.mods is null or sd.mods not like '%SC%') and sd.map_leaderboard_id = map.leaderboard_id;
+
+   CALL recalc_all_weighted_ap();
+   CALL recalc_all_category_stats();
+   CALL refresh_materialized_views();
+END;
+$$ LANGUAGE plpgsql;
+/
+</sql>
+
+
+<sql endDelimiter="/">
+CREATE PROCEDURE recalc_all_weighted_ap() AS $$
+BEGIN
+   UPDATE score_data AS sd
+   SET weighted_ap = wt.weighted_ap
+      FROM (SELECT recalced_table.score_id,
+                 calc_weighted_ap(recalced_table.ap, recalced_table.ranking, recalced_table.category_id) AS weighted_ap,
+                 recalced_table.player_id,
+                 recalced_table.category_id
+          FROM (SELECT *, row_number() over (partition by least(sd.player_id, category_id),greatest(sd.player_id, category_id) order by ap desc ) AS ranking
+                FROM score_data sd join beat_map bm on sd.map_leaderboard_id = bm.leaderboard_id
+                WHERE sd.is_ranked_score) recalced_table) wt
+   WHERE sd.score_id = wt.score_id;
+END;
+$$ LANGUAGE plpgsql;
+/
+</sql>
+
+
+<sql endDelimiter="/">
+   CREATE PROCEDURE take_ranking_snapshot() AS $$
+BEGIN
+   INSERT INTO player_rank_history (date, player_id, ap, average_acc, average_ap_per_map,
+                                    ranked_plays, category_id, ranking)
+   SELECT *
+   FROM (SELECT  current_date                                                           AS date,
+              pcs.player_id                                                          AS player_id,
+              pcs.ap                                                                 AS ap,
+              pcs.average_acc                                                        AS average_acc,
+              pcs.average_ap                                                         AS average_ap_per_map,
+              pcs.ranked_plays                                                       AS ranked_plays,
+              pcs.category_id                                                        AS category_id,
+              row_number() over ( PARTITION BY pcs.category_id ORDER BY pcs.ap DESC) AS ranking
+         FROM (player_category_stats pcs
+            JOIN player_data pd ON (pcs.player_id = pd.player_id))
+         WHERE pcs.ranked_plays &lt;&gt; 0) AS cur_standings ON conflict (player_id,date, category_id)
+    DO UPDATE SET ap                 = excluded.ap,
+                                             average_acc        = excluded.average_acc,
+                                             ranked_plays       = excluded.ranked_plays,
+                                             average_ap_per_map = excluded.average_ap_per_map,
+                                             ranking            = excluded.ranking;
+
+INSERT INTO player_rank_history (date, player_id, ap, average_acc, average_ap_per_map,
+                                 ranked_plays, category_id, ranking)
+SELECT *
+FROM (SELECT current_date            AS date,
+             oacp.player_id          AS player_id,
+             oacp.ap                 AS ap,
+             oacp.average_acc        AS average_acc,
+             oacp.average_ap_per_map AS average_ap_per_map,
+             oacp.ranked_plays       AS ranked_plays,
+             -1                      AS category_id,
+             oacp.ranking            AS ranking
+      FROM (overall_acc_saber_player oacp
+         JOIN player_data pd ON (oacp.player_id = pd.player_id))) AS cur_standings
+   ON CONFLICT (player_id, date, category_id)
+    DO UPDATE SET ap                 = excluded.ap,
+             average_acc        = excluded.average_acc,
+             ranked_plays       = excluded.ranked_plays,
+             average_ap_per_map = excluded.average_ap_per_map,
+             ranking            = excluded.ranking;
+
+
+   UPDATE player_category_stats category_stats
+   SET ranking_last_week = ranking_delta_tuples.ranking_delta
+   FROM (SELECT prh.ranking as ranking_delta, prh.player_id, prh.category_id
+          FROM player_rank_history prh
+          WHERE prh.date = current_date - 7) ranking_delta_tuples
+   WHERE category_stats.player_id = ranking_delta_tuples.player_id
+   AND category_stats.category_id = ranking_delta_tuples.category_id;
+
+END;
+$$ LANGUAGE plpgsql;
+/
+</sql>
+
+
+<sql endDelimiter="/">
+CREATE PROCEDURE recalc_player_category_stats(player_id_param BIGINT) AS $$
+BEGIN
+   INSERT INTO player_category_stats(ap, average_acc, average_ap, ranked_plays, category_id, player_id)
+   SELECT *
+   FROM (SELECT sum(sd.weighted_ap) AS ap,
+                avg(sd.accuracy)    AS average_acc,
+                avg(sd.ap)          AS average_ap,
+                count(score_id)     AS ranked_plays,
+                bm.category_id,
+                sd.player_id
+         FROM score_data sd
+                 JOIN beat_map bm
+                      ON sd.map_leaderboard_id = bm.leaderboard_id
+         WHERE is_ranked_score
+           AND sd.player_id = player_id_param
+         GROUP BY least(sd.player_id, bm.category_id), greatest(sd.player_id, bm.category_id), bm.category_id, sd.player_id) as new_stats ON CONFLICT (player_id, category_id)
+              DO UPDATE SET
+               ap           = excluded.ap,
+               average_acc  = excluded.average_acc,
+               ranked_plays = excluded.ranked_plays,
+               average_ap   = excluded.average_ap;
+END;
+$$ LANGUAGE plpgsql;
+/
+</sql>
+
+
+<sql endDelimiter="/">
+   CREATE PROCEDURE recalc_player_category_stat(player_id_param BIGINT, category_id_param BIGINT) AS $$
+   BEGIN
+   INSERT INTO player_category_stats(ap, average_acc, average_ap, ranked_plays, category_id, player_id)
+   SELECT *
+   FROM (SELECT sum(sd.weighted_ap) AS ap,
+                avg(sd.accuracy)    AS average_acc,
+                avg(sd.ap)          AS average_ap,
+                count(score_id)     AS ranked_plays,
+                bm.category_id,
+                sd.player_id
+         FROM score_data sd
+                 JOIN beat_map bm
+                      ON sd.map_leaderboard_id = bm.leaderboard_id
+         WHERE is_ranked_score
+           AND sd.player_id = player_id_param
+           AND bm.category_id = category_id_param
+         GROUP by least(sd.player_id, bm.category_id), greatest(sd.player_id, bm.category_id), bm.category_id, sd.player_id) as new_stats
+      ON CONFLICT (player_id, category_id)
+        DO UPDATE SET ap         = excluded.ap,
+                    average_acc  = excluded.average_acc,
+                    ranked_plays = excluded.ranked_plays,
+                    average_ap   = excluded.average_ap;
+   END;
+$$ LANGUAGE plpgsql;
+
+/
+</sql>
+
+
+<sql endDelimiter="/">
+CREATE PROCEDURE recalc_specific_category_stats(category_id_param BIGINT) AS $$
+BEGIN
+   INSERT INTO player_category_stats(ap, average_acc, average_ap, ranked_plays, category_id, player_id)
+   SELECT *
+   FROM (SELECT sum(sd.weighted_ap) AS ap,
+                avg(sd.accuracy)    AS average_acc,
+                avg(sd.ap)          AS average_ap,
+                count(score_id)     AS ranked_plays,
+                bm.category_id,
+                sd.player_id
+         FROM score_data sd
+                 JOIN beat_map bm
+                      ON sd.map_leaderboard_id = bm.leaderboard_id
+         WHERE is_ranked_score
+           AND bm.category_id = category_id_param
+         GROUP by least(sd.player_id, bm.category_id), greatest(sd.player_id, bm.category_id), bm.category_id, sd.player_id) AS new_stats
+      ON CONFLICT (player_id, category_id)
+        DO UPDATE SET ap         = excluded.ap,
+                    average_acc  = excluded.average_acc,
+                    ranked_plays = excluded.ranked_plays,
+                    average_ap   = excluded.average_ap;
+END;
+$$ LANGUAGE plpgsql;
+/
+</sql>
+
+
+<sql endDelimiter="/">
+CREATE PROCEDURE recalc_all_category_stats() AS $$
+BEGIN
+   INSERT INTO player_category_stats(ap, average_acc, average_ap, ranked_plays, category_id, player_id)
+   SELECT *
+   FROM (SELECT sum(sd.weighted_ap) as ap,
+                avg(sd.accuracy)    as average_acc,
+                avg(sd.ap)          as average_ap,
+                count(score_id)     as ranked_plays,
+                bm.category_id,
+                sd.player_id
+         FROM score_data sd
+                 join beat_map bm
+                      on sd.map_leaderboard_id = bm.leaderboard_id
+         WHERE is_ranked_score
+         GROUP by least(sd.player_id, bm.category_id), greatest(sd.player_id, bm.category_id), bm.category_id, sd.player_id) AS new_stats
+      ON CONFLICT (player_id,category_id)
+        DO UPDATE SET
+            ap           = excluded.ap,
+            average_acc  = excluded.average_acc,
+            ranked_plays = excluded.ranked_plays,
+            average_ap   = excluded.average_ap;
+END;
+$$ LANGUAGE plpgsql;
+/
+</sql>
+
+<sql endDelimiter="/">
+CREATE PROCEDURE refresh_materialized_views() AS $$
+BEGIN
+   refresh materialized view acc_saber_score;
+   refresh materialized view category_acc_saber_player;
+   refresh materialized view overall_acc_saber_player;
+END;
+$$ LANGUAGE plpgsql;
+/
+</sql>
+
+
+<sql endDelimiter="/">
+   CREATE FUNCTION save_score_history() RETURNS TRIGGER AS $$
+   BEGIN
+      INSERT INTO score_data_history(score_id, accuracy, ap, map_leaderboard_id, score, time_set, unmodified_score, weighted_ap, player_id, mods)
+      values (OLD.score_id, OLD.accuracy, OLD.ap, OLD.map_leaderboard_id, old.score, old.time_set, old.unmodified_score, old.weighted_ap, old.player_id, old.mods);
+      RETURN null;
+   END;
+   $$ LANGUAGE plpgsql;
+   /
+</sql>
+
+<sql endDelimiter="/">
+CREATE TRIGGER save_score_history_trigger
+   BEFORE UPDATE
+      ON score_data
+   FOR EACH ROW
+   WHEN ( old.is_ranked_score = new.is_ranked_score and old.time_set != new.time_set )
+   EXECUTE FUNCTION save_score_history();
+END;
+   /
+</sql>
+
+<sql endDelimiter="/">
+    CREATE PROCEDURE recalc_weighted_ap(category BIGINT) AS $$
+    BEGIN
+    UPDATE score_data sd
+    SET weighted_ap = wt.weighted_ap
+        FROM (SELECT recalced_table.score_id,
+                 calc_weighted_ap(recalced_table.ap, recalced_table.ranking, recalced_table.category_id) AS weighted_ap,
+                 recalced_table.player_id,
+                 recalced_table.category_id
+          FROM (SELECT *,
+                       row_number() over (PARTITION BY least(sd.player_id, category_id),greatest(sd.player_id, category_id) ORDER BY ap DESC ) AS ranking
+                FROM score_data sd
+                         JOIN beat_map bm ON sd.map_leaderboard_id = bm.leaderboard_id
+                WHERE sd.is_ranked_score
+                  AND bm.category_id = category) recalced_table) AS wt
+    WHERE sd.score_id = wt.score_id;
+    END
+$$ LANGUAGE plpgsql;
+    /
+</sql>
+</changeSet>
+</databaseChangeLog>
+<!-- @formatter:on -->

@@ -1,6 +1,5 @@
 package de.ixsen.accsaber.database.repositories.view
 
-import de.ixsen.accsaber.database.model.Category
 import de.ixsen.accsaber.database.model.players.PlayerData
 import de.ixsen.accsaber.database.repositories.ReadOnlyRepository
 import de.ixsen.accsaber.database.views.AccSaberScore
@@ -18,11 +17,11 @@ interface AccSaberScoreRepository : ReadOnlyRepository<AccSaberScore, Long, AccS
     @Query(
         """
             from AccSaberScore ass
-            where ass.player = ?1 and ass.beatMap.category = ?2
+            where ass.player = ?1 and ass.categoryName = ?2
             order by ass.ap desc 
         """
     )
-    fun findAllByPlayerAndCategoryOrderByApDesc(playerData: PlayerData, category: Category): List<AccSaberScore>
+    fun findAllByPlayerAndCategoryOrderByApDesc(playerData: PlayerData, category: String): List<AccSaberScore>
 
     @Query("SELECT * FROM acc_saber_score ass where ass.map_leaderboard_id = ?1 limit 10 offset ?2", nativeQuery = true)
     fun findAllByLeaderboardIdAround(leaderboardId: Long, position: Long?): List<AccSaberScore>

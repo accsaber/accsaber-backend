@@ -1,0 +1,21 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="4-trigger-fix" author="Ixsen">
+        <!--  @formatter:off    -->
+<sql endDelimiter="/">
+DROP TRIGGER save_score_history_trigger ON score_data;
+CREATE TRIGGER save_score_history_trigger
+    AFTER UPDATE
+    ON score_data
+    FOR EACH ROW
+    WHEN ( old.is_ranked_score = new.is_ranked_score and old.time_set != new.time_set )
+EXECUTE FUNCTION save_score_history();
+END;
+/
+</sql>
+        <!-- @formatter:on -->
+    </changeSet>
+</databaseChangeLog>

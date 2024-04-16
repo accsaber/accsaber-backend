@@ -71,6 +71,8 @@ class JobService
                 }
             }
 
+            this.playerService.refreshMaterializedViews()
+
             val duration = Duration.between(start, Instant.now()).seconds
             val minutes = duration / 60
             val seconds = duration % 60
