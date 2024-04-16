@@ -231,10 +231,10 @@ class PlayerService @Autowired constructor(
      * Loads the avatar of a player.
      */
     private fun loadAvatar(playerId: Long, avatarUrl: String) {
-        val avatar = scoreSaberConnector.loadAvatar(avatarUrl)
+        val avatar = scoreSaberConnector.loadAvatar(avatarUrl) ?: return
         try {
             FileOutputStream("$avatarFolder/$playerId.jpg").use { fileOutputStream -> fileOutputStream.write(avatar) }
-        } catch (e: IOException) {
+        } catch (e: Exception) {
             this.getLogger().error("Unable to save avatar for player with playerId {}", playerId, e)
         }
     }
