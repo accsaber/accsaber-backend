@@ -6,5 +6,5 @@ class ScoreSaberScoreDto {
     var baseScore = 0
     var modifiers: String? = null
     var timeSet: String? = null
-    var hmd: Hmd? = null
+    var deviceHmd: String? = null
 }

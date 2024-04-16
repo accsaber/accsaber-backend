@@ -189,6 +189,7 @@ class PlayerService @Autowired constructor(
             score = mappingComponent.scoreMapper.scoreSaberScoreDtoToScore(scoreSaberScoreBundleDto)
             player.addScore(score)
         }
+        player.hmd = scoreSaberScoreBundleDto.score?.deviceHmd
         newlySetScores.add(score)
     }
 

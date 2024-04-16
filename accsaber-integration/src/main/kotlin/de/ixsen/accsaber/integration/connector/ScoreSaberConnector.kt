@@ -29,13 +29,13 @@ class ScoreSaberConnector : AbstractConnector() {
         val requestUrl = String.format("%s/player/%s/full", url, playerId)
         return getRequest(requestUrl)
             .bodyToMono(ScoreSaberPlayerDto::class.java)
-            .onErrorResume(WebClientResponseException.NotFound::class.java) { notFound: WebClientResponseException.NotFound? -> Mono.empty() }
-            .doOnError(WebClientResponseException.TooManyRequests::class.java) { tooManyRequests: WebClientResponseException.TooManyRequests? ->
+            .onErrorResume(WebClientResponseException.NotFound::class.java) { Mono.empty() }
+            .doOnError(WebClientResponseException.TooManyRequests::class.java) {
                 logger.warn("Too many requests reached, pausing...")
                 pauseInstant = Instant.now()
                 throw RuntimeException()
             }
-            .doOnError(UnsupportedMediaTypeException::class.java) { unsupportedMediaType: UnsupportedMediaTypeException? ->
+            .doOnError(UnsupportedMediaTypeException::class.java) {
                 logger.warn("Too many requests reached, pausing...")
                 pauseInstant = Instant.now()
                 throw RuntimeException()
@@ -50,13 +50,13 @@ class ScoreSaberConnector : AbstractConnector() {
         val requestUrl = String.format("%s/player/%s/scores?page=%d&sort=recent&limit=100", url, playerId, page)
         return getRequest(requestUrl)
             .bodyToMono(ScoreSaberScoreListDto::class.java)
-            .onErrorResume(WebClientResponseException.NotFound::class.java) { notFound: WebClientResponseException.NotFound? -> Mono.empty() }
-            .doOnError(WebClientResponseException.TooManyRequests::class.java) { tooManyRequests: WebClientResponseException.TooManyRequests? ->
+            .onErrorResume(WebClientResponseException.NotFound::class.java) { Mono.empty() }
+            .doOnError(WebClientResponseException.TooManyRequests::class.java) {
                 logger.warn("Too many requests reached, pausing...")
                 pauseInstant = Instant.now()
                 throw RuntimeException()
             }
-            .doOnError(UnsupportedMediaTypeException::class.java) { unsupportedMediaType: UnsupportedMediaTypeException? ->
+            .doOnError(UnsupportedMediaTypeException::class.java) {
                 logger.warn("Too many requests reached, pausing...")
                 pauseInstant = Instant.now()
                 throw RuntimeException()
