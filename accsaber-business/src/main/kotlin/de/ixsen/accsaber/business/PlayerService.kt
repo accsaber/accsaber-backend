@@ -10,10 +10,7 @@ import de.ixsen.accsaber.database.model.maps.BeatMap
 import de.ixsen.accsaber.database.model.players.PlayerData
 import de.ixsen.accsaber.database.model.players.PlayerRankHistory
 import de.ixsen.accsaber.database.model.players.ScoreData
-import de.ixsen.accsaber.database.repositories.model.CategoryRepository
-import de.ixsen.accsaber.database.repositories.model.PlayerDataRepository
-import de.ixsen.accsaber.database.repositories.model.PlayerRankHistoryRepository
-import de.ixsen.accsaber.database.repositories.model.ScoreDataRepository
+import de.ixsen.accsaber.database.repositories.model.*
 import de.ixsen.accsaber.database.repositories.view.CategoryAccSaberPlayerRepository
 import de.ixsen.accsaber.database.repositories.view.OverallAccSaberPlayerRepository
 import de.ixsen.accsaber.database.views.AccSaberPlayer
@@ -26,7 +23,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import java.io.FileOutputStream
-import java.io.IOException
 import java.time.Duration
 import java.time.Instant
 import java.util.function.Consumer
@@ -44,6 +40,7 @@ class PlayerService @Autowired constructor(
     private val scoreSaberConnector: ScoreSaberConnector,
     private val mappingComponent: BusinessMappingComponent,
     private val categoryRepository: CategoryRepository,
+    private val playerCategoryStatsRepository: PlayerCategoryStatsRepository,
     @Value("\${accsaber.image-save-location}") imageFolder: String
 ) : HasLogger {
     private val avatarFolder: String = "$imageFolder/avatars"
@@ -53,7 +50,10 @@ class PlayerService @Autowired constructor(
 
     fun signupPlayer(playerId: Long, playerName: String) {
         if (playerDataRepository.existsById(playerId)) {
-            throw AccsaberOperationException(ExceptionType.PLAYER_ALREADY_EXISTS, String.format("Player with ID %s already exists.", playerId))
+            throw AccsaberOperationException(
+                ExceptionType.PLAYER_ALREADY_EXISTS,
+                String.format("Player with ID %s already exists.", playerId)
+            )
         }
         val player = PlayerData(
             playerId, playerName
@@ -69,7 +69,8 @@ class PlayerService @Autowired constructor(
         playerDataRepository.save(player)
     }
 
-    fun getRankedPlayer(playerId: Long): AccSaberPlayer? = overallAccSaberPlayerRepository.findPlayerByPlayerId(playerId)
+    fun getRankedPlayer(playerId: Long): AccSaberPlayer? =
+        overallAccSaberPlayerRepository.findPlayerByPlayerId(playerId)
 
     fun getRankedPlayerForCategory(playerId: Long, category: String): AccSaberPlayer? {
         return if (category == "overall") {
@@ -81,7 +82,12 @@ class PlayerService @Autowired constructor(
 
     fun getPlayer(playerId: Long): PlayerData {
         return playerDataRepository.findById(playerId)
-            .orElseThrow { AccsaberOperationException(ExceptionType.PLAYER_NOT_FOUND, "Player with ID $playerId does not exist.") }
+            .orElseThrow {
+                AccsaberOperationException(
+                    ExceptionType.PLAYER_NOT_FOUND,
+                    "Player with ID $playerId does not exist."
+                )
+            }
     }
 
     @Transactional
@@ -102,6 +108,12 @@ class PlayerService @Autowired constructor(
         var playerData = getScoreSaberPlayerData(player.playerId)
         if (playerData == null) {
             this.getLogger().error("Couldn't fetch player with id {}, skipping", player.playerId)
+            return
+        }
+
+        if (player.isBanned || playerData.inactive == true || playerData.banned == true) {
+            this.getLogger().info("Player {} | {} is banned or inactive, skipping", playerData.name, playerId)
+            this.handleBannedOrInactivePlayer(player)
             return
         }
 
@@ -145,7 +157,10 @@ class PlayerService @Autowired constructor(
         if (playerData != null) {
             val newMaxPage = ceil(playerData.scoreStats!!.totalPlayCount / 100.0).toInt()
             if (pageCount < newMaxPage && score == null) {
-                this.getLogger().trace("Player {} has set a score that created a new page, while scores were loading, reloading latest page.", player.playerName)
+                this.getLogger().trace(
+                    "Player {} has set a score that created a new page, while scores were loading, reloading latest page.",
+                    player.playerName
+                )
                 val scoreSaberScores = getScoreSaberScore(player.playerId, newMaxPage)
                 for (scoreSaberScoreBundleDto in scoreSaberScores.playerScores) {
                     this.handleSetScores(player, newlySetScores, scoreSaberScoreBundleDto)
@@ -158,8 +173,14 @@ class PlayerService @Autowired constructor(
         scoreDataRepository.flush()
         playerDataRepository.flush()
 
+        if (player.scores.none { it.isRankedScore }) {
+            newlySetScores.addAll(player.scores)
+        }
+
         val categoryIds = newlySetScores.stream()
-            .filter { tuple: ScoreData? -> allRankedMaps.stream().anyMatch { map: BeatMap -> map.leaderboardId == tuple!!.leaderboardId } }
+            .filter { tuple: ScoreData? ->
+                allRankedMaps.stream().anyMatch { map: BeatMap -> map.leaderboardId == tuple!!.leaderboardId }
+            }
             .map { scoreTuple: ScoreData? ->
                 allRankedMaps.stream().filter { map: BeatMap -> map.leaderboardId == scoreTuple!!.leaderboardId }
                     .findFirst().get().category.id
@@ -169,7 +190,12 @@ class PlayerService @Autowired constructor(
         if (newlySetScores.isEmpty()) {
             return
         }
-        this.getLogger().trace(String.format("Recalculating player AP for %s after successfully loading new scores", player.playerName))
+        this.getLogger().trace(
+            String.format(
+                "Recalculating player AP for %s after successfully loading new scores",
+                player.playerName
+            )
+        )
         playerDataRepository.recalcPlayerAp(player.playerId)
         if (categoryIds.size == 3) {
             playerDataRepository.recalculatePlayerCategoryStats(player.playerId)
@@ -180,11 +206,30 @@ class PlayerService @Autowired constructor(
         }
     }
 
-    private fun handleSetScores(player: PlayerData, newlySetScores: MutableList<ScoreData>, scoreSaberScoreBundleDto: ScoreSaberScoreBundleDto) {
-        val optScore = player.scores.stream().filter { score: ScoreData -> score.scoreId == scoreSaberScoreBundleDto.score?.id!! }.findFirst()
+    private fun handleBannedOrInactivePlayer(player: PlayerData) {
+        player.scores.forEach {
+            it.isRankedScore = false
+            it.accuracy = null
+            it.ap = null
+            it.weightedAp = null
+        }
+        this.scoreDataRepository.saveAll(player.scores)
+        this.playerDataRepository.save(player)
+        this.playerCategoryStatsRepository.deleteByPlayer(player)
+    }
+
+    private fun handleSetScores(
+        player: PlayerData,
+        newlySetScores: MutableList<ScoreData>,
+        scoreSaberScoreBundleDto: ScoreSaberScoreBundleDto
+    ) {
+        val optScore =
+            player.scores.stream().filter { score: ScoreData -> score.scoreId == scoreSaberScoreBundleDto.score?.id!! }
+                .findFirst()
         val score: ScoreData
         if (optScore.isPresent) {
-            score = mappingComponent.scoreMapper.scoreSaberScoreDtoToExistingScore(optScore.get(), scoreSaberScoreBundleDto)
+            score =
+                mappingComponent.scoreMapper.scoreSaberScoreDtoToExistingScore(optScore.get(), scoreSaberScoreBundleDto)
         } else {
             score = mappingComponent.scoreMapper.scoreSaberScoreDtoToScore(scoreSaberScoreBundleDto)
             player.addScore(score)
@@ -220,7 +265,12 @@ class PlayerService @Autowired constructor(
 
     fun getRecentPlayerRankHistoryForCategory(playerId: Long, categoryName: String): List<PlayerRankHistory> {
         val category = categoryRepository.findByCategoryName(categoryName)
-            .orElseThrow { AccsaberOperationException(ExceptionType.CATEGORY_NOT_FOUND, String.format("Category [%s] does not exist.", categoryName)) }
+            .orElseThrow {
+                AccsaberOperationException(
+                    ExceptionType.CATEGORY_NOT_FOUND,
+                    String.format("Category [%s] does not exist.", categoryName)
+                )
+            }
         return playerRankHistoryRepository.findLastMonthForPlayerAndCategory(playerId, category.id)
     }
 

@@ -6,4 +6,6 @@ data class ScoreSaberPlayerDto(
     var profilePicture: String? = null,
     var country: String? = null,
     var scoreStats: ScoreSaberScoreStatsDto? = null,
+    var banned: Boolean? = false,
+    var inactive: Boolean? = false,
 )

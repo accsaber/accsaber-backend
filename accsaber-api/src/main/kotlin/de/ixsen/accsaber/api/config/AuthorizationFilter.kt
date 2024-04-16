@@ -43,7 +43,7 @@ class AuthorizationFilter(authManager: AuthenticationManager?, private val secre
                     return UsernamePasswordAuthenticationToken(user, null, emptyList())
                 }
             } catch (e: JWTVerificationException) {
-                logger.warn("A token could not be validated.")
+                logger.debug("WARN: A token could not be validated.")
                 return null
             }
         }

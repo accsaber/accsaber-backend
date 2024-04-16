@@ -26,8 +26,11 @@ class PlayerData(
 
     @CreatedDate
     @Column(nullable = false, updatable = false)
-    var joinDate: Instant = Instant.now()
-    ) {
+    var joinDate: Instant = Instant.now(),
+
+    @ColumnDefault("false")
+    var isBanned: Boolean = false
+) {
 
     fun addScore(score: ScoreData) {
         scores.add(score)
