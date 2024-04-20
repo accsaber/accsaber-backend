@@ -1,0 +1,25 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="6-add-indexes" author="Ixsen">
+        <!--  @formatter:off    -->
+        <sql endDelimiter="/">
+            COMMENT ON materialized view acc_saber_score is E'@primaryKey score_id
+                @foreignKey (player_id) references player_data (player_id)
+                @foreignKey (leaderboard_id) references beat_map (leaderboard_id)';
+            COMMENT ON COLUMN "public"."beat_map"."song" IS '@name songId';
+
+            CREATE UNIQUE INDEX IF NOT EXISTS "overall_acc_saber_player_player_id_idx" ON "public"."overall_acc_saber_player"("player_id");
+            CREATE INDEX IF NOT EXISTS "overall_acc_saber_player_ranking_idx" ON "public"."overall_acc_saber_player"("ranking");
+
+            CREATE UNIQUE INDEX IF NOT EXISTS "category_acc_saber_player_player_id_category_name_idx" ON "public"."category_acc_saber_player"("player_id","category_name");
+            CREATE INDEX IF NOT EXISTS "category_acc_saber_player_ranking_idx" ON "public"."category_acc_saber_player"("ranking");
+
+            CREATE INDEX IF NOT EXISTS "score_data_history_player_id_map_leaderboard_id_idx" ON "public"."score_data_history"("player_id","map_leaderboard_id");
+            /
+        </sql>
+        <!-- @formatter:on -->
+    </changeSet>
+</databaseChangeLog>

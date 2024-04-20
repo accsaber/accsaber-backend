@@ -9,3 +9,5 @@ databaseChangeLog:
       file: db/changelog/changelogs/4-fix-score-history-trigger.xml
   - include:
       file: db/changelog/changelogs/5-banned-players.xml
+  - include:
+      file: db/changelog/changelogs/6-add-indexes.xml
