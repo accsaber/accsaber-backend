@@ -46,8 +46,12 @@ class ScoreService @Autowired constructor(
         return accSaberScoreRepository.findAllByLeaderboardIdAround(beatMap.leaderboardId, max(playerScore.ranking!! - 6, 0L))
     }
 
-    fun getScoresForPlayer(player: PlayerData): List<AccSaberScore> {
-        return accSaberScoreRepository.findAllByPlayerOrderByApDesc(player)
+    fun getScoresForPlayer(player: PlayerData, page: Int, pageSize: Int,): List<AccSaberScore> {
+        return accSaberScoreRepository.findAllByPlayerOrderByApDesc(player, PageRequest.of(page, pageSize))
+    }
+
+    fun getRecentScoresForPlayer(player: PlayerData, page: Int, pageSize: Int,): List<AccSaberScore> {
+        return accSaberScoreRepository.findAllByPlayerOrderByTimeSetDesc(player, PageRequest.of(page, pageSize))
     }
 
     fun getScoresForPlayer(player: PlayerData, categoryName: String): List<AccSaberScore> {

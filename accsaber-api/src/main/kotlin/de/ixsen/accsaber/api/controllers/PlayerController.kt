@@ -66,9 +66,25 @@ class PlayerController @Autowired constructor(
     }
 
     @GetMapping(path = ["/{playerId}/scores"])
-    fun getPlayerScores(@PathVariable playerId: Long): ResponseEntity<ArrayList<PlayerScoreDto>> {
+    fun getPlayerScores(
+        @PathVariable playerId: Long,
+        @RequestParam(defaultValue = "0") page: Int,
+        @RequestParam(defaultValue = "10") pageSize: Int,
+    ): ResponseEntity<ArrayList<PlayerScoreDto>> {
         val player = playerService.getPlayer(playerId)
-        val scoresForPlayer = scoreService.getScoresForPlayer(player)
+        val scoresForPlayer = scoreService.getScoresForPlayer(player, page, pageSize)
+        val playerScoreDtos = this.scoreMapper.rankedScoresToPlayerScores(scoresForPlayer)
+        return ResponseEntity.ok(playerScoreDtos)
+    }
+
+    @GetMapping(path = ["/{playerId}/recent-scores"])
+    fun getRecentPlayerScores(
+        @PathVariable playerId: Long,
+        @RequestParam(defaultValue = "0") page: Int,
+        @RequestParam(defaultValue = "10") pageSize: Int,
+    ): ResponseEntity<ArrayList<PlayerScoreDto>> {
+        val player = playerService.getPlayer(playerId)
+        val scoresForPlayer = scoreService.getRecentScoresForPlayer(player, page, pageSize)
         val playerScoreDtos = this.scoreMapper.rankedScoresToPlayerScores(scoresForPlayer)
         return ResponseEntity.ok(playerScoreDtos)
     }

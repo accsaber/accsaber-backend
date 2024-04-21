@@ -12,7 +12,9 @@ interface AccSaberScoreRepository : ReadOnlyRepository<AccSaberScore, Long, AccS
     fun findAllByLeaderboardId(leaderboardId: Long): List<AccSaberScore>
     fun findAllByLeaderboardId(leaderboardId: Long, pageRequest: Pageable): List<AccSaberScore>
 
-    fun findAllByPlayerOrderByApDesc(playerData: PlayerData): List<AccSaberScore>
+    fun findAllByPlayerOrderByApDesc(playerData: PlayerData, pageRequest: Pageable): List<AccSaberScore>
+
+    fun findAllByPlayerOrderByTimeSetDesc(playerData: PlayerData, pageRequest: Pageable): List<AccSaberScore>
 
     @Query(
         """
