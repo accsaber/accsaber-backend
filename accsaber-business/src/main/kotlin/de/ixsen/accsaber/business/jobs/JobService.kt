@@ -12,6 +12,7 @@ import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import java.time.Duration
 import java.time.Instant
+import java.time.LocalDateTime
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.Executors
@@ -32,6 +33,13 @@ class JobService
     @Value("\${accsaber.reload-song-covers-on-startup}") private val reloadSongCoversOnStartup: Boolean,
     @Value("\${accsaber.fetch-thread-pool}") private val fetchThreadPool: Int
 ) : HasLogger {
+
+    private var lastUpdate: LocalDateTime = LocalDateTime.MIN;
+
+    fun getLastUpdate() : LocalDateTime {
+        return this.lastUpdate
+    }
+
     @PostConstruct
     fun onStartUpDone() {
         if (recalculateApOnStartup) {
@@ -78,6 +86,7 @@ class JobService
             val seconds = duration % 60
             this.getLogger().info("Loading scores finished in {} minutes and {} seconds.", minutes, seconds)
             this.getLogger().info("Maximum amount of fetches per minute was {} with a thread pool of {}.", ScoreSaberConnector.maxRequestsThisSession, fetchThreadPool)
+            this.lastUpdate = LocalDateTime.now()
         }
     }
 
