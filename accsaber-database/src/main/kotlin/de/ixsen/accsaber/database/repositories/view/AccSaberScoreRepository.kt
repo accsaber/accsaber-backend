@@ -25,7 +25,7 @@ interface AccSaberScoreRepository : ReadOnlyRepository<AccSaberScore, Long, AccS
     )
     fun findAllByPlayerAndCategoryOrderByApDesc(playerData: PlayerData, category: String): List<AccSaberScore>
 
-    @Query("SELECT * FROM acc_saber_score ass where ass.map_leaderboard_id = ?1 limit 10 offset ?2", nativeQuery = true)
+    @Query("SELECT * FROM acc_saber_score ass where ass.leaderboard_id = ?1 limit 10 offset ?2", nativeQuery = true)
     fun findAllByLeaderboardIdAround(leaderboardId: Long, position: Long?): List<AccSaberScore>
 
     @Query("FROM AccSaberScore where leaderboardId = ?1 and player.playerId = ?2")
